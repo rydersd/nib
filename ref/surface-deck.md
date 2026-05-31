@@ -78,7 +78,7 @@ The stage is a **fixed 1600×900** box: padding `52px 80px` leaves ≈ **1440 wi
 | Export current slide → `.svg` | `E` | "SVG" button (dock, bottom-right) |
 | Export whole deck → `.pptx` | `A` | "Export PPTX" button (dock, bottom-right) |
 
-**PowerPoint export** rasterizes each `.slide-stage` to a full-bleed image (via `html2canvas`, using the live same-origin DOM + loaded webfonts — avoids the `@font-face`/canvas-taint problems of SVG rasterization) and assembles a real `.pptx` (via `PptxGenJS`) at 13.333×7.5in (16:9). Both libs **lazy-load on first use** from `vendor/html2canvas.min.js` + `vendor/pptxgenjs.min.js` (paths resolved relative to `proto-deck.js`, so decks at any folder depth work), so normal page loads never pay the ~700KB cost.
+**PowerPoint export** produces a **fully editable** `.pptx` — it walks each slide's live DOM and maps it to native PowerPoint objects: text → text boxes (preserving `<strong>`/`<em>`/`<a href>`/`.accent` runs and `<br>`), `<table>` → real PPT tables, card containers → shapes, and inline `<svg>` diagrams → embedded vector SVG (right-click → *Convert to Shape* to edit). 100% client-side and deterministic — no rasterization, no network at export time, no model in the loop. Positions are read from each element's box in the transform-neutralized 1600×900 stage (px → inches, font px → points). `PptxGenJS` **lazy-loads on first use** from `vendor/pptxgenjs.min.js` (path resolved relative to `proto-deck.js`, so decks at any folder depth work). The output is a PowerPoint-native approximation of the web layout, not a pixel-perfect copy.
 
 ## Class reference
 

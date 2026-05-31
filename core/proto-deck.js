@@ -258,17 +258,25 @@
   }
 
   // ============================================================
-  // POWERPOINT EXPORT — every slide → one full-bleed 16:9 image in a
-  // real .pptx. Press 'A' or click the export button.
+  // POWERPOINT EXPORT — a fully EDITABLE .pptx (no images). Each slide's
+  // live DOM is mapped to native PowerPoint objects: text -> text boxes
+  // (with bold / italic / hyperlink / accent runs preserved), <table> ->
+  // real PPT tables, card containers -> shapes, and inline <svg> diagrams
+  // -> embedded vector SVG (right-click -> Convert to Shape to edit).
   //
-  // Rasterization uses html2canvas (live, same-origin DOM with already-
-  // loaded webfonts) rather than the SVG/foreignObject path above —
-  // SVG image contexts drop @font-face and can taint the canvas, which
-  // would break toDataURL. Both libs lazy-load on first use so normal
-  // page loads never pay the ~700KB cost. 1600x900 stages are the native
-  // PowerPoint frame (13.333in x 7.5in).
+  // 100% client-side and deterministic — no rasterization, no network at
+  // export time, no model in the loop. PptxGenJS lazy-loads on first use.
+  // Positions read from each element's box in the neutralized 1600x900
+  // stage; px map to inches (x PX2IN) and font px to points (x PX2PT).
+  // Press 'A' or click "Export PPTX".
   // ============================================================
   const VENDOR_BASE = DR_SCRIPT ? new URL('../../vendor/', DR_SCRIPT.src).href : 'vendor/';
+  const PX2IN = 13.333 / 1600;   // canvas px -> inches
+  const PX2PT = 0.6;             // canvas px -> points (1600px == 960pt wide)
+  const ACCENT_HEX = '6B1A26';  // --accent (deck burgundy)
+  const PAPER_HEX  = 'F5F0E6';  // --paper
+  const INLINE = { A:1, SPAN:1, STRONG:1, B:1, EM:1, I:1, BR:1, SUB:1, SUP:1, CODE:1, SMALL:1, U:1, MARK:1, KBD:1 };
+
   function loadScript(src) {
     return new Promise((resolve, reject) => {
       if (document.querySelector('script[data-vendor="' + src + '"]')) return resolve();
@@ -279,52 +287,181 @@
       document.head.appendChild(s);
     });
   }
-  async function ensurePptxLibs() {
-    if (!window.html2canvas) await loadScript(VENDOR_BASE + 'html2canvas.min.js');
-    if (!window.PptxGenJS)   await loadScript(VENDOR_BASE + 'pptxgenjs.min.js');
+  async function ensurePptx() {
+    if (!window.PptxGenJS) await loadScript(VENDOR_BASE + 'pptxgenjs.min.js');
+  }
+
+  // "rgb(r, g, b)" / "rgba(...)" -> "RRGGBB", or null when fully transparent.
+  function rgbToHex(rgb) {
+    const m = /rgba?\(([^)]+)\)/.exec(rgb || '');
+    if (!m) return null;
+    const p = m[1].split(',').map(s => parseFloat(s.trim()));
+    if (p.length >= 4 && p[3] === 0) return null;
+    return p.slice(0, 3).map(n => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  function firstFont(ff) { return (ff || '').split(',')[0].replace(/["']/g, '').trim() || 'Arial'; }
+  function isTextLeaf(el) {
+    if (!el.textContent.trim()) return false;
+    for (const c of el.children) if (!INLINE[c.tagName]) return false;
+    return true;
+  }
+  function isCardLike(el) {
+    const cs = getComputedStyle(el);
+    const bw = parseFloat(cs.borderTopWidth) || 0;
+    const bg = rgbToHex(cs.backgroundColor);
+    const bordered = bw >= 0.5 && cs.borderTopStyle !== 'none';
+    const filled = bg && bg !== PAPER_HEX;
+    return bordered || filled;
+  }
+  // Build PptxGenJS text runs from a leaf's inline children (preserves
+  // <strong>/<em>/<a href>/.accent and <br> line breaks).
+  function inlineRuns(el, baseColor) {
+    const runs = [];
+    (function rec(node, inh) {
+      node.childNodes.forEach(ch => {
+        if (ch.nodeType === 3) {
+          const t = ch.textContent.replace(/\s+/g, ' ');
+          if (t) runs.push({ text: t, options: Object.assign({}, inh) });
+        } else if (ch.nodeType === 1) {
+          if (ch.tagName === 'BR') { if (runs.length) runs[runs.length - 1].options.breakLine = true; return; }
+          const o = Object.assign({}, inh);
+          if (ch.tagName === 'STRONG' || ch.tagName === 'B') o.bold = true;
+          if (ch.tagName === 'EM' || ch.tagName === 'I') o.italic = true;
+          if (ch.classList && ch.classList.contains('accent')) o.color = ACCENT_HEX;
+          if (ch.tagName === 'A' && ch.href) { o.hyperlink = { url: ch.href }; o.underline = true; o.color = ACCENT_HEX; }
+          rec(ch, o);
+        }
+      });
+    })(el, { color: baseColor });
+    return runs.length ? runs : [{ text: el.textContent.trim(), options: { color: baseColor } }];
+  }
+
+  function box(el, sRect) {
+    const r = el.getBoundingClientRect();
+    return {
+      x: (r.left - sRect.left) * PX2IN,
+      y: (r.top - sRect.top) * PX2IN,
+      w: Math.max(0.1, r.width * PX2IN),
+      h: Math.max(0.1, r.height * PX2IN)
+    };
+  }
+
+  function emitText(el, ps, sRect) {
+    const cs = getComputedStyle(el);
+    const b = box(el, sRect);
+    ps.addText(inlineRuns(el, rgbToHex(cs.color) || '15110D'), {
+      x: b.x, y: b.y, w: b.w, h: b.h + 0.06,
+      fontSize: parseFloat(cs.fontSize) * PX2PT,
+      fontFace: firstFont(cs.fontFamily),
+      color: rgbToHex(cs.color) || '15110D',
+      bold: (parseInt(cs.fontWeight, 10) || 400) >= 600,
+      italic: cs.fontStyle === 'italic',
+      align: cs.textAlign === 'center' ? 'center' : cs.textAlign === 'right' ? 'right' : 'left',
+      valign: 'top', margin: 0, wrap: true,
+      lineSpacingMultiple: 1.08, charSpacing: (parseFloat(cs.letterSpacing) || 0) * PX2PT
+    });
+  }
+
+  function emitBox(el, ps, sRect, pptx) {
+    const cs = getComputedStyle(el);
+    const b = box(el, sRect);
+    const fill = rgbToHex(cs.backgroundColor);
+    const line = parseFloat(cs.borderTopWidth) >= 0.5 ? rgbToHex(cs.borderTopColor) : null;
+    if (!fill && !line) return;
+    const opt = { x: b.x, y: b.y, w: b.w, h: b.h };
+    opt.fill = fill ? { color: fill } : { type: 'none' };
+    if (line) opt.line = { color: line, width: Math.max(0.5, parseFloat(cs.borderTopWidth) * PX2PT) };
+    const rad = parseFloat(cs.borderTopLeftRadius) || 0;
+    ps.addShape(rad > 1 ? pptx.ShapeType.roundRect : pptx.ShapeType.rect, opt);
+  }
+
+  function emitTable(table, ps, sRect, pptx) {
+    const b = box(table, sRect);
+    const rows = [];
+    let colW = null;
+    table.querySelectorAll('tr').forEach(tr => {
+      const cells = [];
+      tr.querySelectorAll('th,td').forEach(cell => {
+        const cs = getComputedStyle(cell);
+        const head = cell.tagName === 'TH';
+        cells.push({
+          text: cell.textContent.trim().replace(/\s+/g, ' '),
+          options: {
+            bold: head || (parseInt(cs.fontWeight, 10) || 400) >= 600,
+            color: rgbToHex(cs.color) || '2D251C',
+            fill: { color: rgbToHex(cs.backgroundColor) || (head ? 'EBE3CF' : 'FFFFFF') },
+            align: 'left', valign: 'top',
+            fontSize: parseFloat(cs.fontSize) * PX2PT,
+            fontFace: firstFont(cs.fontFamily)
+          }
+        });
+      });
+      if (cells.length) rows.push(cells);
+      if (!colW && tr.querySelectorAll('th').length) {
+        colW = Array.from(tr.querySelectorAll('th')).map(th => (th.getBoundingClientRect().width) * PX2IN);
+      }
+    });
+    if (!rows.length) return;
+    ps.addTable(rows, {
+      x: b.x, y: b.y, w: b.w, colW: colW || undefined,
+      border: { type: 'solid', color: 'DDD3BF', pt: 0.5 },
+      valign: 'top', autoPage: false
+    });
+  }
+
+  function emitSvg(svg, ps, sRect) {
+    const b = box(svg, sRect);
+    const clone = svg.cloneNode(true);
+    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    const str = new XMLSerializer().serializeToString(clone);
+    const data = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(str)));
+    ps.addImage({ data: data, x: b.x, y: b.y, w: b.w, h: b.h });
+  }
+
+  function walkSlide(node, ps, sRect, pptx) {
+    for (const el of node.children) {
+      if (el.classList.contains('slide-numwatermark') || el.classList.contains('slide-header')) continue;
+      const tag = el.tagName;
+      if (tag === 'svg') { emitSvg(el, ps, sRect); continue; }
+      if (tag === 'TABLE') { emitTable(el, ps, sRect, pptx); continue; }
+      if (isTextLeaf(el)) { emitText(el, ps, sRect); continue; }
+      if (isCardLike(el)) emitBox(el, ps, sRect, pptx);
+      walkSlide(el, ps, sRect, pptx);
+    }
   }
 
   let exporting = false;
   async function exportDeckAsPptx() {
     if (exporting) return;
     exporting = true;
+    // Neutralize the fit-scale + autofit transforms so every element measures
+    // in true 1600x900 stage coordinates; restore afterward.
+    const rootEl = document.documentElement;
+    const prevScale = rootEl.style.getPropertyValue('--deck-scale');
+    const fits = Array.from(document.querySelectorAll('.slide-stage > .stage-fit'));
+    const prevT = fits.map(f => f.style.transform);
     try {
-      showToast('Loading export libraries…');
-      await ensurePptxLibs();
+      showToast('Loading PowerPoint engine…');
+      await ensurePptx();
+      rootEl.style.setProperty('--deck-scale', '1');
+      fits.forEach(f => { f.style.transform = 'none'; });
+      void document.body.offsetHeight; // force reflow before measuring
 
       const pptx = new window.PptxGenJS();
       pptx.defineLayout({ name: 'DR16x9', width: 13.333, height: 7.5 });
       pptx.layout = 'DR16x9';
 
       for (let i = 0; i < slides.length; i++) {
-        showToast('Rendering slide ' + (i + 1) + ' / ' + slides.length + '…');
-        const slide = slides[i];
-        const stage = slide.querySelector('.slide-stage') || slide;
-        const isFixed = stage.classList.contains('slide-stage');
-        const w = isFixed ? 1600 : Math.round(stage.getBoundingClientRect().width);
-        const h = isFixed ? 900  : Math.round(stage.getBoundingClientRect().height);
-
-        const canvas = await window.html2canvas(stage, {
-          backgroundColor: getComputedStyle(document.body).backgroundColor || '#f5f0e6',
-          scale: 2,
-          width: w, height: h,
-          windowWidth: 1600, windowHeight: 900,
-          useCORS: true, logging: false,
-          onclone: (doc) => {
-            // Neutralize the fit-scale transform so the stage rasterizes at
-            // its full native 1600x900 instead of the on-screen scaled size.
-            doc.documentElement.style.setProperty('--deck-scale', '1');
-            doc.querySelectorAll('.slide-stage').forEach(st => { st.style.transform = 'none'; });
-          }
-        });
-
-        pptx.addSlide().addImage({
-          data: canvas.toDataURL('image/png'),
-          x: 0, y: 0, w: 13.333, h: 7.5
-        });
+        showToast('Building slide ' + (i + 1) + ' / ' + slides.length + '…');
+        const stage = slides[i].querySelector('.slide-stage') || slides[i];
+        const sRect = stage.getBoundingClientRect();
+        const ps = pptx.addSlide();
+        ps.background = { color: PAPER_HEX };
+        const content = stage.querySelector(':scope > .stage-fit') || stage;
+        walkSlide(content, ps, sRect, pptx);
       }
 
-      showToast('Building .pptx…');
+      showToast('Writing .pptx…');
       const fname = (document.title || 'design-review-deck')
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.pptx';
       await pptx.writeFile({ fileName: fname });
@@ -333,6 +470,8 @@
       console.error('[dr.js] PPTX export failed:', err);
       showToast('PPTX export failed — see console');
     } finally {
+      rootEl.style.setProperty('--deck-scale', prevScale || '');
+      fits.forEach((f, j) => { f.style.transform = prevT[j]; });
       exporting = false;
     }
   }

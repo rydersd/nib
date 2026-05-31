@@ -1,9 +1,4 @@
-/* Nib Surface engine: Design Review Deck — pairs with surfaces/deck.css.
-   Self-contained IIFE; no proto-nav.js dependency (the context bar, when present,
-   comes from the host project's nav and is merely styled by deck.css).
-   See ref/surface-deck.md.
-
-   Design-review deck — shared behavior.
+/* Design-review deck — shared behavior.
    - Auto-injects slide-header chrome + section watermark from data-num + data-title
    - Builds the side-rail dot navigation
    - Highlights the active slide via IntersectionObserver
@@ -110,6 +105,8 @@
       e.preventDefault(); exportCurrentSlideAsSVG();
     } else if (e.key === 'a' || e.key === 'A') {
       e.preventDefault(); exportDeckAsPptx();
+    } else if (e.key === 'x' || e.key === 'X') {
+      e.preventDefault(); exportTablesToXlsx();
     }
   });
 
@@ -409,13 +406,97 @@
     });
   }
 
-  function emitSvg(svg, ps, sRect) {
+  // --- SVG diagram -> native, editable PowerPoint shapes ------------
+  // The schema sketches are a constrained vocabulary (rect / line / text /
+  // circle / a few dashed <path> arrows), so each primitive maps to a real
+  // PPT shape. This renders reliably (no SVG-embed dependency) and every box
+  // and label stays directly editable. Coordinates map from the SVG viewBox
+  // into the diagram's on-slide box.
+  function colorHex(c) {
+    if (!c) return null;
+    c = c.trim();
+    if (c === 'none' || c === 'transparent') return null;
+    if (c[0] === '#') return (c.length === 4 ? c[1]+c[1]+c[2]+c[2]+c[3]+c[3] : c.slice(1, 7)).toUpperCase();
+    if (c.indexOf('rgb') === 0) return rgbToHex(c);
+    return null;
+  }
+  function nums(str) { return (String(str || '').match(/-?\d*\.?\d+(?:e[-+]?\d+)?/gi) || []).map(Number); }
+  function pairs(arr) { const p = []; for (let i = 0; i + 1 < arr.length; i += 2) p.push([arr[i], arr[i + 1]]); return p; }
+
+  function emitSvg(svg, ps, sRect, pptx) {
     const b = box(svg, sRect);
-    const clone = svg.cloneNode(true);
-    if (!clone.getAttribute('xmlns')) clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    const str = new XMLSerializer().serializeToString(clone);
-    const data = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(str)));
-    ps.addImage({ data: data, x: b.x, y: b.y, w: b.w, h: b.h });
+    const vb = nums(svg.getAttribute('viewBox'));
+    const VX = vb.length === 4 ? vb[0] : 0, VY = vb.length === 4 ? vb[1] : 0;
+    const VW = vb.length === 4 ? vb[2] : (parseFloat(svg.getAttribute('width')) || b.w / PX2IN);
+    const VH = vb.length === 4 ? vb[3] : (parseFloat(svg.getAttribute('height')) || b.h / PX2IN);
+    const kx = b.w / VW, ky = b.h / VH;               // inches per viewBox unit
+    const X = sx => b.x + (sx - VX) * kx;
+    const Y = sy => b.y + (sy - VY) * ky;
+
+    const lineFrom = (x1, y1, x2, y2, opt) => {
+      ps.addShape(pptx.ShapeType.line, {
+        x: Math.min(x1, x2), y: Math.min(y1, y2),
+        w: Math.max(Math.abs(x2 - x1), 0.005), h: Math.max(Math.abs(y2 - y1), 0.005),
+        flipH: x2 < x1, flipV: y2 < y1, line: opt
+      });
+    };
+
+    svg.querySelectorAll('rect,line,circle,ellipse,path,polyline,polygon,text').forEach(el => {
+      try {
+        const cs = getComputedStyle(el);
+        const strokeHex = colorHex(el.getAttribute('stroke')) || colorHex(cs.stroke);
+        const sw = parseFloat(el.getAttribute('stroke-width') || cs.strokeWidth) || 1;
+        const dash = (el.getAttribute('stroke-dasharray') || cs.strokeDasharray || '').replace(/none|normal/, '').trim();
+        const lineOpt = strokeHex
+          ? { color: strokeHex, width: Math.max(0.5, sw * kx * 72), dashType: dash ? 'dash' : 'solid' }
+          : { type: 'none' };
+        const fHex = colorHex(el.getAttribute('fill')) || (el.getAttribute('fill') === 'none' ? null : colorHex(cs.fill));
+        const fOp = parseFloat(el.getAttribute('fill-opacity') || cs.fillOpacity);
+        const fillOpt = fHex ? { color: fHex, transparency: isNaN(fOp) ? 0 : Math.round((1 - fOp) * 100) } : { type: 'none' };
+        const tag = el.tagName.toLowerCase();
+
+        if (tag === 'rect') {
+          const x = +el.getAttribute('x') || 0, y = +el.getAttribute('y') || 0;
+          const w = +el.getAttribute('width') || 0, h = +el.getAttribute('height') || 0;
+          const rx = +el.getAttribute('rx') || 0;
+          const o = { x: X(x), y: Y(y), w: w * kx, h: h * ky, fill: fillOpt, line: lineOpt };
+          if (rx > 0) o.rectRadius = Math.min(rx * kx, h * ky / 2);
+          ps.addShape(rx > 0 ? pptx.ShapeType.roundRect : pptx.ShapeType.rect, o);
+        } else if (tag === 'line') {
+          lineFrom(X(+el.getAttribute('x1')), Y(+el.getAttribute('y1')), X(+el.getAttribute('x2')), Y(+el.getAttribute('y2')), lineOpt);
+        } else if (tag === 'circle') {
+          const cx = +el.getAttribute('cx'), cy = +el.getAttribute('cy'), r = +el.getAttribute('r');
+          ps.addShape(pptx.ShapeType.ellipse, { x: X(cx - r), y: Y(cy - r), w: 2 * r * kx, h: 2 * r * ky, fill: fillOpt, line: lineOpt });
+        } else if (tag === 'ellipse') {
+          const cx = +el.getAttribute('cx'), cy = +el.getAttribute('cy'), rx = +el.getAttribute('rx'), ry = +el.getAttribute('ry');
+          ps.addShape(pptx.ShapeType.ellipse, { x: X(cx - rx), y: Y(cy - ry), w: 2 * rx * kx, h: 2 * ry * ky, fill: fillOpt, line: lineOpt });
+        } else if (tag === 'path') {
+          const pts = pairs(nums(el.getAttribute('d')));   // arrows: connect endpoints
+          if (pts.length >= 2 && strokeHex) lineFrom(X(pts[0][0]), Y(pts[0][1]), X(pts[pts.length - 1][0]), Y(pts[pts.length - 1][1]), lineOpt);
+        } else if (tag === 'polyline' || tag === 'polygon') {
+          const pts = pairs(nums(el.getAttribute('points')));
+          for (let i = 0; i + 1 < pts.length; i++) if (strokeHex) lineFrom(X(pts[i][0]), Y(pts[i][1]), X(pts[i + 1][0]), Y(pts[i + 1][1]), lineOpt);
+        } else if (tag === 'text') {
+          const txt = el.textContent.trim();
+          if (!txt) return;
+          const x = +el.getAttribute('x') || 0, y = +el.getAttribute('y') || 0;
+          const fsPx = parseFloat(cs.fontSize) || 10;
+          const ptFs = fsPx * ky * 72;
+          const anchor = el.getAttribute('text-anchor') || cs.textAnchor || 'start';
+          const align = anchor === 'middle' ? 'center' : anchor === 'end' ? 'right' : 'left';
+          const ls = parseFloat(el.getAttribute('letter-spacing') || cs.letterSpacing) || 0;
+          const wEst = ((txt.length * fsPx * 0.62) + Math.max(0, txt.length - 1) * ls) * kx + 0.25;
+          const bx = align === 'center' ? X(x) - wEst / 2 : align === 'right' ? X(x) - wEst : X(x) - 0.04;
+          ps.addText(txt, {
+            x: bx, y: Y(y) - ptFs / 72 * 0.92, w: wEst, h: ptFs / 72 * 1.4,
+            fontSize: ptFs, fontFace: firstFont(cs.fontFamily),
+            color: colorHex(el.getAttribute('fill')) || colorHex(cs.fill) || '15110D',
+            bold: (parseInt(cs.fontWeight, 10) || 400) >= 600, italic: cs.fontStyle === 'italic',
+            align: align, valign: 'middle', margin: 0, wrap: false, charSpacing: ls * kx * 72
+          });
+        }
+      } catch (e) { /* skip a malformed primitive rather than fail the export */ }
+    });
   }
 
   function walkSlide(node, ps, sRect, pptx) {
@@ -476,6 +557,87 @@
     }
   }
 
+  // ============================================================
+  // EXCEL EXPORT — qualifying data tables (>=2 cols, >=2 body rows) -> .xlsx,
+  // one sheet per table. Zero new deps: a minimal OOXML workbook zipped with
+  // JSZip (already bundled inside the vendored pptxgenjs). Deliberately NOT the
+  // vulnerable SheetJS 'xlsx' package. Press 'X' or click "Excel".
+  // ============================================================
+  async function ensureJSZip() {
+    if (!window.JSZip) await loadScript(VENDOR_BASE + 'pptxgenjs.min.js'); // its bundle sets window.JSZip
+    return window.JSZip;
+  }
+  function xmlEsc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+  function colRef(i) { let s = ''; i += 1; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = (i - m - 1) / 26; } return s; }
+  function isNumericCell(t) { const s = t.trim(); return /^-?[\d,]+(\.\d+)?$/.test(s) && /\d/.test(s); }
+
+  // A qualifying data table = real <table>, >= 2 columns and >= 2 body rows.
+  function dataTables() {
+    const out = [];
+    slides.forEach((s, i) => {
+      s.querySelectorAll('table').forEach(t => {
+        const rows = Array.from(t.querySelectorAll('tr'));
+        const cols = rows[0] ? rows[0].querySelectorAll('th,td').length : 0;
+        const bodyRows = t.querySelectorAll('tbody tr').length || Math.max(0, rows.length - 1);
+        if (cols >= 2 && bodyRows >= 2) out.push({ table: t, slide: i + 1, title: s.dataset.title || ('Slide ' + (i + 1)) });
+      });
+    });
+    return out;
+  }
+  function sheetXml(table) {
+    const xmlRows = Array.from(table.querySelectorAll('tr')).map((tr, r) => {
+      const cells = Array.from(tr.querySelectorAll('th,td')).map((cell, c) => {
+        const ref = colRef(c) + (r + 1);
+        const txt = cell.textContent.replace(/\s+/g, ' ').trim();
+        if (isNumericCell(txt)) return `<c r="${ref}"><v>${txt.replace(/,/g, '')}</v></c>`;
+        return `<c r="${ref}" t="inlineStr"><is><t xml:space="preserve">${xmlEsc(txt)}</t></is></c>`;
+      }).join('');
+      return `<row r="${r + 1}">${cells}</row>`;
+    }).join('');
+    return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><sheetData>${xmlRows}</sheetData></worksheet>`;
+  }
+  function safeSheetName(s, used) {
+    let n = (s.replace(/[\\\/\?\*\[\]:]/g, ' ').replace(/\s+/g, ' ').slice(0, 28).trim()) || 'Sheet';
+    const base = n; let k = 2;
+    while (used.has(n.toLowerCase())) n = (base.slice(0, 25) + ' ' + k++);
+    used.add(n.toLowerCase()); return n;
+  }
+  async function exportTablesToXlsx() {
+    if (exporting) return;
+    const tables = dataTables();
+    if (!tables.length) { showToast('No data tables on this deck'); return; }
+    exporting = true;
+    try {
+      showToast('Building Excel…');
+      const JSZip = await ensureJSZip();
+      const zip = new JSZip();
+      const used = new Set();
+      const sheets = tables.map((t, i) => ({ id: i + 1, name: safeSheetName('S' + t.slide + ' ' + t.title, used), table: t.table }));
+      const ov = sheets.map(s => `<Override PartName="/xl/worksheets/sheet${s.id}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('');
+      zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${ov}</Types>`);
+      zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+      zip.file('xl/workbook.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets>${sheets.map(s => `<sheet name="${xmlEsc(s.name)}" sheetId="${s.id}" r:id="rId${s.id}"/>`).join('')}</sheets></workbook>`);
+      zip.file('xl/_rels/workbook.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map(s => `<Relationship Id="rId${s.id}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${s.id}.xml"/>`).join('')}</Relationships>`);
+      sheets.forEach(s => zip.file('xl/worksheets/sheet' + s.id + '.xml', sheetXml(s.table)));
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (document.title || 'deck-tables').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-tables.xlsx';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+      showToast('Downloaded ' + a.download + ' (' + tables.length + ' table' + (tables.length > 1 ? 's' : '') + ')');
+    } catch (err) {
+      console.error('[dr.js] Excel export failed:', err);
+      showToast('Excel export failed — see console');
+    } finally { exporting = false; }
+  }
+
   // Floating export dock — primary "Export PPTX" (whole deck) + secondary
   // "Export SVG" (current slide), bottom-right beside the side-rail dots.
   if (slides.length > 1) {
@@ -497,6 +659,16 @@
     pptxBtn.addEventListener('click', exportDeckAsPptx);
 
     dock.appendChild(svgBtn);
+    // Excel button only when the deck actually has data tables worth exporting.
+    if (dataTables().length) {
+      const xlsBtn = document.createElement('button');
+      xlsBtn.className = 'dr-export-btn dr-export-secondary';
+      xlsBtn.type = 'button';
+      xlsBtn.setAttribute('aria-label', 'Export the deck\'s data tables to an Excel .xlsx file');
+      xlsBtn.innerHTML = '<span class="dr-export-icon">↓</span><span class="dr-export-label">Excel</span>';
+      xlsBtn.addEventListener('click', exportTablesToXlsx);
+      dock.appendChild(xlsBtn);
+    }
     dock.appendChild(pptxBtn);
     document.body.appendChild(dock);
   }

@@ -10,6 +10,7 @@
 | Slack wireframe | + `surface-slack.md` + `components.md` |
 | Salesforce wireframe | + `surface-salesforce.md` + `surface-salesforce-rules.md` + `components.md` |
 | Internal portal wireframe | + `surface-internal.md` + `components.md` |
+| Presentation deck / design review | `surface-deck.md` (self-contained — no `tokens.md`/`page-template.md`) |
 | Complex layout | + `layouts.md` |
 | New project from scratch | `new-project.md` (reads others for you) |
 | Understanding the system | `architecture.md` |

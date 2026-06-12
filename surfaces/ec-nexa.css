@@ -1,0 +1,465 @@
+/* ============================================================================
+   Nib Surface: Experience Cloud / Nexa — requires proto-core.css
+   ============================================================================
+   Polished tier for partner-facing Experience Cloud pages (rep/, pc/, pm/
+   subset, onboarding/). Engages only when:
+     html[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"]
+
+   Scoping plan: wiki/references/fidelity-redesign-plan.md (stream 2).
+   Brand-styling-in-HTML policy: brand opt-in via the fidelity dropdown only.
+
+   STATE: tokens + typography ramp + base button locked from Figma
+   "Partner Central" file (4076:26460 + 600:44224). Header chrome, panel
+   treatment, form fields, tables, KPI tiles, and gradient usage are still
+   TODO — pending visual inspection (screenshot blocked on rate limit).
+   The design is fluid per user direction — values committed here are
+   token-accurate but compositional choices may shift.
+   ============================================================================ */
+
+/* ── Nexa Text webfonts (6 cuts staged) ─────────────────────────────────────
+      Light 300 · Book 400 (brand-distinctive Book cut, not Regular) ·
+      Regular 400 (preferred for standard body per Figma 'Body/Body' token) ·
+      Bold 700 · ExtraBold 800 (preferred for headings per Figma 'Headline/*'
+      tokens) · Heavy (kept for potential hero treatments).
+
+      Note: Figma's design tokens use Regular at 400 and ExtraBold at 800.
+      Book is also @400 and Heavy is also @800 — they're brand-distinctive
+      cuts available via the explicit @font-face below. Authors override by
+      requesting the specific cut via font-family declaration if needed.
+      font-display: swap so blueprint + napkin tiers never block on Nexa. */
+
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-Light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-Regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nexa Text Book';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-Book.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-Bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-ExtraBold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Nexa Text Heavy';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('../../fonts/nexa-text/NexaText-Heavy.woff2') format('woff2');
+}
+
+/* ── EC design tokens ───────────────────────────────────────────────────────
+      All tokens below sourced from Figma file dYWN2DAmZCmm0OgPIIQWiC,
+      nodes 4076:26460 (eq-pc tokens) + 600:44224 (dashboard tokens).
+      Scoped to the EC polished surface so they never leak into blueprint. */
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] {
+  /* ── BLUEPRINT TOKEN OVERRIDES — brand alignment bridge ────────────────────
+        The wireframe.css blueprint defines --wf-accent (#3d6daa, a dusty
+        blue) and uses it across hundreds of inline styles + page-embedded
+        CSS for backgrounds, buttons, borders, hovers. Remapping --wf-*
+        tokens at the surface scope flips every var(--wf-*) reference to
+        the brand-aligned value without touching any page. This is what
+        kills "too much blue everywhere" at polished EC. */
+  --wf-accent: #131925;          /* was dusty blue; now brand dark navy */
+  --wf-accent-lt: #f5f5f5;       /* was light-blue row hover; now off-white */
+  --wf-ink: #131925;
+  --wf-text: #131925;
+  --wf-muted: #5a657b;
+  --wf-line: #d0d2da;
+  --wf-tint: #f5f5f5;
+  --wf-surface: #ffffff;
+  --wf-canvas: #ffffff;
+  --wf-red: #e91c24;
+  --wf-green: #33a85c;
+  --wf-purple: #40075f;
+  --wf-color-primary: #131925;
+  --wf-color-primary-dark: #000000;
+  --wf-primary: #131925;
+  --wf-text-primary: #131925;
+  --wf-text-secondary: #5a657b;
+  --wf-bg-secondary: #ffffff;
+  --wf-border: #d0d2da;
+
+  /* EC text colors (use as var(--ec-*) on EC-specific components) */
+  --ec-text-primary: #131925;
+  --ec-text-secondary: #5a657b;
+  --ec-text-inverse: #ffffff;
+  --ec-text-link: #086ae3;       /* true links stay blue — restraint by reducing fills */
+  --ec-text-link-strong: #e91c24;
+  --ec-ink: #181818;
+
+  /* Surface */
+  --ec-canvas: #ffffff;
+  --ec-line: #d0d2da;
+  --ec-line-offset: #e1e3e7;
+  --ec-stroke-blend-dark: rgba(0, 0, 0, 0.2);
+
+  /* Neutrals */
+  --ec-neutral-150: #d0d2da;
+  --ec-neutral-400: #8b93a3;
+  --ec-grey-300: #a1a1a4;
+
+  /* Brand accent palette */
+  --ec-purple-dark: #200430;
+  --ec-purple-mid: #40075f;
+  --ec-purple-light: #edccff;
+  --ec-violet: #7739d9;
+  --ec-blue-mid: #086ae3;
+  --ec-blue-light: #cce3ff;
+  --ec-green-mid: #33a85c;
+  --ec-green-light: #dffbe5;
+  --ec-aqua-mid: #87f3fb;
+  --ec-aqua-dark: #00737a;
+  --ec-aqua-light: #ccfbff;
+  --ec-red-mid: #e91c24;
+  --ec-maroon-dark: #51011c;
+  --ec-maroon-light: #ffccdd;
+  --ec-yellow-light: #fff1cc;
+  --ec-orange-dark: #f55200;
+
+  /* Gradients — purple→blue is the brand-doc-anchored hero gradient. Footer
+     gradient referenced in Figma but values not exposed via variable defs;
+     using the same stops is a reasonable default until confirmed. */
+  --ec-gradient-hero: linear-gradient(135deg, #40075f 0%, #086ae3 100%);
+  --ec-gradient-footer: linear-gradient(135deg, #40075f 0%, #086ae3 100%);
+
+  /* Radii */
+  --ec-radius-xs: 4px;   /* radius/sm */
+  --ec-radius-sm: 6px;   /* radius/md */
+  --ec-radius-md: 8px;   /* SLDS-aligned */
+  --ec-radius-lg: 12px;
+  --ec-radius-xl: 20px;
+  --ec-radius-circle: 9999px;
+
+  /* Spacing */
+  --ec-space-1: 4px;
+  --ec-space-2: 8px;
+  --ec-space-2-5: 10px;
+  --ec-space-3: 12px;
+  --ec-space-3-5: 14px;
+  --ec-space-4: 16px;
+  --ec-space-6: 24px;
+  --ec-space-7: 28px;
+  --ec-space-x-large: 32px;
+  --ec-space-9: 36px;
+  --ec-space-xx-large: 48px;
+
+  /* Borders */
+  --ec-border-default: 1px;
+  --ec-border-sm: 2px;
+
+  /* Control sizing */
+  --ec-control-height: 44px;
+
+  /* Effects */
+  --ec-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --ec-shadow-md:
+    0 0 4.4px rgba(0, 0, 0, 0.08),
+    0 4.3px 4.4px rgba(0, 0, 0, 0.09),
+    0 -1px 1.44px rgba(0, 0, 0, 0.03);
+
+  /* Buttons (primary is black per Figma 600:44224 dashboard tokens) */
+  --ec-btn-primary-surface: #000000;
+  --ec-btn-primary-stroke: #000000;
+  --ec-btn-primary-text: #ffffff;
+}
+
+/* ── Surface root: typography + canvas ──────────────────────────────────────
+      All rules below engage only at the EC polished surface. Default + napkin
+      + non-ec-nexa surfaces never see them and never fetch the font. */
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] {
+  font-family: 'Nexa Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--ec-text-primary);
+  background: var(--ec-canvas);
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] body,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] input,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] button,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] select,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] textarea {
+  font-family: inherit;
+}
+
+/* ── Type ramp ──────────────────────────────────────────────────────────────
+      Matches Figma's Headline/* + Body/* + eq-pc/* tokens.
+      Default body: Nexa Regular 14/20 (eq-pc/body).
+      Headings: ExtraBold per Headline/H1..H4. */
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] body,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] p {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+/* Headline/H1 — Nexa ExtraBold 32/48 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h1,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-h1 {
+  font-size: 32px;
+  line-height: 48px;
+  font-weight: 800;
+  letter-spacing: 0;
+  color: var(--ec-text-primary);
+}
+
+/* Headline/H2 — Nexa ExtraBold 28/40 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h2,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-h2 {
+  font-size: 28px;
+  line-height: 40px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* Headline/H4 — Nexa ExtraBold 20/28 (no H3 in token set; H4 covers mid) */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h3,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h4,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-h4 {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* Headline/H4 Light — alt H4 in light weight (Nexa Book/Light @ 300) */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-h4-light {
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 300;
+  letter-spacing: 0;
+}
+
+/* eq-pc/heading-sm — Nexa Bold 18/24 (sub-component heading, not page) */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h5,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-heading-sm {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+/* eq-pc/heading-xs — Nexa Bold 16/22 (card titles, small section heads) */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] h6,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-heading-xs {
+  font-size: 16px;
+  line-height: 22px;
+  font-weight: 700;
+}
+
+/* Body/Body Large — Nexa Regular 16/24 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-body-lg {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+/* Body/Body Large Bold — Nexa Bold 16/24 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-body-lg-bold {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 700;
+}
+
+/* eq-pc/body-sm — Nexa Regular 13/18 (secondary body) */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-muted,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ds-muted,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] small,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-body-sm {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 400;
+  color: var(--ec-text-secondary);
+}
+
+/* Body/Label — Nexa Regular 12/16 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] label,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ec-text-secondary);
+}
+
+/* Body/Label Bold — Nexa Bold 12/16 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-label-bold {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 700;
+}
+
+/* eq-pc/field-value-bold — Nexa Bold 13/20 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-field-value {
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 700;
+  color: var(--ec-text-primary);
+}
+
+/* eq-pc/overline — Nexa Bold 10/14 with 0.5px tracking, uppercase */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-eyebrow,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ds-eyebrow,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-overline {
+  font-size: 10px;
+  line-height: 14px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ec-text-secondary);
+}
+
+/* eq-pc/link — Nexa Regular 13/18 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] a {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--ec-text-link);
+  text-decoration: none;
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] a:hover {
+  text-decoration: underline;
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] a.ec-link-strong {
+  color: var(--ec-text-link-strong);
+  font-weight: 700;
+}
+
+/* eq-pc/nav-header — Nexa Light 14/20 */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-ctx-bar,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-nav-header {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 300;
+}
+
+/* ── Primary button — Figma dashboard tokens: black surface + white text ───
+      Height 44px, radius 4px (radius/sm). Subject to design shifts. */
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .btn-primary,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .sfdc-btn-primary,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-btn-primary {
+  background: var(--ec-btn-primary-surface);
+  border: 1px solid var(--ec-btn-primary-stroke);
+  color: var(--ec-btn-primary-text);
+  height: var(--ec-control-height);
+  border-radius: var(--ec-radius-xs);
+  padding: 0 var(--ec-space-6);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .btn-primary:hover,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ec-btn-primary:hover {
+  background: var(--ec-purple-mid);
+}
+
+/* ── Data tables — tighter density per user direction 2026-05-15 ───────────
+      Blueprint default is 10px/12px padding (~32px tall rows). EC polished
+      tightens to 6px/12px (~24px tall rows) for a dense, brand-aligned read.
+      Header keeps its uppercase / letter-spaced treatment but in Nexa. */
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-table {
+  font-size: 13px;
+  border-collapse: collapse;
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-table thead th {
+  font-family: 'Nexa Text', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  background: var(--wf-canvas);
+  border-bottom: 1px solid var(--ec-line);
+  color: var(--ec-text-primary);
+}
+
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-table tbody td {
+  font-family: 'Nexa Text', sans-serif;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--ec-line);
+  color: var(--ec-text-primary);
+  line-height: 20px;
+}
+
+/* No zebra — EC tables read cleaner with single divider only */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-table tbody tr:nth-child(even) td {
+  background: var(--wf-canvas);
+}
+
+/* Subtle hover — off-white, not blue tint */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .wf-table tbody tr:hover td {
+  background: #f5f5f5;
+}
+
+/* Apply same density to .ds-table if it exists */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ds-table th,
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ds-table td {
+  padding: 6px 12px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+/* ── Welcome banner / hero — collapse blueprint blue gradient to brand fill
+      Many partner-portal pages have <div style="background:linear-gradient(...
+      var(--wf-accent)...)"> for hero banners. With --wf-accent overridden to
+      dark navy, those gradients automatically read dark — no per-page edits
+      needed. This rule just sharpens the read at full ec-nexa polish. */
+html.wireframe[data-wf-fidelity="polished"][data-wf-surface="ec-nexa"] .ds-welcome-banner {
+  background: var(--ec-gradient-hero) !important;
+}
+
+/* ============================================================================
+   TODO — still pending visual inspection (Figma screenshot rate-limited):
+   ============================================================================
+   - Header chrome (Partner Central top nav: logo, primary nav, user menu)
+   - Footer (gradient defined but composition unknown — uses --ec-gradient-footer)
+   - Panel / card header treatment (overline + heading pattern, dividers)
+   - Secondary + tertiary button styles
+   - Form field chrome (input borders, focus states, helper text placement)
+   - Table treatment (header row, row hover, zebra, sort indicators, density)
+   - KPI tile treatment (the brand-doc-referenced white tiles with --ec-line
+     borders and accent-colored numbers — confirm composition)
+   - Tab / pill / chip styles
+   - Card shadow (--ec-shadow-sm vs --ec-shadow-md usage)
+   - Status color usage (which palette token = success / warning / error / info)
+   - Footer gradient composition (angle, stops, height, content)
+   - How vibrant gradients (gradient/vibrant/7,8,11) are composed —
+     Figma exposes the variable names but not the stop values
+   ============================================================================ */

@@ -1357,3 +1357,1259 @@ html.wireframe[data-wf-fidelity="napkin"] .sfdc-path-complete-btn:hover {
   color: var(--wf-ink);
   border-color: var(--wf-ink);
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   Phase A — net-new SFDC record-page components (per governance proposal:
+   wiki/references/sfdc-layout-standardization.md). Restructured 2026-05-16
+   per feedback #56:
+     1. .sfdc-object-header — title row with (object type) eyebrow + H1
+        record name (left) + page-level action icons (right). Sits ABOVE
+        the highlights bar.
+     2. .sfdc-spanning-highlights — full-width metric tiles row. Sticky-
+        collapse on scroll. PATH IS NO LONGER INSIDE THIS COMPONENT.
+     3. .sfdc-path-row — spans 3 columns. Contains the path stages and an
+        "Expand for stage details" toggle.
+     4. .sfdc-path-detail — expansion panel under the path showing stage-
+        specific Key Fields + Guidance for Success.
+     5. .sfdc-nba — Next Best Action panel (Einstein-style). Sits at the
+        TOP of the right column, ABOVE the quick actions and activity tabs.
+     6. .sfdc-activity-tabs — tabbed activity strip (Slack | Activity).
+     7. .sfdc-activity-filter — chip-style sub-filter inside Activity tab.
+     8. .sfdc-quick-actions — Lightning-style icon+text actions (NO circle
+        backgrounds per feedback #56). Restructured.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── 0. Object header — canonical Lightning record-page header.
+        Explicit SLDS-flavored styling so it renders cleanly at ANY fidelity
+        tier (no dark surface leaks, no illegible text). Light bg, dark
+        navy text, SLDS-blue accents, sans-serif. Matches the reviewer's
+        reference screenshot (House Atreides account record) shape. */
+.sfdc-object-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 16px;
+  padding: 12px 4px;
+  background: transparent;
+  color: #181818;
+  font-family: 'Salesforce Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+.sfdc-object-header-identity {
+  display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0;
+}
+.sfdc-object-header-icon {
+  width: 48px; height: 48px;
+  border-radius: 6px;
+  background: #6B8FE0;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+.sfdc-object-header-text { min-width: 0; flex: 1; }
+.sfdc-object-header-type {
+  font-size: 13px; font-weight: 400; color: #444444;
+  margin-bottom: 0; line-height: 1.3;
+}
+.sfdc-object-header-name {
+  font-size: 28px; font-weight: 700; color: #181818;
+  margin: 0; line-height: 1.15; letter-spacing: -0.005em;
+}
+.sfdc-object-header-actions {
+  display: flex; gap: 6px; align-items: center; flex-shrink: 0;
+}
+.sfdc-object-header-actions .icon-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: #FFFFFF;
+  border: 1px solid #C9C9C9;
+  border-radius: 16px;
+  cursor: pointer;
+  color: #0070D2;
+  font-size: 14px; padding: 0;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.sfdc-object-header-actions .icon-btn:hover {
+  background: #F4F6F9;
+  border-color: #0070D2;
+}
+/* Outline pill action buttons (Edit / Create Case) */
+.sfdc-object-header-actions .pill-btn {
+  height: 32px;
+  padding: 0 16px;
+  background: #FFFFFF;
+  border: 1px solid #C9C9C9;
+  border-radius: 4px;
+  cursor: pointer;
+  color: #0070D2;
+  font-size: 13px; font-weight: 400;
+  font-family: inherit;
+  transition: background 0.12s, border-color 0.12s;
+}
+.sfdc-object-header-actions .pill-btn:hover {
+  background: #F4F6F9;
+  border-color: #0070D2;
+}
+
+/* ── 1. Spanning sticky-collapse highlights bar ────────────────────────── */
+.sfdc-spanning-highlights {
+  background: #fff;
+  border: 1px solid var(--wf-line);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  transition: padding 0.2s ease, box-shadow 0.2s ease;
+}
+.sfdc-spanning-highlights.is-collapsed {
+  padding: 8px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+.sfdc-spanning-highlights-row {
+  display: flex; align-items: center; gap: 24px;
+  transition: gap 0.2s ease;
+}
+.sfdc-spanning-highlights-identity {
+  display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  min-width: 240px;
+}
+.sfdc-spanning-highlights-icon {
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  background: var(--wf-accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+  transition: width 0.2s, height 0.2s;
+}
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-icon {
+  width: 26px; height: 26px; font-size: 11px;
+}
+.sfdc-spanning-highlights-name {
+  font-size: 18px; font-weight: 700; color: var(--wf-ink);
+  line-height: 1.2;
+  transition: font-size 0.2s;
+}
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-name {
+  font-size: 14px;
+}
+.sfdc-spanning-highlights-recordtype {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--wf-muted);
+  margin-bottom: 2px;
+}
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-recordtype {
+  display: none;
+}
+.sfdc-spanning-highlights-path {
+  flex: 0 1 auto; min-width: 0;
+}
+.sfdc-spanning-highlights-metrics {
+  display: flex; gap: 0;
+  flex: 1; min-width: 0;
+  border-left: 1px solid var(--wf-line);
+  padding-left: 24px; margin-left: auto;
+}
+.sfdc-spanning-highlights-metric {
+  flex: 1; min-width: 0;
+  padding: 0 16px;
+  border-right: 1px solid var(--wf-line);
+}
+.sfdc-spanning-highlights-metric:last-child { border-right: none; }
+.sfdc-spanning-highlights-metric-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.3px; color: var(--wf-muted); margin-bottom: 2px;
+}
+.sfdc-spanning-highlights-metric-value {
+  font-size: 14px; font-weight: 600; color: var(--wf-ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-metric-value {
+  font-size: 12px;
+}
+/* Collapsed state hides extra metrics beyond the first 3 critical ones */
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-metric.is-secondary {
+  display: none;
+}
+.sfdc-spanning-highlights-actions {
+  display: flex; gap: 6px; align-items: center; flex-shrink: 0;
+}
+.sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-actions .is-secondary-action {
+  display: none;
+}
+
+/* ── 1b. Spanning path row (separate from highlights per feedback #56) ─── */
+.sfdc-path-row {
+  background: #fff;
+  border: 1px solid var(--wf-line);
+  border-radius: 6px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.sfdc-path-row-bar {
+  display: flex; align-items: stretch;
+  padding: 0;
+}
+.sfdc-path-row-bar .sfdc-path-bar {
+  flex: 1; margin: 0; padding: 12px 0;
+}
+.sfdc-path-row-expand {
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 16px;
+  background: var(--wf-surface);
+  border-left: 1px solid var(--wf-line);
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.4px; color: var(--wf-accent);
+  cursor: pointer; border: none; border-left: 1px solid var(--wf-line);
+  white-space: nowrap;
+  font-family: inherit;
+  transition: background 0.12s;
+}
+.sfdc-path-row-expand:hover { background: var(--wf-tint); }
+.sfdc-path-row-expand .chevron {
+  display: inline-block; margin-left: 4px;
+  transition: transform 0.2s;
+}
+.sfdc-path-row.is-expanded .sfdc-path-row-expand .chevron {
+  transform: rotate(180deg);
+}
+.sfdc-path-detail {
+  display: none;
+  padding: 16px 20px;
+  border-top: 1px solid var(--wf-line);
+  background: var(--wf-surface);
+  font-size: 13px;
+}
+.sfdc-path-row.is-expanded .sfdc-path-detail {
+  display: block;
+}
+.sfdc-path-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+.sfdc-path-detail-section h4 {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: var(--wf-muted);
+  margin: 0 0 8px;
+}
+.sfdc-path-detail-section .key-field {
+  display: flex; justify-content: space-between;
+  padding: 4px 0; border-bottom: 1px solid var(--wf-tint);
+  font-size: 12px;
+}
+.sfdc-path-detail-section .key-field:last-child { border-bottom: none; }
+.sfdc-path-detail-section .key-field-label { color: var(--wf-muted); }
+.sfdc-path-detail-section .key-field-value { color: var(--wf-ink); font-weight: 500; text-align: right; }
+.sfdc-path-detail-section .guidance {
+  font-size: 12px; line-height: 1.6; color: var(--wf-text);
+  margin: 0 0 8px;
+}
+.sfdc-path-detail-section .guidance:last-child { margin-bottom: 0; }
+.sfdc-path-detail-mark {
+  display: inline-block; margin-top: 12px;
+  padding: 6px 14px;
+  background: var(--wf-accent); color: #fff;
+  border: 1px solid var(--wf-accent); border-radius: 4px;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+}
+.sfdc-path-detail-mark:hover { filter: brightness(1.08); }
+
+/* ── 1c. Next Best Action panel (top of right column) ─────────────────── */
+.sfdc-nba {
+  background: linear-gradient(135deg, #f4f0fc 0%, #f0e8f4 100%);
+  border: 1px solid #c4b3e0;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.sfdc-nba-eyebrow {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px; color: #6048a0;
+  margin-bottom: 8px;
+}
+.sfdc-nba-icon { font-size: 12px; }
+.sfdc-nba-title {
+  font-size: 13px; font-weight: 700; color: var(--wf-ink);
+  margin: 0 0 4px; line-height: 1.4;
+}
+.sfdc-nba-reason {
+  font-size: 11px; color: var(--wf-text); line-height: 1.5;
+  margin-bottom: 10px;
+}
+.sfdc-nba-actions {
+  display: flex; gap: 6px;
+}
+.sfdc-nba-btn {
+  padding: 6px 12px;
+  font-size: 11px; font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer; font-family: inherit;
+  border: 1px solid;
+}
+.sfdc-nba-btn.primary {
+  background: #6048a0; color: #fff; border-color: #6048a0;
+}
+.sfdc-nba-btn.primary:hover { filter: brightness(1.08); }
+.sfdc-nba-btn.secondary {
+  background: transparent; color: #6048a0; border-color: #c4b3e0;
+}
+.sfdc-nba-btn.secondary:hover { background: rgba(96,72,160,0.06); }
+
+/* ── 2. Activity tabs (Slack | Activity) ───────────────────────────────── */
+.sfdc-activity-tabs {
+  display: flex; gap: 0;
+  border-bottom: 2px solid var(--wf-line);
+  margin-bottom: 12px;
+}
+.sfdc-activity-tab {
+  flex: 1; padding: 10px 12px;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--wf-muted); cursor: pointer;
+  text-align: center; background: transparent;
+  border: none; border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.12s, border-color 0.12s;
+  font-family: inherit;
+}
+.sfdc-activity-tab:hover { color: var(--wf-ink); }
+.sfdc-activity-tab.active {
+  color: var(--wf-accent);
+  border-bottom-color: var(--wf-accent);
+}
+.sfdc-activity-tab-count {
+  display: inline-block; margin-left: 4px;
+  font-size: 10px; font-weight: 500; opacity: 0.7;
+}
+.sfdc-activity-panel { display: none; }
+.sfdc-activity-panel.active { display: block; }
+
+/* ── 3. Activity filter chips (inside Activity tab) ────────────────────── */
+.sfdc-activity-filter {
+  display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.sfdc-activity-filter-chip {
+  padding: 4px 10px; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  border: 1px solid var(--wf-line); border-radius: 12px;
+  background: #fff; color: var(--wf-muted);
+  cursor: pointer; font-family: inherit;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.sfdc-activity-filter-chip:hover { color: var(--wf-ink); border-color: var(--wf-ink); }
+.sfdc-activity-filter-chip.active {
+  background: var(--wf-ink); color: #fff; border-color: var(--wf-ink);
+}
+
+/* ── 4. Quick actions — Lightning-style icon + text, NO circle (per #56) ─ */
+.sfdc-quick-actions {
+  display: flex; gap: 4px;
+  padding: 10px 0 12px;
+  border-bottom: 1px solid var(--wf-line);
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.sfdc-quick-action {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 10px;
+  background: transparent; border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer; font-family: inherit;
+  color: var(--wf-accent);
+  font-size: 11px; font-weight: 600;
+  transition: background 0.12s, border-color 0.12s;
+}
+.sfdc-quick-action:hover {
+  background: var(--wf-surface);
+  border-color: var(--wf-line);
+}
+.sfdc-quick-action-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 16px; height: 16px; flex-shrink: 0;
+}
+.sfdc-quick-action-icon svg { width: 14px; height: 14px; }
+.sfdc-quick-action-text { white-space: nowrap; }
+.sfdc-quick-action-dropdown {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: transparent; border: none;
+  color: var(--wf-muted); cursor: pointer;
+  font-size: 9px; padding: 2px; margin-left: 2px;
+  border-radius: 2px;
+}
+.sfdc-quick-action-dropdown:hover {
+  background: var(--wf-tint); color: var(--wf-ink);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   SLDS 2 / COSMOS PRODUCTION LAYER (added 2026-05-16)
+
+   Scoped to `html[data-wf-surface="sfdc"]` so every SFDC page renders with
+   canonical Lightning Cosmos values regardless of fidelity tier. The goal is
+   that opening any SFDC-surface page reads as "this is a real Lightning
+   record page" — not "wireframe approximating Lightning."
+
+   Reference: @salesforce-ux/design-system v2.27.2 (Cosmos)
+              https://www.lightningdesignsystem.com/
+
+   Cosmos tokens applied:
+     SURFACE_1   #FFFFFF   (white card)
+     SURFACE_2   #F3F3F3   (page bg)
+     ON_SURFACE_1 #5C5C5C  (muted text)
+     ON_SURFACE_2 #2E2E2E  (body text)
+     ON_SURFACE_3 #03234D  (heading text — deep navy)
+     BORDER_1    #C9C9C9   (primary border)
+     BRAND       #0176D3   (Cosmos brand blue)
+     ACCENT_2    #0250D9   (electric blue 40)
+     BRAND_30    #022AC0   (saturated blue)
+     SUCCESS     #04844B   (Salem green)
+     ERROR       #C23934   (Mahogany red)
+     WARNING     #844800   (Cinnamon)
+   ============================================================================ */
+
+html[data-wf-surface="sfdc"] body {
+  background: #F3F3F3;
+  color: #2E2E2E;
+  /* Salesforce uses the OS system font — SF Pro on macOS via -apple-system,
+     Segoe UI on Windows, fallback to system-ui. No webfont needed. */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+html[data-wf-surface="sfdc"] {
+  --sl-brand: #0176D3;
+  --sl-brand-hover: #014486;
+  --sl-on-1: #5C5C5C;
+  --sl-on-2: #2E2E2E;
+  --sl-on-3: #03234D;
+  --sl-border-1: #C9C9C9;
+  --sl-border-2: #5C5C5C;
+  --sl-surface-1: #FFFFFF;
+  --sl-surface-2: #F3F3F3;
+  --sl-surface-3: #E5E5E5;
+  --sl-success: #04844B;
+  --sl-error: #C23934;
+  --sl-warning: #844800;
+}
+
+/* ── Global header (Equinix-branded SLDS app nav) ──────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-global-header {
+  background: #FFFFFF;
+  border-bottom: 1px solid #DDDBDA;
+  height: 48px;
+  display: flex; align-items: stretch;
+  padding: 0 16px;
+  position: relative;
+  z-index: 50;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding-right: 16px;
+  border-right: 1px solid #DDDBDA;
+  margin-right: 16px;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-equinix-logo {
+  width: 22px; height: 22px;
+  background: #ED1C24; /* Equinix red */
+  border-radius: 2px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 12px;
+  letter-spacing: -0.5px;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-app-label {
+  font-weight: 700; font-size: 14px; color: #03234D;
+  letter-spacing: 0.01em;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-nav {
+  display: flex; align-items: stretch; flex: 1;
+  font-size: 13px;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-nav a {
+  display: flex; align-items: center;
+  padding: 0 14px;
+  color: #2E2E2E; text-decoration: none;
+  position: relative;
+  font-weight: 400;
+  transition: color 0.12s, background 0.12s;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-nav a:hover {
+  color: #0176D3;
+  background: #F4F6F9;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-nav a.active {
+  color: #181818;
+  font-weight: 700;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-nav a.active::after {
+  content: '';
+  position: absolute; left: 14px; right: 14px; bottom: -1px;
+  height: 3px; background: #0176D3;
+  border-radius: 2px 2px 0 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-utility {
+  display: flex; align-items: center; gap: 4px;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-utility .util-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: transparent; border: none; border-radius: 16px;
+  color: #5C5C5C; cursor: pointer;
+  font-size: 15px;
+  position: relative;
+  transition: background 0.12s;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-utility .util-btn:hover { background: #F4F6F9; color: #0176D3; }
+html[data-wf-surface="sfdc"] .sfdc-gh-utility .util-badge {
+  position: absolute; top: 2px; right: 0;
+  background: #C23934; color: #fff;
+  min-width: 14px; height: 14px;
+  border-radius: 7px; padding: 0 4px;
+  font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+html[data-wf-surface="sfdc"] .sfdc-gh-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: #5867E8;
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 11px;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+/* ── Page canvas + sandbox banner ──────────────────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-sandbox-banner {
+  background: #DDF0FF;
+  color: #014486;
+  font-size: 12px; font-weight: 500;
+  padding: 6px 16px;
+  text-align: center;
+  border-bottom: 1px solid #B3DDF8;
+}
+html[data-wf-surface="sfdc"] .sfdc-sandbox-banner a { color: #0176D3; text-decoration: none; }
+html[data-wf-surface="sfdc"] .sfdc-sandbox-banner a:hover { text-decoration: underline; }
+
+/* ── Object header — Cosmos values ─────────────────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-object-header {
+  background: transparent;
+  padding: 16px 4px 12px;
+  color: #03234D;
+  font-family: inherit;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-icon {
+  width: 48px; height: 48px;
+  border-radius: 6px;
+  background: #6B8FE0; /* Account icon hue — Cosmos uses object-specific tints */
+  font-size: 22px;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-type {
+  font-size: 13px; font-weight: 400; color: #5C5C5C;
+  margin-bottom: 0; line-height: 1.3;
+  text-transform: none; letter-spacing: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-name {
+  font-size: 28px; font-weight: 700; color: #03234D;
+  line-height: 1.15; letter-spacing: -0.005em;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-actions .icon-btn {
+  background: #FFFFFF;
+  border: 1px solid #C9C9C9;
+  color: #0176D3;
+  width: 32px; height: 32px; border-radius: 16px;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-actions .icon-btn:hover {
+  background: #F4F6F9; border-color: #0176D3;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-actions .pill-btn {
+  background: #FFFFFF;
+  border: 1px solid #C9C9C9;
+  color: #0176D3;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: 4px;
+  font-size: 13px; font-weight: 400;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+html[data-wf-surface="sfdc"] .sfdc-object-header-actions .pill-btn:hover {
+  background: #F4F6F9; border-color: #0176D3;
+}
+
+/* ── Spanning highlights bar — Cosmos card style ───────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  padding: 12px 24px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights.is-collapsed {
+  padding: 8px 24px;
+  box-shadow: 0 4px 12px 0 rgba(0,0,0,0.08);
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metrics {
+  border-left: none;
+  padding-left: 0;
+  margin-left: 0;
+  gap: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric {
+  padding: 0 24px;
+  border-right: 1px solid #E5E5E5;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric:first-child { padding-left: 0; }
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric:last-child { border-right: none; padding-right: 0; }
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric-label {
+  font-size: 11px; font-weight: 400;
+  text-transform: none; letter-spacing: 0;
+  color: #5C5C5C; margin-bottom: 4px;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric-value {
+  font-size: 14px; font-weight: 700; color: #03234D;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric-value a { color: #0176D3; text-decoration: none; }
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric-value a:hover { text-decoration: underline; }
+
+/* ── Path row — Cosmos Lightning Path ──────────────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-path-row {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row-bar {
+  padding: 12px 16px;
+  align-items: center;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row-bar .sfdc-path-bar {
+  padding: 0; gap: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step {
+  background: #ECEBEA;
+  color: #706E6B;
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
+  padding: 10px 12px 10px 22px;
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.3px;
+  margin-left: -2px;
+  border: none;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  text-transform: none;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step:first-child {
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%);
+  border-radius: 4px 0 0 4px;
+  margin-left: 0;
+  padding-left: 14px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step:last-child {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%);
+  border-radius: 0 4px 4px 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.complete {
+  background: #0176D3; color: #FFFFFF;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.complete::before {
+  content: '\2713\00a0'; font-weight: 700;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.current {
+  background: #FFFFFF; color: #0176D3;
+  box-shadow: inset 0 0 0 1px #0176D3;
+  font-weight: 700;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step:hover:not(.current) {
+  background: #DDDBDA;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.complete:hover {
+  background: #014486;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row-expand {
+  border: none;
+  border-left: 1px solid #DDDBDA;
+  background: transparent;
+  color: #0176D3;
+  font-size: 13px; font-weight: 600;
+  text-transform: none; letter-spacing: 0;
+  padding: 0 16px;
+  margin-left: 12px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row-expand:hover { background: #F4F6F9; }
+html[data-wf-surface="sfdc"] .sfdc-path-detail {
+  background: #FAFAF9;
+  border-top: 1px solid #DDDBDA;
+  padding: 20px 24px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-detail-section h4 {
+  font-size: 12px; font-weight: 700;
+  text-transform: none; letter-spacing: 0;
+  color: #03234D; margin: 0 0 10px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-detail-section .key-field {
+  border-color: #E5E5E5; font-size: 13px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-detail-section .key-field-label { color: #5C5C5C; }
+html[data-wf-surface="sfdc"] .sfdc-path-detail-section .key-field-value { color: #03234D; }
+html[data-wf-surface="sfdc"] .sfdc-path-detail-section .guidance {
+  font-size: 13px; color: #2E2E2E; line-height: 1.6;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-detail-mark {
+  background: #0176D3; color: #FFFFFF;
+  border: 1px solid #0176D3;
+  padding: 8px 16px;
+  font-size: 13px; font-weight: 400;
+  border-radius: 4px;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-detail-mark:hover { background: #014486; border-color: #014486; filter: none; }
+
+/* ── 3-col grid + cards (Cosmos) ───────────────────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-record-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 12px;
+  align-items: start;
+}
+html[data-wf-surface="sfdc"] .sfdc-col-related,
+html[data-wf-surface="sfdc"] .sfdc-col-record,
+html[data-wf-surface="sfdc"] .sfdc-col-activity {
+  display: flex; flex-direction: column; gap: 12px;
+  min-width: 0;
+}
+
+/* Related Info cards (left column) */
+html[data-wf-surface="sfdc"] .sfdc-sidebar-card {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+html[data-wf-surface="sfdc"] .sfdc-sidebar-card-title {
+  padding: 12px 14px;
+  font-size: 13px; font-weight: 700;
+  text-transform: none; letter-spacing: 0;
+  color: #03234D;
+  border-bottom: 1px solid #E5E5E5;
+  background: transparent;
+}
+
+/* Center column cards */
+html[data-wf-surface="sfdc"] .sfdc-col-record .sfdc-card {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-radius: 4px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+
+/* Center tabs */
+html[data-wf-surface="sfdc"] .sfdc-tabs {
+  display: flex; border-bottom: 1px solid #DDDBDA;
+  background: transparent;
+  padding: 0 16px;
+  margin-bottom: 0;
+  gap: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-tab {
+  padding: 12px 16px;
+  font-size: 13px; font-weight: 700;
+  color: #5C5C5C;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+html[data-wf-surface="sfdc"] .sfdc-tab:hover { color: #0176D3; }
+html[data-wf-surface="sfdc"] .sfdc-tab.active {
+  color: #0176D3;
+  border-bottom-color: #0176D3;
+}
+
+/* ── NBA panel (Einstein-style, Cosmos brand) ──────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-nba {
+  background: linear-gradient(135deg, #F0F1F3 0%, #E5EEFB 100%);
+  border: 1px solid #B5C3D9;
+  border-radius: 4px;
+  padding: 14px 16px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.04);
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-eyebrow {
+  font-size: 11px; font-weight: 700;
+  text-transform: none; letter-spacing: 0;
+  color: #014486;
+  display: flex; align-items: center; gap: 6px;
+  margin-bottom: 6px;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-title {
+  font-size: 14px; font-weight: 700; color: #03234D;
+  margin: 0 0 6px; line-height: 1.4;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-reason {
+  font-size: 12px; color: #2E2E2E; line-height: 1.5;
+  margin-bottom: 12px;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.primary {
+  background: #0176D3; color: #FFFFFF; border-color: #0176D3;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px; font-weight: 400;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.primary:hover {
+  background: #014486; border-color: #014486; filter: none;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.secondary {
+  background: #FFFFFF; color: #0176D3; border-color: #C9C9C9;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 12px; font-weight: 400;
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.secondary:hover {
+  background: #F4F6F9; border-color: #0176D3;
+}
+
+/* ── Quick actions (Lightning utility-style icon + text) ───────────────── */
+html[data-wf-surface="sfdc"] .sfdc-quick-actions {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-radius: 4px;
+  padding: 8px 8px 8px;
+  margin-bottom: 0;
+  border-bottom: 1px solid #DDDBDA;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+  gap: 2px;
+}
+html[data-wf-surface="sfdc"] .sfdc-quick-action {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #0176D3;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+html[data-wf-surface="sfdc"] .sfdc-quick-action:hover {
+  background: #F4F6F9; border-color: transparent;
+}
+html[data-wf-surface="sfdc"] .sfdc-quick-action-icon { color: #0176D3; }
+
+/* ── Activity tabs (Slack | Activity) ──────────────────────────────────── */
+html[data-wf-surface="sfdc"] .sfdc-activity-tabs {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-bottom: 1px solid #DDDBDA;
+  border-radius: 4px 4px 0 0;
+  margin-top: 12px;
+  margin-bottom: 0;
+  padding: 0 4px;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.05);
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-tab {
+  flex: 1;
+  padding: 10px 12px;
+  color: #5C5C5C;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  text-transform: none; letter-spacing: 0;
+  font-size: 12px; font-weight: 700;
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-tab:hover { color: #0176D3; }
+html[data-wf-surface="sfdc"] .sfdc-activity-tab.active {
+  color: #0176D3;
+  border-bottom-color: #0176D3;
+}
+
+/* Activity panel — sits under tabs, in its own card */
+html[data-wf-surface="sfdc"] .sfdc-activity-panel {
+  background: #FFFFFF;
+  border: 1px solid #DDDBDA;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 12px 16px;
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-panel.active { display: block; }
+
+html[data-wf-surface="sfdc"] .sfdc-activity-filter-chip {
+  background: #FFFFFF;
+  border: 1px solid #C9C9C9;
+  border-radius: 16px;
+  color: #5C5C5C;
+  padding: 4px 12px;
+  font-size: 11px; font-weight: 600;
+  text-transform: none; letter-spacing: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-filter-chip:hover {
+  color: #0176D3; border-color: #0176D3;
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-filter-chip.active {
+  background: #0176D3; color: #FFFFFF; border-color: #0176D3;
+}
+
+html[data-wf-surface="sfdc"] .sfdc-feed-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #E5E5E5;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-item:last-child { border-bottom: none; }
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar {
+  background: #E5E5E5;
+  color: #5C5C5C;
+  font-weight: 700; font-size: 11px;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar.slack {
+  background: #4A154B; /* Slack purple/aubergine */
+  color: #fff;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar.system {
+  background: #5867E8; color: #fff;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-text { color: #2E2E2E; font-size: 13px; }
+html[data-wf-surface="sfdc"] .sfdc-feed-text strong { color: #03234D; }
+html[data-wf-surface="sfdc"] .sfdc-feed-text a { color: #0176D3; text-decoration: none; }
+html[data-wf-surface="sfdc"] .sfdc-feed-text a:hover { text-decoration: underline; }
+html[data-wf-surface="sfdc"] .sfdc-feed-time { color: #5C5C5C; font-size: 11px; }
+
+/* Make sure the page-shell padding leaves room for the global header */
+html[data-wf-surface="sfdc"] .canon-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 12px 24px 40px;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   COSMOS POLISH LAYER — motion + micro-interactions (added 2026-05-16)
+   Direction: Stripe-Dashboard-quality SLDS 2 polish. One well-orchestrated
+   page-load reveal + targeted micro-interactions. No scattered animation
+   noise — every effect earns its place.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Honor reduced-motion preference for everything below ──────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html[data-wf-surface="sfdc"] *,
+  html[data-wf-surface="sfdc"] *::before,
+  html[data-wf-surface="sfdc"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── 1. Page-load orchestration ─────────────────────────────────────────
+      Each major block fades + slides up on first paint. Staggered with
+      animation-delay so the page composes itself with rhythm rather than
+      slamming in all at once. */
+@keyframes sfdc-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+html[data-wf-surface="sfdc"] .sfdc-global-header,
+html[data-wf-surface="sfdc"] .sfdc-object-header,
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights,
+html[data-wf-surface="sfdc"] .sfdc-path-row,
+html[data-wf-surface="sfdc"] .sfdc-col-related > *,
+html[data-wf-surface="sfdc"] .sfdc-col-record > *,
+html[data-wf-surface="sfdc"] .sfdc-col-activity > * {
+  opacity: 0;
+  animation: sfdc-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+html[data-wf-surface="sfdc"] .sfdc-global-header        { animation-delay: 0ms;   }
+html[data-wf-surface="sfdc"] .sfdc-object-header        { animation-delay: 80ms;  }
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights  { animation-delay: 160ms; }
+html[data-wf-surface="sfdc"] .sfdc-path-row             { animation-delay: 240ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-related > *      { animation-delay: 320ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-record > *       { animation-delay: 360ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-activity > *     { animation-delay: 400ms; }
+/* Staggered reveal of each left-column card */
+html[data-wf-surface="sfdc"] .sfdc-col-related > *:nth-child(2) { animation-delay: 360ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-related > *:nth-child(3) { animation-delay: 400ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-related > *:nth-child(4) { animation-delay: 440ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-related > *:nth-child(n+5) { animation-delay: 480ms; }
+/* Right-column stack: NBA → quick actions → activity */
+html[data-wf-surface="sfdc"] .sfdc-col-activity > *:nth-child(1) { animation-delay: 400ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-activity > *:nth-child(2) { animation-delay: 440ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-activity > *:nth-child(3) { animation-delay: 480ms; }
+html[data-wf-surface="sfdc"] .sfdc-col-activity > *:nth-child(n+4) { animation-delay: 520ms; }
+
+/* ── 2. Sticky-collapse — smooth secondary-metric fade + backdrop-blur ─── */
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights {
+  transition: padding 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              backdrop-filter 0.22s ease,
+              background-color 0.22s ease;
+  will-change: padding, box-shadow;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights.is-collapsed {
+  background-color: rgba(255, 255, 255, 0.86);
+  backdrop-filter: saturate(140%) blur(8px);
+  -webkit-backdrop-filter: saturate(140%) blur(8px);
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights-metric.is-secondary {
+  transition: opacity 0.22s ease, max-width 0.3s ease, padding 0.3s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-spanning-highlights.is-collapsed .sfdc-spanning-highlights-metric.is-secondary {
+  opacity: 0;
+  max-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border-right: none;
+}
+
+/* ── 3. Path-row expansion — silky motion + chevron sync ────────────────
+      Replace display:none/block with max-height transition so the panel
+      grows/collapses smoothly. The detail panel uses `position:relative`
+      so its content animates with the container. */
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-detail {
+  display: block;
+  max-height: 0;
+  overflow: hidden;
+  padding-top: 0;
+  padding-bottom: 0;
+  border-top: 1px solid transparent;
+  transition: max-height 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+              padding 0.28s ease,
+              border-color 0.32s ease,
+              opacity 0.28s ease;
+  opacity: 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row.is-expanded .sfdc-path-detail {
+  max-height: 480px;
+  padding-top: 20px;
+  padding-bottom: 24px;
+  border-top-color: #DDDBDA;
+  opacity: 1;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row-expand .chevron {
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  display: inline-block;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row.is-expanded .sfdc-path-row-expand .chevron {
+  transform: rotate(180deg);
+}
+
+/* Path stage hover preview — subtle scale + brightening */
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step {
+  cursor: pointer;
+  transform: translateY(0);
+  transition: background 0.18s ease, color 0.18s ease, filter 0.18s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step:hover {
+  filter: brightness(1.04);
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.current {
+  position: relative;
+}
+html[data-wf-surface="sfdc"] .sfdc-path-row .sfdc-path-step.current::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(1,118,211,0.04) 100%);
+  pointer-events: none;
+}
+
+/* ── 4. NBA panel — Einstein "fresh insight" feel ───────────────────────
+      Pulsing indicator dot + subtle ✨ eyebrow shimmer + satisfying button
+      press. The shimmer is on the gradient background, not text. */
+html[data-wf-surface="sfdc"] .sfdc-nba {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F0F1F3 0%, #E5EEFB 50%, #F0F1F3 100%);
+  background-size: 200% 200%;
+  animation: sfdc-nba-shimmer 6s ease-in-out infinite;
+}
+@keyframes sfdc-nba-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+/* Pulsing live indicator dot — top-right of panel */
+html[data-wf-surface="sfdc"] .sfdc-nba::before {
+  content: '';
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 8px; height: 8px;
+  background: #0176D3;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(1, 118, 211, 0.6);
+  animation: sfdc-nba-pulse 2.2s ease-out infinite;
+}
+@keyframes sfdc-nba-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(1, 118, 211, 0.55); }
+  70%  { box-shadow: 0 0 0 10px rgba(1, 118, 211, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(1, 118, 211, 0); }
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-eyebrow .sfdc-nba-icon {
+  display: inline-block;
+  animation: sfdc-nba-sparkle 3s ease-in-out infinite;
+}
+@keyframes sfdc-nba-sparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.95; }
+  50%      { transform: scale(1.12) rotate(8deg); opacity: 1; }
+}
+/* Satisfying button press */
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.primary {
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease;
+  box-shadow: 0 1px 0 0 rgba(1, 68, 134, 0.4);
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px 0 rgba(1, 118, 211, 0.28);
+}
+html[data-wf-surface="sfdc"] .sfdc-nba-btn.primary:active {
+  transform: translateY(0);
+  box-shadow: 0 0 0 0 rgba(1, 68, 134, 0);
+}
+
+/* ── 5. Activity feed — refined avatars + hover-reveal actions ──────────
+      Avatars get gradient backgrounds keyed off initials/role.
+      Slack messages get a tiny aubergine accent.
+      Feed item hover reveals inline Reply/Forward affordances. */
+html[data-wf-surface="sfdc"] .sfdc-feed-item {
+  position: relative;
+  transition: background 0.15s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-item:hover {
+  background: rgba(1, 118, 211, 0.025);
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar {
+  background: linear-gradient(135deg, #C8D4E6 0%, #A8BBD8 100%);
+  color: #03234D;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  position: relative;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar.slack {
+  background: linear-gradient(135deg, #4A154B 0%, #611f60 100%);
+  color: #fff;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar.slack::after {
+  /* Tiny Slack-pinwheel-inspired accent dot */
+  content: '';
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 8px; height: 8px;
+  background: #ECB22E;
+  border: 1.5px solid #fff;
+  border-radius: 50%;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-avatar.system {
+  background: linear-gradient(135deg, #5867E8 0%, #4555D2 100%);
+  color: #fff;
+}
+/* Hover-reveal quick-action row beneath the feed item */
+html[data-wf-surface="sfdc"] .sfdc-feed-item .sfdc-feed-actions {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  display: flex; gap: 12px;
+  font-size: 11px; font-weight: 600;
+  color: #0176D3;
+  transition: opacity 0.18s ease, max-height 0.18s ease, margin-top 0.18s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-item:hover .sfdc-feed-actions,
+html[data-wf-surface="sfdc"] .sfdc-feed-item:focus-within .sfdc-feed-actions {
+  opacity: 1;
+  max-height: 24px;
+  margin-top: 6px;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-actions button {
+  background: transparent; border: none; color: #0176D3;
+  font: inherit; cursor: pointer; padding: 2px 0;
+}
+html[data-wf-surface="sfdc"] .sfdc-feed-actions button:hover { text-decoration: underline; }
+
+/* Time gets a hover-revealed absolute date via the title attribute (no JS) */
+html[data-wf-surface="sfdc"] .sfdc-feed-time { cursor: help; }
+
+/* ── 6. Quick-action ripple-ish press feedback ──────────────────────────
+      Subtle scale-on-press and accent ring on focus-visible. */
+html[data-wf-surface="sfdc"] .sfdc-quick-action {
+  position: relative;
+  transition: background 0.12s ease, border-color 0.12s ease,
+              transform 0.08s ease, color 0.12s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-quick-action:active { transform: scale(0.97); }
+html[data-wf-surface="sfdc"] .sfdc-quick-action-icon svg {
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-wf-surface="sfdc"] .sfdc-quick-action:hover .sfdc-quick-action-icon svg {
+  transform: scale(1.08);
+}
+
+/* ── 7. Filter chips — smooth state transition ──────────────────────────  */
+html[data-wf-surface="sfdc"] .sfdc-activity-filter-chip {
+  transition: background 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+              color 0.18s ease, border-color 0.18s ease, transform 0.08s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-activity-filter-chip:active { transform: scale(0.96); }
+
+/* ── 8. Cosmos focus rings (accessibility + polish) ─────────────────────  */
+html[data-wf-surface="sfdc"] button:focus-visible,
+html[data-wf-surface="sfdc"] a:focus-visible,
+html[data-wf-surface="sfdc"] [role="button"]:focus-visible {
+  outline: 2px solid #0176D3;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── 9. Empty state — zero-filter activity panel ────────────────────────
+      When the filter chips zero out the visible items, show a clean
+      "Nothing matches" placeholder instead of an empty void. JS hook in
+      the page toggles `.is-empty` on the panel. */
+html[data-wf-surface="sfdc"] .sfdc-activity-panel.is-empty::after {
+  content: 'No items match this filter.';
+  display: block;
+  padding: 24px 12px 28px;
+  text-align: center;
+  font-size: 12px;
+  color: #5C5C5C;
+  font-style: italic;
+}
+
+/* ── 10. Related Info card — subtle interaction polish ──────────────────  */
+html[data-wf-surface="sfdc"] .sfdc-sidebar-card-title {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-sidebar-card-title:hover { background: #FAFAF9; }
+html[data-wf-surface="sfdc"] .demo-related-row {
+  transition: background 0.12s ease;
+}
+html[data-wf-surface="sfdc"] .demo-related-row:hover { background: rgba(1, 118, 211, 0.03); }
+
+/* ── 11. Tab strip — animated underline transition ──────────────────────  */
+html[data-wf-surface="sfdc"] .sfdc-tab,
+html[data-wf-surface="sfdc"] .sfdc-activity-tab {
+  position: relative;
+  transition: color 0.15s ease;
+}
+html[data-wf-surface="sfdc"] .sfdc-tab::after,
+html[data-wf-surface="sfdc"] .sfdc-activity-tab::after {
+  content: '';
+  position: absolute;
+  left: 50%; right: 50%; bottom: -1px;
+  height: 3px;
+  background: #0176D3;
+  border-radius: 2px 2px 0 0;
+  transition: left 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              right 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+html[data-wf-surface="sfdc"] .sfdc-tab.active::after,
+html[data-wf-surface="sfdc"] .sfdc-activity-tab.active::after {
+  left: 0; right: 0;
+}
+/* Override the borders set in the production layer so the animated underline owns this */
+html[data-wf-surface="sfdc"] .sfdc-tab,
+html[data-wf-surface="sfdc"] .sfdc-tab.active,
+html[data-wf-surface="sfdc"] .sfdc-activity-tab,
+html[data-wf-surface="sfdc"] .sfdc-activity-tab.active {
+  border-bottom-color: transparent;
+}
+
+

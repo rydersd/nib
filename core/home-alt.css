@@ -1,0 +1,602 @@
+/* ============================================================================
+   home-alt.css — Realistic-fidelity Day-N landing alternates
+   ============================================================================
+   Shared by:
+     pm/pm-home-dashboard-alt1.html   rep/rep-home-alt1.html   (agent-as-module)
+     pm/pm-home-dashboard-alt2.html   rep/rep-home-alt2.html   (agent-as-front-door)
+
+   Standalone realistic pages (no html.wireframe class — they render as the
+   product would ship). Tokens lifted from nib/surfaces/ec-nexa.css, which is
+   itself locked from the Figma "Partner Central" file (4076:26460, 600:44224):
+   Nexa Text ramp, ink #131925, link #086ae3, red #e91c24, purple→blue hero
+   gradient, black primary buttons. Agent affordances use the EC violet.
+   ============================================================================ */
+
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal; font-weight: 300; font-display: swap;
+  src: url('../fonts/nexa-text/NexaText-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal; font-weight: 400; font-display: swap;
+  src: url('../fonts/nexa-text/NexaText-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal; font-weight: 700; font-display: swap;
+  src: url('../fonts/nexa-text/NexaText-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Nexa Text';
+  font-style: normal; font-weight: 800; font-display: swap;
+  src: url('../fonts/nexa-text/NexaText-ExtraBold.woff2') format('woff2');
+}
+
+:root {
+  --pr-ink: #131925;
+  --pr-text: #131925;
+  --pr-muted: #5a657b;
+  --pr-line: #d0d2da;
+  --pr-line-soft: #e1e3e7;
+  --pr-tint: #f5f5f5;
+  --pr-canvas: #f6f7f9;
+  --pr-card: #ffffff;
+  --pr-link: #086ae3;
+  --pr-red: #e91c24;
+  --pr-green: #33a85c;
+  --pr-green-bg: #dffbe5;
+  --pr-amber: #b45309;
+  --pr-amber-bg: #fff1cc;
+  --pr-red-bg: #ffe4e6;
+  --pr-blue-bg: #cce3ff;
+  --pr-violet: #7739d9;
+  --pr-purple-dark: #40075f;
+  --pr-gradient-hero: linear-gradient(135deg, #40075f 0%, #086ae3 100%);
+  --pr-radius: 8px;
+  --pr-radius-lg: 12px;
+  --pr-radius-xl: 20px;
+  --pr-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --pr-shadow-md: 0 0 4.4px rgba(0,0,0,0.06), 0 4.3px 4.4px rgba(0,0,0,0.07);
+}
+
+* { box-sizing: border-box; }
+
+html.home-alt { background: var(--pr-canvas); }
+html.home-alt body {
+  margin: 0;
+  font-family: 'Nexa Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--pr-text);
+  background: var(--pr-canvas);
+  /* Sticky footer: the page always ends ON the footer, flush with the
+     viewport bottom — never an accidental strip of bare canvas. Column
+     flex; wf-nav's injected ctx bar + header stretch full-width as items. */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+html.home-alt .pr-page { flex: 1 0 auto; width: 100%; }
+.pr-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  padding: 18px 24px 22px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--pr-muted);
+  border-top: 1px solid var(--pr-line-soft);
+}
+
+/* ── Portal header — realistic skin for the wf-nav-injected chrome ────────
+      wf-nav.js owns the portal header (single source of truth) and injects
+      it on these pages too, but wireframe.css gates its styles behind
+      html.wireframe. These rules give the same markup a realistic product
+      treatment on html.home-alt pages. */
+html.home-alt .wf-header {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--pr-ink); color: #fff;
+  padding: 0 24px; height: 58px;
+}
+html.home-alt .wf-header-logo { display: inline-flex; align-items: center; color: #fff; flex-shrink: 0; }
+html.home-alt .wf-header-title {
+  font-size: 13.5px; font-weight: 700; white-space: nowrap; color: #fff;
+  padding-left: 14px; border-left: 1px solid rgba(255,255,255,0.25);
+}
+html.home-alt .wf-header-nav { display: flex; gap: 2px; flex: 1; min-width: 0; padding-left: 8px; }
+html.home-alt .wf-header-nav a {
+  font-size: 13.5px; color: rgba(255,255,255,0.75); text-decoration: none;
+  padding: 7px 11px; border-radius: 6px; white-space: nowrap;
+}
+html.home-alt .wf-header-nav a:hover { color: #fff; background: rgba(255,255,255,0.08); }
+html.home-alt .wf-header-nav a.active { color: #fff; font-weight: 700; background: rgba(255,255,255,0.14); }
+html.home-alt .wf-header-util { display: flex; align-items: center; gap: 10px; margin-left: auto; flex-shrink: 0; }
+html.home-alt .wf-header-util button,
+html.home-alt .wf-hdr-help-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  background: none; color: rgba(255,255,255,0.85); font-size: 14px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+html.home-alt .wf-header-util button:hover,
+html.home-alt .wf-hdr-help-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
+html.home-alt .wf-hdr-bell { position: relative; }
+html.home-alt .wf-hdr-bell-badge {
+  position: absolute; top: -1px; right: -2px; min-width: 15px; height: 15px;
+  border-radius: 9999px; background: var(--pr-red); color: #fff;
+  font-size: 9.5px; font-weight: 700; line-height: 15px; text-align: center; padding: 0 3px;
+}
+html.home-alt .wf-avatar {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--pr-blue-bg);
+  color: #0653b6; font-size: 12px; font-weight: 800; cursor: default;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+/* Header search: collapsed = icon only; .open reveals the inline input */
+html.home-alt .wf-header-search { position: relative; display: flex; align-items: center; gap: 6px; }
+html.home-alt .wf-header-search .wf-portal-search-input,
+html.home-alt .wf-header-search .wf-search-close-btn { display: none; }
+html.home-alt .wf-header-search.open .wf-portal-search-input {
+  display: block; width: 240px; font-family: inherit; font-size: 13px;
+  padding: 7px 13px; border: none; border-radius: 9999px;
+  background: rgba(255,255,255,0.14); color: #fff;
+}
+html.home-alt .wf-header-search.open .wf-portal-search-input::placeholder { color: rgba(255,255,255,0.6); }
+html.home-alt .wf-header-search.open .wf-search-close-btn { display: inline-flex; }
+html.home-alt .wf-portal-search-box {
+  display: none; position: absolute; top: calc(100% + 10px); right: 0; z-index: 80;
+  width: 380px; max-height: 60vh; overflow: auto;
+  background: var(--pr-card); color: var(--pr-text);
+  border: 1px solid var(--pr-line); border-radius: var(--pr-radius-lg);
+  box-shadow: var(--pr-shadow-md); padding: 10px;
+  font-size: 13px; text-align: left;
+}
+html.home-alt .wf-header-search.open .wf-portal-search-box { display: block; }
+html.home-alt .wf-portal-search-box a { color: var(--pr-link); text-decoration: none; }
+/* Help dropdown */
+html.home-alt .wf-hdr-help { position: relative; }
+html.home-alt .wf-hdr-help-menu {
+  display: none; position: absolute; top: calc(100% + 10px); right: 0; z-index: 80;
+  width: 230px; background: var(--pr-card); color: var(--pr-text);
+  border: 1px solid var(--pr-line); border-radius: var(--pr-radius-lg);
+  box-shadow: var(--pr-shadow-md); padding: 6px;
+}
+html.home-alt .wf-hdr-help-menu.open { display: block; }
+html.home-alt .wf-hdr-help-hd {
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--pr-muted); padding: 8px 10px 6px;
+}
+html.home-alt .wf-hdr-help-item {
+  display: flex; align-items: center; gap: 8px; font-size: 12.5px;
+  color: var(--pr-ink); text-decoration: none; padding: 8px 10px; border-radius: 6px;
+}
+html.home-alt .wf-hdr-help-item:hover { background: var(--pr-tint); }
+html.home-alt .wf-hdr-help-divider { height: 1px; background: var(--pr-line-soft); margin: 4px 6px; }
+
+.pr-avatar {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--pr-ink);
+  color: #fff; font-size: 12px; font-weight: 700;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ── Page shell ──────────────────────────────────────────────────────────── */
+.pr-page { max-width: 1240px; margin: 0 auto; padding: 24px 24px 72px; }
+.pr-grid { display: grid; grid-template-columns: minmax(0, 1fr) 348px; gap: 20px; align-items: start; }
+.pr-stack > * + * { margin-top: 20px; }
+
+/* ── Greeting hero (alt 1) ───────────────────────────────────────────────── */
+.pr-hero {
+  background: var(--pr-card); border: 1px solid var(--pr-line);
+  border-radius: var(--pr-radius-lg); box-shadow: var(--pr-shadow-sm);
+  display: flex; align-items: stretch; overflow: hidden; margin-bottom: 20px;
+}
+.pr-hero-main { flex: 1; padding: 22px 26px; min-width: 0; }
+.pr-hero-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--pr-muted); margin-bottom: 6px;
+}
+.pr-hero h1 { font-size: 24px; font-weight: 800; margin: 0 0 6px; letter-spacing: -0.2px; }
+.pr-hero-sub { font-size: 13.5px; color: var(--pr-muted); margin: 0; max-width: 560px; }
+.pr-hero-side {
+  flex: 0 0 360px; padding: 20px 24px;
+  background: var(--pr-gradient-hero); color: #fff;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.pr-hero-side .k { font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; opacity: 0.8; }
+.pr-hero-side .tier-line { display: flex; align-items: baseline; gap: 8px; margin: 4px 0 10px; }
+.pr-hero-side .tier { font-size: 21px; font-weight: 800; }
+.pr-hero-side .next { font-size: 12.5px; opacity: 0.85; }
+.pr-meter { height: 7px; border-radius: 9999px; background: rgba(255,255,255,0.25); overflow: hidden; margin-bottom: 8px; }
+.pr-meter > span { display: block; height: 100%; border-radius: 9999px; background: #ffffff; }
+.pr-hero-side .note { font-size: 12px; opacity: 0.9; line-height: 1.45; }
+.pr-hero-side a { color: #fff; font-weight: 700; font-size: 12px; }
+
+/* ── Cards ───────────────────────────────────────────────────────────────── */
+.pr-card {
+  background: var(--pr-card); border: 1px solid var(--pr-line);
+  border-radius: var(--pr-radius-lg); box-shadow: var(--pr-shadow-sm);
+  overflow: hidden;
+}
+.pr-card-hd {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 18px 12px;
+}
+.pr-card-hd h2 { font-size: 14.5px; font-weight: 800; margin: 0; letter-spacing: -0.1px; }
+.pr-card-hd .meta { font-size: 12px; color: var(--pr-muted); }
+.pr-card-hd a.meta { color: var(--pr-link); text-decoration: none; font-weight: 700; }
+.pr-card-bd { padding: 0 18px 16px; }
+
+/* Attention list */
+.pr-list { display: flex; flex-direction: column; }
+.pr-list-row {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 13px 18px; border-top: 1px solid var(--pr-line-soft);
+  text-decoration: none; color: inherit;
+}
+.pr-list-row:hover { background: #fafbfc; }
+.pr-pill {
+  flex: 0 0 auto; min-width: 58px; text-align: center;
+  font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 6px;
+}
+.pr-pill--red    { background: var(--pr-red-bg);   color: #b3121a; }
+.pr-pill--amber  { background: var(--pr-amber-bg); color: var(--pr-amber); }
+.pr-pill--blue   { background: var(--pr-blue-bg);  color: #0653b6; }
+.pr-pill--green  { background: var(--pr-green-bg); color: #1d7a40; }
+.pr-pill--grey   { background: var(--pr-tint);     color: var(--pr-muted); }
+.pr-list-row .t { font-size: 13.5px; font-weight: 700; margin-bottom: 1px; }
+.pr-list-row .d { font-size: 12.5px; color: var(--pr-muted); }
+.pr-list-row .chev { margin-left: auto; align-self: center; color: var(--pr-muted); font-size: 14px; }
+
+/* Tables */
+.pr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.pr-table th {
+  text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase; color: var(--pr-muted);
+  padding: 8px 18px; border-top: 1px solid var(--pr-line-soft);
+  border-bottom: 1px solid var(--pr-line-soft); background: #fafbfc;
+}
+.pr-table td { padding: 11px 18px; border-bottom: 1px solid var(--pr-line-soft); vertical-align: top; }
+.pr-table tr:last-child td { border-bottom: none; }
+.pr-table a { color: var(--pr-link); text-decoration: none; font-weight: 700; }
+.pr-table .sub { font-size: 12px; color: var(--pr-muted); }
+
+.pr-status {
+  display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px;
+  border-radius: 9999px; white-space: nowrap;
+}
+.pr-status--green { background: var(--pr-green-bg); color: #1d7a40; }
+.pr-status--amber { background: var(--pr-amber-bg); color: var(--pr-amber); }
+.pr-status--red   { background: var(--pr-red-bg);   color: #b3121a; }
+.pr-status--grey  { background: var(--pr-tint);     color: var(--pr-muted); }
+.pr-status--blue  { background: var(--pr-blue-bg);  color: #0653b6; }
+
+/* Buttons */
+.pr-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit; font-size: 13px; font-weight: 700;
+  border-radius: 9999px; padding: 9px 18px; cursor: pointer;
+  border: 1px solid var(--pr-ink); background: #000; color: #fff;
+  text-decoration: none;
+}
+.pr-btn--ghost { background: var(--pr-card); color: var(--pr-ink); border-color: var(--pr-line); }
+.pr-btn--agent { background: var(--pr-violet); border-color: var(--pr-violet); }
+
+/* ── Agent module (alt 1 rail) ───────────────────────────────────────────── */
+.pr-agent { border-color: #d9c6f7; }
+.pr-agent .pr-card-hd { background: linear-gradient(135deg, rgba(64,7,95,0.05), rgba(8,106,227,0.05)); }
+.pr-agent-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 5px; color: #fff; font-size: 12px;
+  background: linear-gradient(135deg, var(--pr-purple-dark), var(--pr-violet));
+}
+.pr-agent-suggest {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; margin-bottom: 7px;
+  background: #faf8fe; border: 1px solid #e9defa; border-radius: var(--pr-radius);
+  font-size: 12.5px; color: var(--pr-ink); text-decoration: none;
+}
+.pr-agent-suggest:hover { border-color: var(--pr-violet); }
+.pr-agent-suggest .spark { color: var(--pr-violet); flex: 0 0 auto; }
+.pr-agent-suggest .go { margin-left: auto; color: var(--pr-muted); }
+.pr-agent-ask { display: flex; gap: 8px; margin-top: 11px; }
+.pr-agent-ask input {
+  flex: 1; font-family: inherit; font-size: 13px; padding: 9px 13px;
+  border: 1px solid var(--pr-line); border-radius: 9999px; background: var(--pr-card);
+  color: var(--pr-ink);
+}
+.pr-agent-ask input::placeholder { color: var(--pr-muted); }
+.pr-agent-ask input:focus { outline: 2px solid var(--pr-violet); outline-offset: -1px; border-color: transparent; }
+.pr-agent-foot { font-size: 11px; color: var(--pr-muted); margin-top: 9px; }
+
+/* Agent module pinned at the top (Alt 1) — full-width card between the hero
+   and the dashboard grid. Suggestions fan out three-across; the ask field
+   stays a single comfortable line. */
+.pr-agent--top { margin-bottom: 20px; }
+.pr-agent--top .pr-agent-suggests {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 8px; margin-bottom: 12px;
+}
+.pr-agent--top .pr-agent-suggest { margin-bottom: 0; align-items: flex-start; }
+.pr-agent--top .pr-agent-suggest .go { align-self: center; }
+.pr-agent--top .pr-agent-ask { max-width: 620px; }
+@media (max-width: 980px) {
+  .pr-agent--top .pr-agent-suggests { grid-template-columns: 1fr; }
+}
+
+/* ── Agent front door (alt 2 hero) ───────────────────────────────────────── */
+.pr-frontdoor { text-align: center; padding: 44px 24px 36px; }
+.pr-frontdoor .eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase;
+  color: var(--pr-muted); margin-bottom: 10px;
+}
+.pr-frontdoor h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.4px; margin: 0 0 6px; }
+.pr-frontdoor .sub { font-size: 14px; color: var(--pr-muted); margin: 0 0 24px; }
+.pr-frontdoor .sub strong { color: var(--pr-ink); }
+.pr-ask {
+  max-width: 720px; margin: 0 auto;
+  display: flex; align-items: center; gap: 12px;
+  background: var(--pr-card); border: 1.5px solid var(--pr-line);
+  border-radius: var(--pr-radius-xl); box-shadow: var(--pr-shadow-md);
+  padding: 8px 8px 8px 20px;
+}
+.pr-ask:focus-within { border-color: var(--pr-violet); box-shadow: 0 0 0 4px rgba(119,57,217,0.12), var(--pr-shadow-md); }
+.pr-ask .pr-agent-mark { width: 26px; height: 26px; font-size: 14px; flex: 0 0 auto; }
+.pr-ask input {
+  flex: 1; min-width: 0; border: none; background: none; font-family: inherit;
+  font-size: 16px; color: var(--pr-ink); padding: 14px 0;
+}
+.pr-ask input::placeholder { color: var(--pr-muted); }
+.pr-ask input:focus { outline: none; }
+.pr-ask button {
+  flex: 0 0 auto; width: 44px; height: 44px; border-radius: 9999px;
+  border: none; cursor: pointer; font-size: 17px; color: #fff;
+  background: linear-gradient(135deg, var(--pr-purple-dark), var(--pr-violet));
+}
+.pr-chiprow {
+  max-width: 760px; margin: 16px auto 0;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+}
+.pr-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12.5px; font-weight: 700; color: var(--pr-ink); text-decoration: none;
+  background: var(--pr-card); border: 1px solid var(--pr-line);
+  border-radius: 9999px; padding: 8px 14px;
+}
+.pr-chip:hover { border-color: var(--pr-violet); }
+.pr-chip .spark { color: var(--pr-violet); }
+.pr-trustline { font-size: 11.5px; color: var(--pr-muted); margin-top: 14px; }
+
+/* ── Compact rail widgets ────────────────────────────────────────────────── */
+.pr-kv { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--pr-line-soft); font-size: 13px; }
+.pr-kv:last-child { border-bottom: none; }
+.pr-kv .v { font-weight: 800; }
+.pr-quick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pr-quick a {
+  display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--pr-ink);
+  border: 1px solid var(--pr-line); border-radius: var(--pr-radius);
+  padding: 11px 12px; font-size: 12.5px; font-weight: 700; background: #fafbfc;
+}
+.pr-quick a:hover { border-color: var(--pr-ink); }
+.pr-quick .sub { font-weight: 400; font-size: 11.5px; color: var(--pr-muted); }
+.pr-msg {
+  background: #fafbfc; border: 1px solid var(--pr-line-soft);
+  border-radius: var(--pr-radius) var(--pr-radius) var(--pr-radius) 2px;
+  padding: 11px 13px; font-size: 12.5px; color: var(--pr-text); line-height: 1.5;
+}
+.pr-msg-meta { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--pr-muted); margin-top: 6px; }
+.pr-msg-meta a { color: var(--pr-link); text-decoration: none; font-weight: 700; }
+.pr-person { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
+.pr-person .pr-avatar { width: 36px; height: 36px; flex: 0 0 auto; }
+.pr-person .n { font-size: 13px; font-weight: 700; }
+.pr-person .r { font-size: 11.5px; color: var(--pr-muted); }
+.pr-online { width: 8px; height: 8px; border-radius: 50%; background: var(--pr-green); margin-left: auto; }
+
+/* ── Simulated agent reply / chat thread ─────────────────────────────────── */
+.pr-thread { display: flex; flex-direction: column; gap: 4px; }
+.pr-agent-reply { margin-top: 14px; }
+.pr-agent-reply .followups {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid #e9defa;
+}
+.pr-agent-reply .fu-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: inherit; font-size: 12px; font-weight: 700; color: var(--pr-ink);
+  background: var(--pr-card); border: 1px solid var(--pr-line);
+  border-radius: 9999px; padding: 6px 12px; cursor: pointer;
+}
+.pr-agent-reply .fu-chip:hover { border-color: var(--pr-violet); }
+.pr-agent-reply .fu-chip .spark { color: var(--pr-violet); }
+
+/* ── Recent searches dropdown (on ask-input focus) ───────────────────────── */
+.pr-ask, .pr-agent-ask { position: relative; }
+.pr-recent {
+  position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 70;
+  background: var(--pr-card); border: 1px solid var(--pr-line);
+  border-radius: var(--pr-radius-lg); box-shadow: var(--pr-shadow-md);
+  padding: 6px; text-align: left;
+}
+.pr-recent .hd {
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+  color: var(--pr-muted); padding: 7px 11px 5px;
+}
+.pr-recent .item {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  font-family: inherit; font-size: 13px; color: var(--pr-ink); text-align: left;
+  background: none; border: none; border-radius: var(--pr-radius);
+  padding: 8px 11px; cursor: pointer;
+}
+.pr-recent .item:hover { background: var(--pr-tint); }
+.pr-recent .item svg { color: var(--pr-muted); flex-shrink: 0; }
+.pr-agent-reply .q {
+  font-size: 12.5px; font-weight: 700; color: var(--pr-muted);
+  margin-bottom: 8px;
+}
+.pr-agent-reply .q::before { content: 'You · '; font-weight: 400; }
+.pr-agent-reply .a {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: #faf8fe; border: 1px solid #e9defa;
+  border-radius: var(--pr-radius-lg); padding: 13px 15px;
+}
+.pr-agent-reply .a .pr-agent-mark { flex: 0 0 auto; margin-top: 1px; }
+.pr-agent-reply .body { font-size: 13px; line-height: 1.55; min-width: 0; }
+.pr-agent-reply .body ul { margin: 8px 0 0; padding-left: 18px; }
+.pr-agent-reply .thinking { color: var(--pr-muted); }
+.pr-agent-reply .thinking span { animation: pr-blink 1.2s infinite; }
+.pr-agent-reply .thinking span:nth-child(2) { animation-delay: 0.2s; }
+.pr-agent-reply .thinking span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes pr-blink { 0%, 60% { opacity: 1; } 80% { opacity: 0.2; } 100% { opacity: 1; } }
+.pr-agent-reply .confirm-row {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid #e9defa;
+}
+.pr-agent-reply .confirm-row .pr-btn { padding: 7px 14px; font-size: 12px; }
+.pr-agent-reply .confirm-row .hint { font-size: 11px; color: var(--pr-muted); }
+.pr-agent-reply .done { font-size: 12.5px; font-weight: 700; color: #1d7a40; }
+
+@media (max-width: 980px) {
+  .pr-grid { grid-template-columns: 1fr; }
+  .pr-hero { flex-direction: column; }
+  .pr-hero-side { flex-basis: auto; }
+  .pr-nav { display: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   FIDELITY TIERS — these pages declare data-wf-fidelity="polished" and the
+   wf-nav dropdown re-targets the attribute, so all three nib tiers work
+   here too. Polished = the design as authored above. Blueprint flattens to
+   the wireframe palette; Napkin adds the paper + grayscale + artifact
+   treatment (mirrors wf-tokens.css, whose rules are gated html.wireframe).
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Blueprint + Napkin: flatten the brand to the wireframe palette ─────── */
+html.home-alt[data-wf-fidelity="blueprint"],
+html.home-alt[data-wf-fidelity="napkin"] {
+  --pr-ink: #1e2a3a;
+  --pr-text: #3b4f68;
+  --pr-muted: #4a5f7f;
+  --pr-line: #b0bdd0;
+  --pr-line-soft: #dce4ef;
+  --pr-tint: #dce4ef;
+  --pr-canvas: #f0f4fa;
+  --pr-card: #ffffff;
+  --pr-link: #3d6daa;
+  --pr-red: #8b4553;
+  --pr-green: #45785a;
+  --pr-green-bg: #dde9e2;
+  --pr-amber: #6b5a2f;
+  --pr-amber-bg: #efe8d4;
+  --pr-red-bg: #ecdce0;
+  --pr-blue-bg: #dce4ef;
+  --pr-violet: #3d6daa;          /* the ONE blue — agent loses its brand purple */
+  --pr-purple-dark: #2a3d5a;
+  --pr-gradient-hero: #2a3d5a;   /* flat — no brand gradient below polished */
+  --pr-shadow-sm: none;
+  --pr-shadow-md: none;
+}
+html.home-alt[data-wf-fidelity="blueprint"] body,
+html.home-alt[data-wf-fidelity="napkin"] body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+html.home-alt[data-wf-fidelity="blueprint"] .pr-btn,
+html.home-alt[data-wf-fidelity="napkin"] .pr-btn {
+  background: var(--pr-ink); border-color: var(--pr-ink);
+}
+html.home-alt[data-wf-fidelity="blueprint"] .pr-btn--ghost,
+html.home-alt[data-wf-fidelity="napkin"] .pr-btn--ghost {
+  background: var(--pr-card); color: var(--pr-ink); border-color: var(--pr-line);
+}
+html.home-alt[data-wf-fidelity="blueprint"] .pr-agent,
+html.home-alt[data-wf-fidelity="napkin"] .pr-agent { border-color: var(--pr-line); }
+html.home-alt[data-wf-fidelity="blueprint"] .pr-agent .pr-card-hd,
+html.home-alt[data-wf-fidelity="napkin"] .pr-agent .pr-card-hd { background: var(--pr-tint); }
+html.home-alt[data-wf-fidelity="blueprint"] .pr-agent-suggest,
+html.home-alt[data-wf-fidelity="napkin"] .pr-agent-suggest,
+html.home-alt[data-wf-fidelity="blueprint"] .pr-agent-reply .a,
+html.home-alt[data-wf-fidelity="napkin"] .pr-agent-reply .a,
+html.home-alt[data-wf-fidelity="blueprint"] .pr-agent-reply .followups,
+html.home-alt[data-wf-fidelity="napkin"] .pr-agent-reply .followups {
+  background: var(--pr-canvas); border-color: var(--pr-line-soft);
+}
+
+/* ── Napkin only: paper, grayscale, artifacts, wobble ────────────────────── */
+html.home-alt[data-wf-fidelity="napkin"] body::after {
+  content: '';
+  /* Absolute: grain glued to the page, never past the painted background
+     (fixed used to blend vs transparency below content → raw gray band). */
+  position: absolute; inset: 0;
+  background-image: var(--wf-paper-tex, url(../nib/core/textures/natural-paper.png));
+  background-repeat: repeat;
+  mix-blend-mode: multiply; opacity: 0.7;
+  pointer-events: none; z-index: 800;
+}
+html.home-alt[data-wf-fidelity="napkin"] body::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: #808080; mix-blend-mode: saturation;
+  pointer-events: none; z-index: 799;
+}
+/* Stains and scribbles are marks on the paper — absolute, not fixed, so
+   they scroll with the page (body gets position:relative as their anchor;
+   wf-nav.js spreads them over the full document height). */
+html.home-alt[data-wf-fidelity="napkin"] body { position: relative; z-index: 0; /* stacking context: z:-1 stains above board bg, below pieces */ }
+html.home-alt[data-wf-fidelity="napkin"] .wf-stencil-layer {
+  display: block; position: absolute; inset: 0;
+  pointer-events: none; z-index: -1; overflow: hidden;
+}
+html.home-alt[data-wf-fidelity="napkin"] .wf-coffee-ring {
+  display: block; position: absolute; z-index: -1;   /* on the board, under the pieces */
+  mix-blend-mode: multiply; opacity: 0.3; pointer-events: none;
+}
+/* Paper-prototype cut-outs (mirrors wf-fidelity.css): tapering sharpie ink
+   frame stamped by wf-nav.js (--wf-ink-frame), no drawn border — the piece
+   sits on a layered paper shadow — and an nth-child lottery tears some
+   cards out by hand instead of scissor-cutting them. */
+html.home-alt[data-wf-fidelity="napkin"] .pr-card,
+html.home-alt[data-wf-fidelity="napkin"] .pr-hero {
+  position: relative;
+  overflow: visible;
+  border-color: transparent;
+  /* Paper lives on the clipped ::before; the card paints nothing and its
+     drop-shadow hugs the scissor-cut silhouette (no 90° box edges). */
+  background: transparent !important;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 0.6px 0.8px rgba(26, 27, 30, 0.13))
+    drop-shadow(0 1.6px 2.2px rgba(26, 27, 30, 0.085))
+    drop-shadow(0 4px 7px rgba(26, 27, 30, 0.05));
+}
+html.home-alt[data-wf-fidelity="napkin"] .pr-card-hd { background: transparent !important; }
+html.home-alt[data-wf-fidelity="napkin"] .pr-card::before,
+html.home-alt[data-wf-fidelity="napkin"] .pr-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: #fff;
+  background-image: var(--wf-ink-frame, none), var(--wf-paper-tex, url(../nib/core/textures/natural-paper.png));
+  background-size: 100% 100%, auto;
+  background-repeat: no-repeat, repeat;
+  background-blend-mode: normal, multiply;
+  clip-path: var(--wf-cut-path, none);
+  pointer-events: none;
+  z-index: -1;
+}
+/* Hand-ruled table grids + tape, mirroring wf-fidelity.css */
+html.home-alt[data-wf-fidelity="napkin"] .pr-table th,
+html.home-alt[data-wf-fidelity="napkin"] .pr-table td {
+  border-color: rgba(28, 29, 32, 0.32);
+}
+html.home-alt[data-wf-fidelity="napkin"] .pr-table { filter: url(#wf-line-wobble); }
+html.home-alt[data-wf-fidelity="napkin"] .wf-tape-strip {
+  display: block;
+  position: absolute;
+  top: -8px;
+  height: 17px;
+  background: rgba(232, 227, 211, 0.62);
+  border-left: 1px solid rgba(0, 0, 0, 0.03);
+  border-right: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  z-index: 4;
+  pointer-events: none;
+}
+
+html.home-alt[data-wf-fidelity="napkin"] .pr-ask {
+  border-radius: 4px 8px 3px 9px / 7px 3px 9px 4px;
+}

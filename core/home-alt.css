@@ -564,6 +564,22 @@ html.home-alt[data-wf-fidelity="napkin"] .pr-hero {
     drop-shadow(0 4px 7px rgba(26, 27, 30, 0.05));
 }
 html.home-alt[data-wf-fidelity="napkin"] .pr-card-hd { background: transparent !important; }
+/* Corner-reaching fills tagged by wf-nav.js — they'd paint past the cut. */
+html.home-alt[data-wf-fidelity="napkin"] .wf-cut-bleed {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+/* The dark tier panel loses its fill at napkin (it reaches the hero's cut
+   corners), so its white-on-dark text must become ink-on-paper or it
+   disappears entirely. A ruled divider keeps the two halves readable. */
+html.home-alt[data-wf-fidelity="napkin"] .pr-hero-side {
+  background: transparent !important;
+  color: var(--pr-ink);
+  border-left: 1px solid var(--pr-line);
+}
+html.home-alt[data-wf-fidelity="napkin"] .pr-hero-side a { color: var(--pr-link); }
+html.home-alt[data-wf-fidelity="napkin"] .pr-meter { background: var(--pr-line-soft); }
+html.home-alt[data-wf-fidelity="napkin"] .pr-meter > span { background: var(--pr-ink); }
 html.home-alt[data-wf-fidelity="napkin"] .pr-card::before,
 html.home-alt[data-wf-fidelity="napkin"] .pr-hero::before {
   content: '';

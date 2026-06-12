@@ -10,6 +10,8 @@ The framework's documentation surface is `docs/` — Markdown files with `[[Page
 
 Entry points: `docs/Home.md`, `docs/_Sidebar.md`. Canonical pages for the recent additions: `docs/Spreadsheet-Authoring.md`, `docs/Service-Blueprint.md`, `docs/Templates.md`, `docs/Create-Project.md`, `docs/Feedback.md`, `docs/Context-Bar.md`, `docs/Project-Wiki.md`.
 
+**Browsable HTML site.** `npm run docs` (→ `tools/nib-docs.js`) generates a polished static site into `site/` from `docs/*.md` — a hand-crafted landing page plus all 44 wiki pages, the "Blueprint drafting table" theme. The Markdown stays canonical; `site/` is build output (git-ignored). Theme sources live in `tools/docs-assets/` (`docs.css`, `docs.js`, `landing.html`). Open `site/index.html` after building.
+
 ## How to Use This Framework
 
 ### Quickest start: one-command create
@@ -153,7 +155,9 @@ framework/
 │   ├── nib-ingest.js       # Excel / Sheets → Nib project (Track 1)
 │   ├── nib-sync.js         # Idempotent re-ingest with diff (Track 1)
 │   ├── nib-seed-topics.js  # Seed data-topic/data-role on pages (agentic retrieval)
-│   └── nib-pages-index.js  # Build pages-index.html + lean data/pages.json
+│   ├── nib-pages-index.js  # Build pages-index.html + lean data/pages.json
+│   ├── nib-docs.js         # Generate the browsable HTML docs site (npm run docs → site/)
+│   └── docs-assets/        # Docs-site theme — docs.css, docs.js, landing.html
 ├── ref/          # Agent reference docs (read before building)
 ├── docs/         # Wiki — human-facing companion to ref/
 ├── starters/     # Single-file copy-paste HTML templates

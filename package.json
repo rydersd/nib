@@ -14,7 +14,8 @@
     "ingest": "node tools/nib-ingest.js",
     "sync": "node tools/nib-sync.js",
     "wiki": "node tools/nib-wiki.js",
-    "create": "node tools/nib-create.js"
+    "create": "node tools/nib-create.js",
+    "docs": "node tools/nib-docs.js"
   },
   "files": [
     "core/",

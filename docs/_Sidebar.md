@@ -16,6 +16,8 @@
 - [[Icons]]
 - [[Themes]]
 - [[Fidelity-Levels]]
+- [[Pen-Samples]]
+- [[Napkin-References]]
 - [[Confidence-Levels]]
 - [[Evidence]]
 

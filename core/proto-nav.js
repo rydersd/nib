@@ -2794,16 +2794,26 @@ function buildTeaStainSVG(leaf) {
   // all day); otherwise pick per stain (shared desk, different mugs).
   var tea = leaf || TEA_PALETTE[Math.floor(Math.random() * TEA_PALETTE.length)];
   var hue = tea.h + Math.floor(rnd(-3, 3)), sat = tea.s, boost = tea.boost;
-  var seepD = blob(100, 82, rnd(80, 95), rnd(60, 72), 9, 0.22);
+  // 290x280 canvas, bag pivot (145,104): generous margins so jittered
+  // blob points + displacement never reach the bitmap edge (geometry
+  // past the raster cuts off dead-straight — the clipped-ring look).
+  // The water FLARES OUT along the bag's long axis (reference photo:
+  // the seep runs away from the bag, aligned with its rectangle), so
+  // the seep blob is elongated along that axis and offset down-flow,
+  // and the whole stain shares one rotation so flare and bag stay
+  // aligned. Placement already spins the <img> 0-360deg, so down-flow
+  // in SVG space costs no variety.
   var bw = rnd(58, 76), bh = bw * rnd(1.15, 1.35);    // tea-bag proportions
-  var bx = r1(100 - bw / 2 + rnd(-12, 12)), by = r1(82 - bh / 2 + rnd(-8, 6));
   var ang = r1(rnd(-16, 16));
+  var flow = bh * rnd(0.2, 0.35);                     // how far the water ran
+  var seepD = blob(145, r1(104 + flow), rnd(62, 78), rnd(70, 84), 9, 0.22);
+  var bx = r1(145 - bw / 2 + rnd(-6, 6)), by = r1(104 - bh / 2 + rnd(-4, 4));
   var seamLeft = Math.random() < 0.5;
   var sx = r1(seamLeft ? bx - 3 : bx + bw - 6);
   var sh = r1(bh * rnd(0.75, 1.0) + 6), sy = r1(by - 3 + rnd(0, bh - sh + 6));
 
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 164" width="200" height="164">' +
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 280" width="290" height="280">' +
     '<defs>' +
       '<filter id="seep" x="-25%" y="-25%" width="150%" height="150%">' +
         '<feTurbulence type="turbulence" baseFrequency="0.052 0.068" numOctaves="3" seed="' + s1 + '" result="t"/>' +
@@ -2833,12 +2843,14 @@ function buildTeaStainSVG(leaf) {
         '<feGaussianBlur stdDeviation="1.4"/>' +
       '</filter>' +
     '</defs>' +
-    // 1 — seeping water: pale wash (fainter — stakeholder 2026-06-12),
-    //     then the tide line as its own crisp pass on the same blob
-    '<path d="' + seepD + '" fill="hsl(' + hue + ',' + (sat - 8) + '%,74%)" fill-opacity="' + (0.22 * boost).toFixed(2) + '" filter="url(#seep)"/>' +
-    '<path d="' + seepD + '" fill="none" ' +
-      'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.5 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
-    '<g transform="rotate(' + ang + ' 100 82)">' +
+    // One rotation for the whole stain — the seep's elongation axis
+    // must stay aligned with the bag rectangle (the flare direction).
+    '<g transform="rotate(' + ang + ' 145 104)">' +
+      // 1 — seeping water: pale wash (fainter — stakeholder
+      //     2026-06-12), then the tide line as its own crisp pass
+      '<path d="' + seepD + '" fill="hsl(' + hue + ',' + (sat - 8) + '%,74%)" fill-opacity="' + (0.22 * boost).toFixed(2) + '" filter="url(#seep)"/>' +
+      '<path d="' + seepD + '" fill="none" ' +
+        'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.5 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
       // 2 — bag body: fabric-mottled imprint
       '<rect x="' + bx + '" y="' + by + '" width="' + r1(bw) + '" height="' + r1(bh) + '" rx="8" ' +
         'fill="hsl(' + hue + ',' + (sat - 4) + '%,58%)" fill-opacity="' + (0.26 * boost).toFixed(2) + '" style="mix-blend-mode:multiply" filter="url(#bag)"/>' +
@@ -3054,7 +3066,12 @@ function buildInkFrameSVG(W, H, headerY, author) {
     // double-tracking: a faint parallel ghost stroke (ballpoint habit)
     if (Math.random() < P.twin) {
       var off = rnd(0.9, 1.6) * (Math.random() < 0.5 ? 1 : -1);
-      var px = (y2 - y1) === 0 ? 0 : off, py = (y2 - y1) === 0 ? off : 0;
+      // Offset perpendicular to the stroke's DOMINANT axis — the
+      // endpoints carry jitter, so an exact y2===y1 test never matched
+      // on horizontal strokes and the ghost slid along them (hidden
+      // under the main line) instead of tracking beside them.
+      var horiz = Math.abs(x2 - x1) >= Math.abs(y2 - y1);
+      var px = horiz ? 0 : off, py = horiz ? off : 0;
       out += '<path d="M' + r1(x1 + px) + ',' + r1(y1 + py) + ' L' + r1(x2 + px) + ',' + r1(y2 + py) +
         '" fill="none" stroke="' + ink(a * 0.45) + '" stroke-width="' + r1(w * 0.7) + '" stroke-linecap="round"/>';
     }
@@ -3126,7 +3143,7 @@ function stampInkFrames() {
   // width stays true (a stretched viewBox would fatten the stroke).
   // ~30% of pieces also get a strip of masking tape at the top edge,
   // like the reference boards. Visible only at napkin via CSS.
-  var cards = document.querySelectorAll('.wf-card, .ds-card, .ds-kpi-card, .sfdc-card');
+  var cards = document.querySelectorAll('.wf-card, .ds-card, .ds-kpi-card, .sfdc-card, .ds-sidebar-card, .pr-card, .pr-hero');
   // Cast this page's hands. Dashboards with several tiles always get
   // at least two authors (a lone hand made every module read same-pen
   // — stakeholder note 2026-06-12); sparse pages may be one person.
@@ -3146,9 +3163,16 @@ function stampInkFrames() {
     var cw = el.offsetWidth, ch = el.offsetHeight;
     if (cw < 40 || ch < 24) continue;   // hidden or degenerate — skip
     // If the card has a header, rule a title-bar line under it —
-    // measured from the real element so the stroke lands on the seam.
-    var hd = el.querySelector('.ds-card-header, .wf-card-header, .sfdc-card-header');
-    var hy = hd && hd.offsetParent === el ? hd.offsetTop + hd.offsetHeight : 0;
+    // measured with RECTS, not offsetTop: offsetTop needs the card to
+    // be the offsetParent, which is only true at napkin (cards get
+    // position:relative under that gate), and frames are stamped at
+    // whatever fidelity the page loaded in.
+    var hd = el.querySelector('.ds-card-header, .ds-card-hd, .pr-card-hd, .wf-card-hd, .wf-card-header, .sfdc-card-hd, .sfdc-card-header');
+    var hy = 0;
+    if (hd) {
+      var hr = hd.getBoundingClientRect(), cr = el.getBoundingClientRect();
+      if (hr.height) hy = Math.round(hr.top - cr.top + hr.height);
+    }
     var author = (nAuthors === 1 || Math.random() < 0.55)
       ? pageAuthors[0]
       : pageAuthors[1 + Math.floor(Math.random() * (nAuthors - 1))];
@@ -3315,7 +3339,15 @@ function spawnNapkinStencils() {
         strength = 0.22 + Math.random() * 0.14;
       }
       ring.style.opacity = strength.toFixed(2);
-      ring.style.left = (-10 + Math.random() * 95) + '%';
+      // Horizontal: clamped so the right edge stays inside the body —
+      // stains are position:absolute (they scroll with the page), so a
+      // right overhang would grow the scroll area past the painted
+      // background. Left bleed is fine: negative offsets clip, they
+      // don't scroll.
+      var bodyW = document.body.clientWidth || window.innerWidth;
+      ring.style.left = Math.min(
+        Math.round((-0.10 + Math.random() * 0.95) * bodyW),
+        Math.max(0, bodyW - size)) + 'px';
       // px against full document height — % would resolve against the
       // viewport-sized containing block, bunching every ring up top.
       // Clamped fully INSIDE the document: a stain poking past the

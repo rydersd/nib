@@ -218,11 +218,12 @@ html.wireframe::after {
   z-index: 1000;
 }
 
-/* Paper grain texture overlay + grayscale — napkin mode only.
-   Natural paper texture gives the "working on actual paper" feel.
-   backdrop-filter: grayscale(1) desaturates everything behind this overlay
-   without creating a containing block on html/body. Chrome (context bar
-   at z≥1000, drawers at z≥2000) sits above z-800 and stays in color. */
+/* Paper grain texture overlay — napkin mode only.
+   Natural paper texture gives the "working on actual paper" feel; the
+   grayscale comes from the body::before saturation overlay below. Chrome
+   (context bar at z≥1000, drawers at z≥2000) sits above z-800 and stays in
+   color; page surfaces above z-800 (story bar, scenario banner) get their
+   own grayscale(1) in proto-blueprint.css. */
 html.wireframe[data-wf-fidelity="napkin"] body::after {
   content: '';
   /* Absolute, not fixed: the grain is ON the paper, scrolls with it, and
@@ -255,7 +256,10 @@ html.wireframe[data-wf-fidelity="napkin"] body::before {
 
 /* NOTE: do NOT "fall back" to filter: grayscale(1) on html here. A filter on
    the root creates a containing block for fixed descendants (coffee rings,
-   stencil layer, chrome) and breaks hit-testing — see the warning above. */
+   stencil layer, chrome) and breaks hit-testing — see the warning above.
+   The body::before saturation overlay above handles the napkin grayscale
+   for everything below z-799; page surfaces stacked higher (story bar,
+   scenario banner) are desaturated individually in proto-blueprint.css. */
 
 /* Per-element paper texture — napkin mode only.
    Each card gets its own paper grain so siblings look like different

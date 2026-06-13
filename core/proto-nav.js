@@ -2797,18 +2797,20 @@ function buildTeaStainSVG(leaf) {
   // 290x280 canvas, bag pivot (145,104): generous margins so jittered
   // blob points + displacement never reach the bitmap edge (geometry
   // past the raster cuts off dead-straight — the clipped-ring look).
-  // The water FLARES OUT along the bag's long axis (reference photo:
-  // the seep runs away from the bag, aligned with its rectangle), so
-  // the seep blob is elongated along that axis and offset down-flow,
-  // and the whole stain shares one rotation so flare and bag stay
-  // aligned. Placement already spins the <img> 0-360deg, so down-flow
-  // in SVG space costs no variety.
+  // Placement already spins the <img> 0-360deg, so down-flow in SVG
+  // space costs no variety.
   var bw = rnd(58, 76), bh = bw * rnd(1.15, 1.35);    // tea-bag proportions
   var ang = r1(rnd(-16, 16));
-  var flow = bh * rnd(0.2, 0.35);                     // how far the water ran
+  var seamLeft = Math.random() < 0.5;
+  // Fluid direction (annotated reference 2026-06-12): the water runs
+  // DIAGONALLY away from the seam side, at an angle to the bag
+  // rectangle — not straight down its long axis. The seep gets its
+  // own tilt (rendered as a nested rotation so the blob's elongation
+  // follows the flow vector) and its center offsets down-flow.
+  var flow = bh * rnd(0.22, 0.35);                    // how far the water ran
+  var tilt = r1((seamLeft ? -1 : 1) * rnd(18, 45));   // negative = flow swings right, away from a left seam
   var seepD = blob(145, r1(104 + flow), rnd(62, 78), rnd(70, 84), 9, 0.22);
   var bx = r1(145 - bw / 2 + rnd(-6, 6)), by = r1(104 - bh / 2 + rnd(-4, 4));
-  var seamLeft = Math.random() < 0.5;
   var sx = r1(seamLeft ? bx - 3 : bx + bw - 6);
   var sh = r1(bh * rnd(0.75, 1.0) + 6), sy = r1(by - 3 + rnd(0, bh - sh + 6));
 
@@ -2852,14 +2854,17 @@ function buildTeaStainSVG(leaf) {
         '<feGaussianBlur stdDeviation="1.4"/>' +
       '</filter>' +
     '</defs>' +
-    // One rotation for the whole stain — the seep's elongation axis
-    // must stay aligned with the bag rectangle (the flare direction).
+    // Outer rotation orients the whole stain; the nested rotation
+    // tilts ONLY the seep so its elongation and offset follow the
+    // fluid direction, diagonal to the bag rectangle.
     '<g transform="rotate(' + ang + ' 145 104)">' +
-      // 1 — seeping water: pale wash (fainter — stakeholder
-      //     2026-06-12), then the tide line as its own crisp pass
-      '<path d="' + seepD + '" fill="hsl(' + hue + ',' + (sat - 8) + '%,74%)" fill-opacity="' + (0.22 * boost).toFixed(2) + '" filter="url(#seep)"/>' +
-      '<path d="' + seepD + '" fill="none" ' +
-        'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.5 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
+      '<g transform="rotate(' + tilt + ' 145 104)">' +
+        // 1 — seeping water: pale wash (fainter — stakeholder
+        //     2026-06-12), then the tide line as its own crisp pass
+        '<path d="' + seepD + '" fill="hsl(' + hue + ',' + (sat - 8) + '%,74%)" fill-opacity="' + (0.22 * boost).toFixed(2) + '" filter="url(#seep)"/>' +
+        '<path d="' + seepD + '" fill="none" ' +
+          'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.5 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
+      '</g>' +
       // 2 — bag body: fabric-mottled imprint
       '<rect x="' + bx + '" y="' + by + '" width="' + r1(bw) + '" height="' + r1(bh) + '" rx="8" ' +
         'fill="hsl(' + hue + ',' + (sat - 4) + '%,58%)" fill-opacity="' + (0.26 * boost).toFixed(2) + '" style="mix-blend-mode:multiply" filter="url(#bag)"/>' +

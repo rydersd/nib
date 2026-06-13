@@ -10,6 +10,8 @@ The visual reference corpus behind the napkin-tier evolution (2026-06 round, eqP
 | ![double broken ring](assets/stain-samples/coffee-ring-double-broken.jpg) | **Double set-down, broken arcs** — lifted-cup look; dash-gap + offset second pass in `buildCoffeeRingSVG`. |
 | ![heavy annulus](assets/stain-samples/coffee-ring-heavy-annulus.jpg) | **Heavy annulus + ghost echo** — wide ragged band, faint offset echo, interior haze. |
 | ![thin crisp ring](assets/stain-samples/coffee-ring-thin-crisp.jpg) | **Thin crisp band** — the minimal ring style. |
+| ![tea fluid direction](assets/stain-samples/tea-fluid-direction-annotated.jpg) | **Fluid direction (stakeholder annotation, 2026-06-12)** — the seep runs *diagonally away from the seam side*, at an angle to the bag rectangle, not down its long axis. Drives the nested seep tilt (18–45°) in `buildTeaStainSVG`. |
+| ![tea bag edge](assets/stain-samples/tea-bag-edge-annotated.jpg) | **Bag-edge tide (stakeholder annotation, 2026-06-12)** — the imprint boundary concentrates pigment like the seep outline does. Drives the `#bagEdge` crisp rim pass. |
 
 ## Boards (drive the cut-out / tape / shadow / layering model)
 

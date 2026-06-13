@@ -8,6 +8,8 @@ The wiki is the project's living documentation: personas, blueprints, page index
 
 Think of it as a Google Design Sprint that lives in a repo, where the spreadsheet is the source of truth and the wiki is the human-readable face.
 
+> 📖 **New to Nib?** The framework's own documentation is a browsable HTML site. Run `npm run docs` and open `site/index.html` — a guided landing page plus all 44 wiki pages. It is generated from the [`docs/`](docs/) Markdown wiki, which stays canonical (see [`tools/nib-docs.js`](tools/nib-docs.js)).
+
 ## 60-second start
 
 ```sh

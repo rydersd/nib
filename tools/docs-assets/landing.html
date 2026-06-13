@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en" data-doc="index">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nib · the wireframe framework for agents</title>
+<meta name="description" content="Nib is an agent-consumable wireframe prototyping framework — shared CSS, JS and reference docs to generate consistent, professional wireframes, paper-rough to pixel-polished.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,380;0,6..72,500;0,6..72,600;1,6..72,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body class="docs landing">
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="topbar">
+  <a class="brand" href="index.html"><span class="brand-nib" aria-hidden="true"></span>Nib</a>
+  <nav class="topnav" aria-label="Primary">
+    <a href="Getting-Started.html">Guide</a>
+    <a href="For-Agents.html">Reference</a>
+    <a href="Examples.html">Examples</a>
+  </nav>
+  <form class="docsearch" role="search" onsubmit="return false">
+    <input type="search" id="docsearch" placeholder="Search the docs" autocomplete="off" aria-label="Search docs">
+    <kbd>/</kbd>
+  </form>
+  <a class="topbar-gh" href="https://github.com/rydersd/nib" target="_blank" rel="noopener">GitHub</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Open navigation" aria-expanded="false">≡</button>
+</header>
+
+<main id="main">
+
+  <!-- ════ HERO ════════════════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">Agent-consumable wireframe framework</p>
+        <h1 class="hero-title">The wireframe<br>framework<br>for <span class="ink-accent">agents</span>.</h1>
+        <p class="hero-sub">Paper-rough to pixel-polished — one framework, every fidelity.
+          Nib hands an agent shared CSS, JS and reference docs so it can generate
+          consistent, professional wireframes for any project.</p>
+        <div class="hero-cta">
+          <a class="btn btn--primary" href="Getting-Started.html">Get started <span aria-hidden="true">→</span></a>
+          <a class="btn btn--ghost" href="#how">How it works</a>
+        </div>
+        <p class="hero-meta"><code>npx create-nib my-project</code> &nbsp;·&nbsp; MIT &nbsp;·&nbsp; zero build step</p>
+      </div>
+
+      <!-- ── Interactive fidelity demo ── -->
+      <figure class="fidelity" id="fidelity">
+        <div class="fid-stage fid--blueprint" id="fidStage">
+          <div class="fid-card" role="img" aria-label="Sample wireframe card at the selected fidelity">
+            <div class="fid-card-bar"><span></span><span></span><span></span></div>
+            <div class="fid-card-body">
+              <p class="fid-h">Partner Dashboard</p>
+              <div class="fid-kpis">
+                <div class="fid-kpi"><b>12</b><i>Active deals</i></div>
+                <div class="fid-kpi"><b>$4.8M</b><i>Pipeline</i></div>
+              </div>
+              <div class="fid-chart"><span></span><span></span><span></span><span></span><span></span></div>
+              <div class="fid-actions"><span class="fid-btn">Register deal</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="fid-control">
+          <input type="range" id="fidRange" min="0" max="2" step="1" value="1"
+                 aria-label="Fidelity level" list="fid-stops">
+          <datalist id="fid-stops"><option value="0"></option><option value="1"></option><option value="2"></option></datalist>
+          <div class="fid-labels">
+            <button data-fid="0">Napkin</button>
+            <button data-fid="1" class="is-on">Blueprint</button>
+            <button data-fid="2">Polished</button>
+          </div>
+        </div>
+        <figcaption class="fid-cap">One slider — the whole prototype shifts fidelity.
+          Roughness is a message, not an accident. <a href="Fidelity-Levels.html">Fidelity levels →</a></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ════ PILLARS ═════════════════════════════════════════════════════ -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <div class="pillars">
+        <article class="pillar">
+          <p class="pillar-no">01</p>
+          <h3>Built for agents</h3>
+          <p>An agent reads the reference docs, copies a starter, and emits a
+            page that already obeys every token, rule and convention.</p>
+        </article>
+        <article class="pillar">
+          <p class="pillar-no">02</p>
+          <h3>Consistent by construction</h3>
+          <p>Shared CSS and JS, one design-token system, and surface overlays
+            for Slack, Salesforce and internal portals — never hardcoded.</p>
+        </article>
+        <article class="pillar">
+          <p class="pillar-no">03</p>
+          <h3>Honest fidelity</h3>
+          <p>Napkin, Blueprint or Polished. The aesthetic itself tells a
+            reviewer how settled the design is — and now, how grounded.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ HOW A PAGE IS BUILT ═════════════════════════════════════════ -->
+  <section class="section" id="how">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">The build path</p>
+        <h2 class="section-title">How a page is built</h2>
+        <p class="section-lead">Four moves from empty folder to a navigable,
+          design-noted wireframe. No bundler, no framework runtime.</p>
+      </header>
+      <ol class="flow">
+        <li class="flow-step">
+          <p class="flow-no">Step 01</p>
+          <div class="flow-glyph" data-g="starter"></div>
+          <h3>Copy a starter</h3>
+          <p>Grab a single HTML file from <code>starters/</code> for your surface.</p>
+          <a href="Page-Template.html">Page template →</a>
+        </li>
+        <li class="flow-step">
+          <p class="flow-no">Step 02</p>
+          <div class="flow-glyph" data-g="data"></div>
+          <h3>Define <code>project-data.js</code></h3>
+          <p>Declare your <code>SECTIONS</code> — the drawer and breadcrumbs build themselves.</p>
+          <a href="Navigation.html">Navigation →</a>
+        </li>
+        <li class="flow-step">
+          <p class="flow-no">Step 03</p>
+          <div class="flow-glyph" data-g="runtime"></div>
+          <h3>Load the runtime</h3>
+          <p><code>proto-nav.js</code> wires the context bar, drawer, notes and fidelity.</p>
+          <a href="Architecture.html">Architecture →</a>
+        </li>
+        <li class="flow-step">
+          <p class="flow-no">Step 04</p>
+          <div class="flow-glyph" data-g="page"></div>
+          <h3>Your wireframe</h3>
+          <p>Author by hand, declaratively via <code>PAGE_BLUEPRINT</code>, or compose.</p>
+          <a href="Page-Blueprint.html">Page Blueprint →</a>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ════ SURFACES ════════════════════════════════════════════════════ -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">One framework, many platforms</p>
+        <h2 class="section-title">Three surfaces</h2>
+        <p class="section-lead">A surface is a CSS overlay that makes a wireframe
+          read as a specific platform. One surface per page — never mixed.</p>
+      </header>
+      <div class="surfaces">
+        <a class="surface-card surf--internal" href="Surface-Internal.html">
+          <div class="surf-mock">
+            <span class="sm-row"></span><span class="sm-row"></span>
+            <span class="sm-tile"></span><span class="sm-tile"></span>
+          </div>
+          <h3>Internal portal</h3>
+          <p>KPI dashboards, forms, record pages.</p>
+          <code>ds-</code>
+        </a>
+        <a class="surface-card surf--slack" href="Surface-Slack.html">
+          <div class="surf-mock">
+            <span class="sm-bub"></span><span class="sm-bub sm-bub--alt"></span>
+            <span class="sm-bub"></span>
+          </div>
+          <h3>Slack app</h3>
+          <p>Channels, messages, threads, app shells.</p>
+          <code>slack-</code>
+        </a>
+        <a class="surface-card surf--sfdc" href="Surface-Salesforce.html">
+          <div class="surf-mock">
+            <span class="sm-path"></span>
+            <span class="sm-col"></span><span class="sm-col"></span><span class="sm-col"></span>
+          </div>
+          <h3>Salesforce</h3>
+          <p>Lightning record pages, path, feed.</p>
+          <code>sfdc-</code>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ QUICK-START PATHS ═══════════════════════════════════════════ -->
+  <section class="section" id="start">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">Three ways in</p>
+        <h2 class="section-title">Pick your path</h2>
+      </header>
+      <div class="paths">
+        <article class="path">
+          <h3><span class="path-no">A</span> From a spreadsheet</h3>
+          <p>Hand Nib one workbook — pages, tokens, personas, blueprints — and it
+            scaffolds the whole project plus a wiki.</p>
+          <pre class="codeblock" data-lang="bash"><code>npx create-nib shop --workbook ./brief.xlsx</code></pre>
+          <a href="Spreadsheet-Authoring.html">Spreadsheet authoring →</a>
+        </article>
+        <article class="path">
+          <h3><span class="path-no">B</span> From a template</h3>
+          <p>Clone a worked example whole — deal flows, service blueprints,
+            research studies — then swap in your data.</p>
+          <pre class="codeblock" data-lang="bash"><code>npx create-nib shop --template service-blueprint</code></pre>
+          <a href="Templates.html">Template catalog →</a>
+        </article>
+        <article class="path">
+          <h3><span class="path-no">C</span> Hand-authored</h3>
+          <p>Copy a starter, write <code>project-data.js</code>, and build pages
+            yourself with the shared components.</p>
+          <pre class="codeblock" data-lang="bash"><code>cp starters/dashboard.html my-project/</code></pre>
+          <a href="New-Project.html">New project →</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ EXAMPLES ════════════════════════════════════════════════════ -->
+  <section class="section section--tint">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">Learn by reading real ones</p>
+        <h2 class="section-title">Worked examples</h2>
+        <p class="section-lead">Full multi-file projects you can open, read and clone.</p>
+      </header>
+      <div class="ex-grid">
+        <a class="ex-card" href="../examples/deal-registration/"><b>Deal registration</b><span>A 9-screen clickable compose-flow.</span></a>
+        <a class="ex-card" href="../examples/service-blueprint/"><b>Service blueprint</b><span>The editable React-Flow journey canvas.</span></a>
+        <a class="ex-card" href="../examples/design-review/"><b>Design review deck</b><span>The scroll-snapping presentation engine.</span></a>
+        <a class="ex-card" href="../examples/spreadsheet-bootstrap/"><b>Spreadsheet bootstrap</b><span>A project ingested from one workbook.</span></a>
+        <a class="ex-card" href="../examples/charts-dashboard/"><b>Charts dashboard</b><span>Data viz on the internal surface.</span></a>
+        <a class="ex-card" href="../examples/research-study/"><b>Research study</b><span>Card-sort + findings, lifted to a template.</span></a>
+      </div>
+      <p class="ex-all"><a href="../examples/index.html">Browse all examples →</a></p>
+    </div>
+  </section>
+
+  <!-- ════ DOCS MAP ════════════════════════════════════════════════════ -->
+  <section class="section" id="docs">
+    <div class="wrap">
+      <header class="section-head">
+        <p class="eyebrow">The whole wiki</p>
+        <h2 class="section-title">Explore the docs</h2>
+        <p class="section-lead">44 pages, generated from Markdown — start anywhere.</p>
+      </header>
+      <div class="docmap">
+        <div class="docmap-group">
+          <p class="docmap-title">Get started</p>
+          <a href="Getting-Started.html">Getting Started</a>
+          <a href="Create-Project.html">Create Project</a>
+          <a href="Philosophy.html">Philosophy</a>
+          <a href="For-Agents.html">For Agents</a>
+        </div>
+        <div class="docmap-group">
+          <p class="docmap-title">Design system</p>
+          <a href="Design-Tokens.html">Design Tokens</a>
+          <a href="Components.html">Components</a>
+          <a href="Fidelity-Levels.html">Fidelity Levels</a>
+          <a href="Evidence.html">Evidence</a>
+        </div>
+        <div class="docmap-group">
+          <p class="docmap-title">Authoring</p>
+          <a href="Page-Blueprint.html">Page Blueprint</a>
+          <a href="Page-Compose.html">Page Compose</a>
+          <a href="Decks.html">Decks</a>
+          <a href="Service-Blueprint.html">Service Blueprint</a>
+        </div>
+        <div class="docmap-group">
+          <p class="docmap-title">Runtime &amp; surfaces</p>
+          <a href="Architecture.html">Architecture</a>
+          <a href="Navigation.html">Navigation</a>
+          <a href="Surfaces.html">Surfaces</a>
+          <a href="Review-Mode.html">Review Mode</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ CLOSER ══════════════════════════════════════════════════════ -->
+  <section class="closer">
+    <div class="wrap closer-in">
+      <div class="closer-tape" aria-hidden="true"></div>
+      <p class="eyebrow">Ready when you are</p>
+      <h2>Start with a five-minute project.</h2>
+      <div class="hero-cta">
+        <a class="btn btn--primary" href="Getting-Started.html">Get started <span aria-hidden="true">→</span></a>
+        <a class="btn btn--ghost" href="Home.html">Open the wiki</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap site-foot-in">
+    <span class="brand"><span class="brand-nib" aria-hidden="true"></span>Nib</span>
+    <p>An agent-consumable wireframe prototyping framework.</p>
+    <nav>
+      <a href="Home.html">Wiki</a>
+      <a href="Glossary.html">Glossary</a>
+      <a href="For-Agents.html">For Agents</a>
+      <a href="https://github.com/rydersd/nib" target="_blank" rel="noopener">GitHub ↗</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="nav-scrim" id="navScrim"></div>
+<script src="assets/nib-search.js"></script>
+<script src="assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+/* ============================================================================
+   PROTO EVIDENCE — evidence-driven fidelity
+   ============================================================================
+   Styles for core/proto-evidence.js. Each `data-wf-evidence` region gets a
+   border treatment + corner chip that signals how grounded the design is —
+   guesses render rough (dashed, wobbled), validated regions render crisp.
+   The effect composes with the global Napkin/Blueprint/Polished slider: a
+   `guess` stays visibly rough even on a Polished page.
+
+   Load order: after proto-blueprint.css (so the explicit polished-mode
+   overrides below win on the cascade). All colour comes from --wf-* tokens.
+   In Napkin mode the chips/bars desaturate with the rest of the page (by
+   design — Napkin is grayscale); the dashed-vs-solid borders and chip text
+   still differentiate, and the fixed legend panel keeps its colour key.
+   ============================================================================ */
+
+/* ── Region treatments — a 4-step rough → crisp gradient ─────────────────── */
+.wf-ev { /* hook class added by proto-evidence.js — see per-level rules */ }
+
+/* Guess — invented. Dashed, hand-drawn radius, line-wobble filter so it reads
+   rough at every fidelity level. */
+html.wireframe .wf-ev--guess {
+  border: 1.5px dashed var(--wf-red);
+  border-radius: 13px 5px 15px 6px / 6px 13px 5px 14px;
+  filter: url(#wf-line-wobble);
+}
+/* Keep the guess rough even in Polished mode (which otherwise sets
+   filter:none / a clean radius on cards). */
+html.wireframe[data-wf-fidelity="polished"] .wf-ev--guess {
+  filter: url(#wf-line-wobble);
+  border-radius: 13px 5px 15px 6px / 6px 13px 5px 14px;
+}
+/* The napkin prototype-wide coverage block out-specifies the base guess
+   radius — restore the guess's hand-drawn radius in Napkin too. */
+html.wireframe[data-wf-fidelity="napkin"] .wf-ev--guess {
+  border-radius: 13px 5px 15px 6px / 6px 13px 5px 14px;
+}
+
+/* Assumption — rests on a stated assumption. Dashed, lightly irregular. */
+html.wireframe .wf-ev--assumption {
+  border: 1.5px dashed var(--wf-amber);
+  border-radius: 7px 4px 8px 5px / 5px 7px 4px 8px;
+}
+
+/* Researched — backed by a citation. Clean solid line. */
+html.wireframe .wf-ev--researched {
+  border: 1.5px solid var(--wf-accent);
+  border-radius: var(--wf-radius);
+}
+
+/* Validated — tested / signed off. Crisp, with a confident left rule. */
+html.wireframe .wf-ev--validated {
+  border: 1.5px solid var(--wf-green);
+  border-radius: var(--wf-radius);
+}
+
+/* A researched/validated claim with no source cited — soften toward dashed
+   so an unbacked claim never looks fully solid. */
+html.wireframe .wf-ev--unsourced.wf-ev--researched,
+html.wireframe .wf-ev--unsourced.wf-ev--validated {
+  border-style: dashed;
+}
+
+/* ── Corner chip ─────────────────────────────────────────────────────────── */
+.wf-ev-chip {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px 1px 5px;
+  font-family: var(--wf-font);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1.6;
+  border-radius: 10px;
+  background: var(--wf-white);
+  border: 1px solid var(--wf-line);
+  color: var(--wf-muted);
+  pointer-events: auto;
+  user-select: none;
+}
+.wf-ev-chip-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+.wf-ev-chip-flag {
+  font-weight: 800;
+  opacity: 0.8;
+  margin-left: 1px;
+}
+
+.wf-ev-chip--guess      { color: var(--wf-red);    border-color: var(--wf-red); }
+.wf-ev-chip--assumption { color: var(--wf-amber);  border-color: var(--wf-amber); }
+.wf-ev-chip--researched { color: var(--wf-accent); border-color: var(--wf-accent); }
+.wf-ev-chip--validated  { color: var(--wf-green);  border-color: var(--wf-green); }
+
+/* ── Heatmap mode — scan certainty at a glance ───────────────────────────── */
+/* The inset left-bar is layered over --wf-paper-shadow so cards keep depth. */
+body.wf-ev-heatmap .wf-ev {
+  box-shadow: inset 5px 0 0 -1px var(--wf-line), var(--wf-paper-shadow);
+}
+body.wf-ev-heatmap .wf-ev--guess      { box-shadow: inset 5px 0 0 -1px var(--wf-red), var(--wf-paper-shadow); }
+body.wf-ev-heatmap .wf-ev--assumption { box-shadow: inset 5px 0 0 -1px var(--wf-amber), var(--wf-paper-shadow); }
+body.wf-ev-heatmap .wf-ev--researched { box-shadow: inset 5px 0 0 -1px var(--wf-accent), var(--wf-paper-shadow); }
+body.wf-ev-heatmap .wf-ev--validated  { box-shadow: inset 5px 0 0 -1px var(--wf-green), var(--wf-paper-shadow); }
+/* Louder chips when the heatmap is on. */
+body.wf-ev-heatmap .wf-ev-chip          { color: var(--wf-white); }
+body.wf-ev-heatmap .wf-ev-chip--guess      { background: var(--wf-red); }
+body.wf-ev-heatmap .wf-ev-chip--assumption { background: var(--wf-amber); }
+body.wf-ev-heatmap .wf-ev-chip--researched { background: var(--wf-accent); }
+body.wf-ev-heatmap .wf-ev-chip--validated  { background: var(--wf-green); }
+body.wf-ev-heatmap .wf-ev-chip .wf-ev-chip-dot { background: var(--wf-white); }
+
+/* ── Flash — legend row click highlights its regions ─────────────────────── */
+@keyframes wf-ev-flash {
+  0%, 100% { outline-color: transparent; }
+  30%, 60% { outline-color: var(--wf-accent); }
+}
+.wf-ev-flash {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  animation: wf-ev-flash 1.2s ease-in-out;
+}
+
+/* ── Legend / certainty panel ────────────────────────────────────────────── */
+.wf-ev-legend {
+  position: fixed;
+  bottom: 14px;
+  left: 14px;
+  z-index: 950;            /* above the napkin texture overlay (800), below chrome */
+  width: 208px;
+  font-family: var(--wf-font);
+  font-size: 11px;
+  color: var(--wf-text);
+  background: var(--wf-white);
+  border: 1px solid var(--wf-line);
+  border-radius: var(--wf-radius);
+  box-shadow: var(--wf-paper-shadow);
+  overflow: hidden;
+}
+.wf-ev-legend-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 8px 7px 10px;
+  background: var(--wf-surface);
+  border-bottom: 1px solid var(--wf-line);
+}
+.wf-ev-legend-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--wf-ink);
+}
+.wf-ev-score {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--wf-accent);
+}
+.wf-ev-legend-collapse {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--wf-muted);
+  background: transparent;
+  border: 1px solid var(--wf-line);
+  border-radius: 3px;
+  cursor: pointer;
+}
+.wf-ev-legend.is-collapsed .wf-ev-legend-body { display: none; }
+.wf-ev-legend-body { padding: 8px; }
+
+.wf-ev-meter {
+  display: flex;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  background: var(--wf-tint);
+}
+.wf-ev-meter-seg { height: 100%; }
+.wf-ev-meter-seg--guess      { background: var(--wf-red); }
+.wf-ev-meter-seg--assumption { background: var(--wf-amber); }
+.wf-ev-meter-seg--researched { background: var(--wf-accent); }
+.wf-ev-meter-seg--validated  { background: var(--wf-green); }
+
+.wf-ev-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 3px 4px;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.wf-ev-legend-row:hover { background: var(--wf-surface); }
+.wf-ev-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.wf-ev-swatch--guess      { background: var(--wf-red); }
+.wf-ev-swatch--assumption { background: var(--wf-amber); }
+.wf-ev-swatch--researched { background: var(--wf-accent); }
+.wf-ev-swatch--validated  { background: var(--wf-green); }
+.wf-ev-legend-label { flex: 1; }
+.wf-ev-legend-count {
+  font-weight: 700;
+  color: var(--wf-ink);
+  font-variant-numeric: tabular-nums;
+}
+.wf-ev-legend-note {
+  margin: 8px 0 0;
+  padding: 6px 7px;
+  font-size: 10px;
+  line-height: 1.45;
+  color: var(--wf-amber);
+  background: var(--wf-accent-fill);
+  border-radius: 3px;
+}
+.wf-ev-heatmap-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--wf-tint);
+  font-size: 11px;
+  cursor: pointer;
+}
+.wf-ev-legend-summary {
+  margin: 6px 0 0;
+  font-size: 10px;
+  color: var(--wf-muted);
+}
+
+/* Polished mode strips the wobble filter from guesses' siblings, but the
+   evidence signal must survive — keep dashed borders + chips visible. */
+html.wireframe[data-wf-fidelity="polished"] .wf-ev-chip { filter: none; }

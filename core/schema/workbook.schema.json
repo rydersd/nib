@@ -1,0 +1,286 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://nib.framework/schema/workbook.schema.json",
+  "title": "NibProject",
+  "description": "Canonical shape produced by every Nib ingest adapter (xlsx, sheets-csv, sheets-api). The whole shape is the Nib project; emitters write data/*.js files from this.",
+  "type": "object",
+  "required": ["meta"],
+  "properties": {
+    "meta": {
+      "description": "Project-level config — emitted as WIREFRAME_CONFIG.",
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string" },
+        "theme": { "type": "string", "description": "Default Nib theme name." },
+        "defaultSurface": { "enum": ["slack", "salesforce", "internal", "blueprint", "none"] },
+        "feedbackEndpoint": { "type": "string", "format": "uri-reference" },
+        "emailRecipient": { "type": "string", "format": "email" },
+        "portalHeader": {
+          "type": ["object", "boolean"],
+          "description": "Track 4 opt-in. Truthy enables the .wf-header chrome.",
+          "properties": {
+            "logo": { "type": "string" },
+            "nav": { "type": "array", "items": { "type": "object" } }
+          }
+        },
+        "search": {
+          "type": ["object", "boolean"],
+          "description": "Track 4 opt-in. Truthy enables the search widget; { ai: true } enables Ask AI.",
+          "properties": {
+            "ai": { "type": "boolean" }
+          }
+        },
+        "changelog": { "type": "boolean" }
+      }
+    },
+
+    "pages": {
+      "description": "Page tree → SECTIONS + page stub HTML per row.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "label": { "type": "string" },
+          "parent": { "type": ["string", "null"], "description": "id of parent page; null/empty = top-level section" },
+          "surface": { "enum": ["slack", "salesforce", "internal", "blueprint", "none", null] },
+          "template": {
+            "description": "Starter template name (e.g. 'compose-record', 'blueprint-dashboard') OR a custom template id.",
+            "type": ["string", "null"]
+          },
+          "icon": { "type": ["string", "null"] },
+          "summary": { "type": ["string", "null"] },
+          "personaId": { "type": ["string", "null"] },
+          "storyIds": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string", "description": "semicolon- or newline-separated list" }
+            ]
+          },
+          "blueprintId": {
+            "type": ["string", "null"],
+            "description": "If set, page renders the named blueprint flow."
+          }
+        }
+      }
+    },
+
+    "tokens": {
+      "description": "CSS variable overrides — emitted as a project.css :root block.",
+      "type": "object",
+      "additionalProperties": { "type": "string" }
+    },
+
+    "personas": {
+      "description": "Persona records → STORY_MAP and personas page.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "label": { "type": "string" },
+          "role": { "type": ["string", "null"] },
+          "org": { "type": ["string", "null"] },
+          "initials": { "type": ["string", "null"] },
+          "color": { "type": ["string", "null"] },
+          "summary": { "type": ["string", "null"] },
+          "jtbd": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string" }
+            ]
+          },
+          "pains": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string" }
+            ]
+          },
+          "goals": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string" }
+            ]
+          }
+        }
+      }
+    },
+
+    "stories": {
+      "description": "JTBD entries + design stories → DESIGN_STORIES.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "kind": { "enum": ["jtbd", "design", "ac"], "default": "jtbd" },
+          "personaId": { "type": ["string", "null"] },
+          "summary": { "type": ["string", "null"] },
+          "status": { "enum": ["todo", "in-progress", "done", "blocked", "draft", "live", null] },
+          "pageIds": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string" }
+            ]
+          },
+          "criteria": {
+            "anyOf": [
+              { "type": "array", "items": { "type": "string" } },
+              { "type": "string" }
+            ]
+          }
+        }
+      }
+    },
+
+    "blueprints": {
+      "description": "Service blueprints. Key = flow id (kebab). Each flow follows the eqPartners ingest schema, extended with parent + summary metadata for nested-blueprint Overview view.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/definitions/BlueprintFlow" }
+    },
+
+    "registries": {
+      "description": "Controlled vocab — emitted as data/<name>.js.",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+
+  "definitions": {
+    "BlueprintFlow": {
+      "type": "object",
+      "required": ["meta", "phases", "lanes", "nodes"],
+      "properties": {
+        "meta": {
+          "type": "object",
+          "required": ["flowId", "title"],
+          "properties": {
+            "flowId": { "type": "string" },
+            "title": { "type": "string" },
+            "parent": {
+              "type": ["string", "null"],
+              "description": "Parent blueprint flowId; null = root. Drives the Overview drill-down breadcrumb."
+            },
+            "summary": { "type": ["string", "null"], "description": "1-line outcome for the leadership Overview card." },
+            "whatChanges": {
+              "anyOf": [
+                { "type": "array", "items": { "type": "string" } },
+                { "type": "string" }
+              ],
+              "description": "3-bullet 'what changes' list for the leadership card."
+            },
+            "ownerPersonaId": { "type": ["string", "null"] },
+            "status": { "enum": ["draft", "review", "live", "archived", null] }
+          }
+        },
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" }
+            }
+          }
+        },
+        "lanes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id"],
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "tier": { "enum": ["current", "future", "signal", null] },
+              "actorGroup": { "type": ["string", "null"] },
+              "accent": { "type": ["string", "null"] },
+              "cells": {
+                "description": "Sentiment cells, populated when tier === 'signal'.",
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "phase": { "type": "string" },
+                    "sentiment": {
+                      "type": "object",
+                      "properties": {
+                        "emoji": { "type": "string" },
+                        "label": { "type": "string" }
+                      }
+                    },
+                    "note": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "nodes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "phase", "lane", "label"],
+            "properties": {
+              "id": { "type": "string" },
+              "phase": { "type": "string" },
+              "lane": { "type": "string" },
+              "label": { "type": "string" },
+              "summary": { "type": "string" },
+              "status": { "enum": ["draft", "live", "future", "blocked", null] },
+              "persona": { "type": ["string", "null"] },
+              "pages": {
+                "anyOf": [
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "string" }
+                ]
+              },
+              "gapNotes": {
+                "anyOf": [
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "string" }
+                ]
+              },
+              "initiativeIds": {
+                "anyOf": [
+                  { "type": "array", "items": { "type": "string" } },
+                  { "type": "string" }
+                ]
+              },
+              "childBlueprintId": {
+                "type": ["string", "null"],
+                "description": "If set, clicking the node in Overview drills into the named child blueprint."
+              },
+              "lucidUrl": { "type": ["string", "null"] },
+              "lucidLabel": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" },
+              "style": { "enum": ["solid", "dashed", "improvement"] },
+              "label": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

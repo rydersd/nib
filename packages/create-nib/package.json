@@ -1,0 +1,28 @@
+{
+  "name": "create-nib",
+  "version": "0.4.0",
+  "description": "Scaffold a Nib wireframe project with an auto-generated, auto-maintained wiki. Run via `npm create nib <name>` or `npx create-nib <name>`.",
+  "bin": {
+    "create-nib": "./bin.js"
+  },
+  "main": "./bin.js",
+  "files": [
+    "bin.js",
+    "README.md"
+  ],
+  "keywords": [
+    "nib",
+    "wireframe",
+    "prototype",
+    "scaffold",
+    "create",
+    "init"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "nib": "^0.4.0"
+  },
+  "license": "MIT"
+}

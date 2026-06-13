@@ -1,0 +1,54 @@
+<svg width="184" height="184" viewBox="0 0 184 184" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_5087_54963)">
+<path d="M4 0.5H180C181.933 0.5 183.5 2.067 183.5 4V180C183.5 181.933 181.933 183.5 180 183.5H4C2.067 183.5 0.5 181.933 0.5 180V4C0.5 2.067 2.067 0.5 4 0.5Z" fill="#F0F7FE"/>
+<path d="M4 0.5H180C181.933 0.5 183.5 2.067 183.5 4V180C183.5 181.933 181.933 183.5 180 183.5H4C2.067 183.5 0.5 181.933 0.5 180V4C0.5 2.067 2.067 0.5 4 0.5Z" stroke="#C1DDFC"/>
+<mask id="path-3-inside-1_5087_54963" fill="white">
+<path d="M0 0H184V12H0V0Z"/>
+</mask>
+<path d="M0 0H184V12H0V0Z" fill="#2B87F8" fill-opacity="0.25"/>
+<path d="M184 12V11H0V12V13H184V12Z" fill="#2B87F8" fill-opacity="0.15" mask="url(#path-3-inside-1_5087_54963)"/>
+<rect x="12" y="4" width="8" height="4" rx="1" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="144" y="4" width="8" height="4" rx="1" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="154" y="4" width="8" height="4" rx="1" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="164" y="4" width="8" height="4" rx="1" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="16" y="40" width="44" height="136" rx="4" fill="#2B87F8" fill-opacity="0.1"/>
+<rect x="16.5" y="40.5" width="43" height="135" rx="3.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="22" y="46" width="32" height="6" rx="2" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="22" y="58" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="22.5" y="58.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="22" y="84" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="22.5" y="84.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="68" y="40" width="44" height="136" rx="4" fill="#2B87F8" fill-opacity="0.1"/>
+<rect x="68.5" y="40.5" width="43" height="135" rx="3.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="74" y="46" width="32" height="6" rx="2" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="74" y="58" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="74.5" y="58.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="74" y="84" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="74.5" y="84.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="74" y="110" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="74.5" y="110.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="120" y="40" width="44" height="136" rx="4" fill="#2B87F8" fill-opacity="0.1"/>
+<rect x="120.5" y="40.5" width="43" height="135" rx="3.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<rect x="126" y="46" width="32" height="6" rx="2" fill="#2B87F8" fill-opacity="0.55"/>
+<rect x="126" y="58" width="32" height="20" rx="3" fill="#2B87F8" fill-opacity="0.15"/>
+<rect x="126.5" y="58.5" width="31" height="19" rx="2.5" stroke="#2B87F8" stroke-opacity="0.15"/>
+<g clip-path="url(#clip1_5087_54963)">
+<rect x="16" y="16" width="88" height="12" rx="2" fill="#2B87F8" fill-opacity="0.55"/>
+<g clip-path="url(#clip2_5087_54963)">
+<rect x="138" y="16" width="12" height="12" rx="2" fill="#2B87F8" fill-opacity="0.4"/>
+<rect x="156" y="16" width="12" height="12" rx="2" fill="#2B87F8" fill-opacity="0.4"/>
+</g>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_5087_54963">
+<rect width="184" height="184" rx="4" fill="white"/>
+</clipPath>
+<clipPath id="clip1_5087_54963">
+<rect width="152" height="12" fill="white" transform="translate(16 16)"/>
+</clipPath>
+<clipPath id="clip2_5087_54963">
+<rect width="30" height="12" fill="white" transform="translate(138 16)"/>
+</clipPath>
+</defs>
+</svg>

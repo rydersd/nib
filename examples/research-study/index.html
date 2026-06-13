@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Research Study — Nib Example</title>
+  <link rel="stylesheet" href="../../core/proto-tokens.css">
+  <link rel="stylesheet" href="../../core/proto-core.css">
+  <style>
+    body { padding: 24px; max-width: 800px; margin: 0 auto; }
+    .study-card {
+      border: 1px solid var(--wf-line);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .study-card h2 { margin: 0 0 4px; font-size: 16px; }
+    .study-card p { margin: 0 0 8px; color: var(--wf-muted); font-size: 13px; }
+    .study-card a { color: var(--wf-accent); }
+  </style>
+</head>
+<body>
+  <h1>Research Study Template</h1>
+  <p style="color: var(--wf-muted);">A starting scaffold for research-mode prototypes — card sorts, persona libraries, JTBD maps, interview synthesis. Each study tab in the workbook becomes a runnable page.</p>
+
+  <div class="study-card">
+    <h2>Closed card sort</h2>
+    <p>Drag-and-drop participants placing cards into pre-defined buckets. Submissions POST to <code>/api/card-sort</code> on the reference Cloudflare Worker.</p>
+    <p><a href="card-sort.html?study=taxonomy">▶ Run the taxonomy study</a></p>
+  </div>
+
+  <div class="study-card" style="opacity: 0.6;">
+    <h2>Personas library <em style="font-weight:normal">(stub)</em></h2>
+    <p>The same persona records that drive STORY_MAP can render here as a persona browser. Generate from the workbook's <code>personas</code> tab.</p>
+  </div>
+
+  <div class="study-card" style="opacity: 0.6;">
+    <h2>JTBD map <em style="font-weight:normal">(stub)</em></h2>
+    <p>Per-persona Jobs-to-Be-Done, sourced from the workbook's <code>stories</code> tab where <code>kind=jtbd</code>.</p>
+  </div>
+
+  <p style="color: var(--wf-muted); font-size: 13px;">See <code>README.md</code> for how to add additional studies and wire your own buckets.</p>
+</body>
+</html>

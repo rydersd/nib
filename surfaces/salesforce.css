@@ -684,7 +684,7 @@
   letter-spacing: 0.3px; padding: 2px 8px; border-radius: 3px;
 }
 .sfdc-tier-badge--gold { background: #fff8e1; color: #8b7745; }
-.sfdc-tier-badge--silver { background: #f0f4fa; color: #546e8a; }
+.sfdc-tier-badge--silver { background: #f3f3f4; color: #546e8a; }
 .sfdc-tier-badge--bronze { background: #f9ede8; color: #8b4553; }
 
 /* ── Stepper / Wizard Steps ────────────────────────────────── */
@@ -1298,11 +1298,11 @@ html.wireframe .sfdc-card {
 html.wireframe .sfdc-card:hover {
   transform: translateY(-2px);
   box-shadow:
-    0 1px 2px rgba(30, 35, 60, 0.10),
-    0 2px 4px rgba(30, 35, 60, 0.08),
-    0 4px 8px rgba(30, 35, 60, 0.06),
-    0 8px 16px rgba(30, 35, 60, 0.04),
-    0 16px 32px rgba(30, 35, 60, 0.025);
+    0 1px 2px rgba(26, 27, 30, 0.10),
+    0 2px 4px rgba(26, 27, 30, 0.08),
+    0 4px 8px rgba(26, 27, 30, 0.06),
+    0 8px 16px rgba(26, 27, 30, 0.04),
+    0 16px 32px rgba(26, 27, 30, 0.025);
 }
 
 html.wireframe .sfdc-chart-card {

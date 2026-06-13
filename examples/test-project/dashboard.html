@@ -6,6 +6,7 @@
   <title>Partner Dashboard — Sales Portal</title>
   <link rel="stylesheet" href="../../core/proto-core.css">
   <link rel="stylesheet" href="../../surfaces/internal-ds.css">
+  <link rel="stylesheet" href="../../core/proto-evidence.css">
   <link rel="stylesheet" href="project.css">
 </head>
 <body>
@@ -16,21 +17,22 @@
 
   <!-- KPI Row -->
   <div class="ds-kpi-grid" style="margin-bottom:24px;">
-    <div class="ds-kpi-card" data-wf-confidence="confirmed">
+    <div class="ds-kpi-card" data-wf-evidence="validated"
+         data-wf-evidence-source="Pipeline export, 2026-05-19">
       <div class="ds-kpi-label">Active Deals</div>
       <div class="ds-kpi-value">12</div>
       <div class="ds-kpi-delta up">↑ 3 vs last quarter</div>
     </div>
-    <div class="ds-kpi-card" data-wf-confidence="partial">
+    <div class="ds-kpi-card" data-wf-evidence="researched">
       <div class="ds-kpi-label">Pipeline Value</div>
       <div class="ds-kpi-value">$4.8M</div>
     </div>
-    <div class="ds-kpi-card wf-torn-bottom">
+    <div class="ds-kpi-card wf-torn-bottom" data-wf-evidence="assumption">
       <div class="ds-kpi-label">Win Rate</div>
       <div class="ds-kpi-value">34%</div>
       <div class="ds-kpi-delta down">↓ 2% vs last quarter</div>
     </div>
-    <div class="ds-kpi-card" data-wf-confidence="uncertain">
+    <div class="ds-kpi-card" data-wf-evidence="guess">
       <div class="ds-kpi-label">Avg Deal Size</div>
       <div class="ds-kpi-value">$400K</div>
     </div>
@@ -39,7 +41,8 @@
   <!-- 2-Column Content -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
 
-    <div class="ds-card wf-tape">
+    <div class="ds-card wf-tape" data-wf-evidence="researched"
+         data-wf-evidence-source="Salesforce report COFY-Q2">
       <div class="ds-card-header">
         <span class="ds-card-title">Recent Opportunities</span>
         <button class="btn btn-sm btn-ghost">View All</button>
@@ -70,7 +73,8 @@
       </div>
     </div>
 
-    <div class="ds-card wf-pin">
+    <div class="ds-card wf-pin" data-wf-evidence="validated"
+         data-wf-evidence-source="Design review, 2026-05-12">
       <div class="ds-card-header">
         <span class="ds-card-title">Quick Actions</span>
       </div>
@@ -104,6 +108,7 @@
 <script src="../../core/proto-nav.js"></script>
 <script src="../../core/proto-scatter-gl.js"></script>
 <script src="../example-nav.js"></script>
+<script src="../../core/proto-evidence.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# nib — open the Nib framework repo in Claude Code with permissions skipped.
+#
+# Usage:
+#   nib              # open Claude Code in /Users/rybooth/Github/nib
+#   nib "<prompt>"   # open with an initial prompt (passed through to claude)
+#
+# Symlinked into ~/.local/bin/nib so `nib` works from any directory.
+set -euo pipefail
+
+NIB_DIR="/Users/rybooth/Github/nib"
+
+if [[ ! -d "$NIB_DIR" ]]; then
+  echo "nib: $NIB_DIR does not exist" >&2
+  exit 1
+fi
+
+cd "$NIB_DIR"
+exec claude --dangerously-skip-permissions "$@"

@@ -1,0 +1,157 @@
+/* card-sort.css — closed card sort study UI */
+
+html:has(body.card-sort-page),
+html:has(body.card-sort-page) body.card-sort-page {
+  margin: 0; padding: 0; height: 100%;
+  overflow: hidden;
+  background: var(--wf-canvas, #f0f4fa);
+}
+
+.card-sort-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 100vh;
+}
+
+html:has(body.card-sort-page)::after { content: none !important; display: none !important; }
+
+.card-sort-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--wf-white);
+  border-bottom: 1px solid var(--wf-line);
+  flex-shrink: 0;
+}
+.card-sort-title { font-size: 15px; font-weight: 700; color: var(--wf-ink); }
+.card-sort-progress { font-size: 12px; color: var(--wf-muted); font-weight: 600; }
+
+#card-sort-root {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background: var(--wf-canvas);
+}
+
+.card-sort-loading {
+  display: flex; align-items: center; justify-content: center;
+  height: 100%; color: var(--wf-muted); font-size: 13px;
+}
+
+/* ── Card ───────────────────────────────────────────── */
+.react-flow__node.react-flow__node-card {
+  z-index: 10 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.card-sort-card {
+  width: 100%;
+  height: 100%;
+  background: var(--wf-white);
+  border: 1px solid var(--wf-line);
+  border-left: 3px solid var(--wf-accent);
+  border-radius: 4px;
+  padding: 0 12px;
+  font-family: var(--wf-font, system-ui);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--wf-ink);
+  display: flex;
+  align-items: center;
+  cursor: grab;
+  user-select: none;
+  box-sizing: border-box;
+  transition: box-shadow .12s, transform .08s;
+}
+.card-sort-card:hover {
+  box-shadow: 0 2px 6px rgba(30, 42, 58, .12);
+  transform: translateY(-1px);
+}
+.card-sort-card.is-placed {
+  border-left-color: #5aad7a;
+}
+
+/* ── Bucket ─────────────────────────────────────────── */
+.react-flow__node.react-flow__node-bucket {
+  z-index: 1 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none;
+}
+.card-sort-bucket {
+  width: 100%;
+  height: 100%;
+  background: var(--wf-white);
+  border: 2px dashed var(--bucket-color, var(--wf-line));
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+}
+.card-sort-bucket-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wf-ink);
+  letter-spacing: .02em;
+  margin-bottom: 2px;
+}
+.card-sort-bucket-count {
+  font-size: 11px;
+  color: var(--wf-muted);
+  font-weight: 600;
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+.card-sort-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 12px 24px;
+  background: var(--wf-white);
+  border-top: 1px solid var(--wf-line);
+  flex-shrink: 0;
+}
+.card-sort-intro {
+  font-size: 12px;
+  color: var(--wf-muted);
+  line-height: 1.5;
+  flex: 1;
+  max-width: 720px;
+}
+.card-sort-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.card-sort-err { font-size: 12px; color: #8b3a1f; }
+.card-sort-actions .btn {
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ── Thank-you state ─────────────────────────────────── */
+.card-sort-thanks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 24px;
+}
+.card-sort-thanks h3 {
+  font-size: 22px;
+  color: var(--wf-ink);
+  margin-bottom: 8px;
+}
+.card-sort-thanks p {
+  font-size: 14px;
+  color: var(--wf-text);
+  margin-bottom: 6px;
+  max-width: 480px;
+}

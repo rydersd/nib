@@ -12,13 +12,18 @@
 @property --wf-shadow-scale  { syntax: '<number>'; inherits: true; initial-value: 1; }
 
 :root {
-  --wf-ink:         #1e2a3a;
-  --wf-text:        #3b4f68;
-  --wf-muted:       #4a5f7f;
-  --wf-line:        #b0bdd0;
-  --wf-tint:        #dce4ef;
-  --wf-surface:     #edf1f7;
-  --wf-canvas:      #f0f4fa;
+  /* Neutral-gray palette. Content ink / text / surfaces are tinted neutral
+     gray rather than blue-grey. The blueprint grid and the --wf-accent
+     itself stay blue (see `html.wireframe body` grid + `--wf-accent`), so
+     blueprint mode still reads as a blueprint — only the content neutrals
+     went gray. Napkin overrides all of these anyway (see below). */
+  --wf-ink:         #27282a;
+  --wf-text:        #4a4c4e;
+  --wf-muted:       #646567;
+  --wf-line:        #c4c5c7;
+  --wf-tint:        #e4e4e6;
+  --wf-surface:     #eeeeef;
+  --wf-canvas:      #f3f3f4;
   --wf-white:       #ffffff;
   --wf-accent:      #3d6daa;
   --wf-accent-lt:   #e8eff8;
@@ -31,12 +36,12 @@
   --wf-mono:        'SF Mono', 'Fira Code', 'Consolas', monospace;
   --wf-radius:      4px;
   --wf-paper-shadow:
-    0 0.5px 0.5px rgba(30, 35, 60, 0.10),
-    0 1px 1px rgba(30, 35, 60, 0.07),
-    0 2px 2px rgba(30, 35, 60, 0.05),
-    0 4px 4px rgba(30, 35, 60, 0.035),
-    0 8px 8px rgba(30, 35, 60, 0.02),
-    0 16px 16px rgba(30, 35, 60, 0.012);
+    0 0.5px 0.5px rgba(26, 27, 30, 0.10),
+    0 1px 1px rgba(26, 27, 30, 0.07),
+    0 2px 2px rgba(26, 27, 30, 0.05),
+    0 4px 4px rgba(26, 27, 30, 0.035),
+    0 8px 8px rgba(26, 27, 30, 0.02),
+    0 16px 16px rgba(26, 27, 30, 0.012);
   --wf-tape-color: rgba(220, 228, 200, 0.55);
   --wf-tape-border: rgba(180, 190, 160, 0.3);
   --wf-pin-color: #c0392b;

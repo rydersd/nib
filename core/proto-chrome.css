@@ -1144,3 +1144,39 @@ html.wf-review-heatmap [data-wf-review="reject"] {
 .wf-nav-settings-link:hover {
   color: var(--wf-accent);
 }
+
+/* ── Design-notes Changelog tab + context-bar recent-changes badge ──────────
+   Per-page changelog: a <script id="wf-changelog" type="application/json">
+   block of { date, note } entries. See wfReadChangelog() in proto-nav.js. */
+.wf-dn-changelog-entry {
+  display: flex;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--wf-tint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.wf-dn-changelog-entry:last-child { border-bottom: none; }
+.wf-dn-changelog-date {
+  flex-shrink: 0;
+  font-family: var(--wf-mono, monospace);
+  font-size: 11px;
+  color: var(--wf-muted);
+  min-width: 78px;
+}
+.wf-dn-changelog-note { color: var(--wf-text); }
+
+.wf-ctx-changelog-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--wf-accent);
+  background: var(--wf-accent-lt);
+  border: 1px solid var(--wf-accent);
+  border-radius: 10px;
+  padding: 1px 8px;
+  margin-left: 4px;
+  cursor: pointer;
+}
+.wf-ctx-changelog-badge:hover { filter: brightness(0.97); }

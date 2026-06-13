@@ -1,0 +1,36 @@
+{
+  "name": "nib",
+  "version": "0.4.0",
+  "private": true,
+  "description": "Wireframe prototyping framework that auto-generates a fully cross-referenced project wiki from a workbook",
+  "bin": {
+    "nib-ingest": "./tools/nib-ingest.js",
+    "nib-sync": "./tools/nib-sync.js",
+    "nib-wiki": "./tools/nib-wiki.js",
+    "nib-create": "./tools/nib-create.js",
+    "create-nib": "./tools/nib-create.js"
+  },
+  "scripts": {
+    "ingest": "node tools/nib-ingest.js",
+    "sync": "node tools/nib-sync.js",
+    "wiki": "node tools/nib-wiki.js",
+    "create": "node tools/nib-create.js"
+  },
+  "files": [
+    "core/",
+    "surfaces/",
+    "starters/",
+    "examples/",
+    "ref/",
+    "docs/",
+    "tools/",
+    "CLAUDE.md",
+    "README.md"
+  ],
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  },
+  "optionalDependencies": {
+    "googleapis": "^131.0.0"
+  }
+}

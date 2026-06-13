@@ -1,0 +1,26 @@
+{
+  "study_id": "taxonomy",
+  "title": "Help us organize the navigation",
+  "description": "Drag each card into the bucket where you'd expect to find it. There's no right answer — your intuition is what we're after.",
+  "cards": [
+    { "id": "c1", "label": "Submit a deal" },
+    { "id": "c2", "label": "Track deal status" },
+    { "id": "c3", "label": "View pipeline" },
+    { "id": "c4", "label": "Request MDF" },
+    { "id": "c5", "label": "Submit MDF claim" },
+    { "id": "c6", "label": "View tier status" },
+    { "id": "c7", "label": "Renew agreement" },
+    { "id": "c8", "label": "Browse training" },
+    { "id": "c9", "label": "Track certifications" },
+    { "id": "c10", "label": "Schedule QBR" },
+    { "id": "c11", "label": "Manage users" },
+    { "id": "c12", "label": "Configure portal" }
+  ],
+  "buckets": [
+    { "id": "b-deals", "label": "Deals" },
+    { "id": "b-funding", "label": "Funding & MDF" },
+    { "id": "b-program", "label": "Program & tier" },
+    { "id": "b-learning", "label": "Training & certs" },
+    { "id": "b-admin", "label": "Admin" }
+  ]
+}

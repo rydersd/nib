@@ -335,3 +335,63 @@ html.wireframe[data-wf-fidelity="polished"]::before,
 html.wireframe[data-wf-fidelity="polished"]::after {
   display: none;
 }
+
+/* ============================================================================
+   NAPKIN — PROTOTYPE-WIDE COVERAGE
+   ============================================================================
+   The napkin rules above (and in proto-tokens.css) only target the four
+   canonical card classes (.wf-card / .ds-card / .ds-kpi-card / .sfdc-card),
+   which also receive unique per-element wobble seeds from proto-nav.js
+   randomizeWobble(). This block extends a baseline roughness to every other
+   container, heading, and table so napkin reads as pervasively low-fi — a
+   perceptual nudge that pushes reviewers from "pixels" toward "direction".
+
+   Containers here use the static #wf-line-wobble (one shared seed); the four
+   canonical cards keep their superior randomized seeds. Per-element opt-out:
+   add [data-fidelity-skip] to any element. Back-ported from eqPartners
+   wf-fidelity.css, rewired from var(--wf-wobble-filter) (which is `none` in
+   Nib napkin) to url(#wf-line-wobble) so the coverage actually renders.
+
+   Type roughening is NOT applied per-element: a container carrying `filter`
+   already rasterizes/roughens all of its descendant text in one pass, so a
+   per-p/li/heading filter would be redundant (and applying an SVG filter to
+   every paragraph on a page is a real performance hazard). The container and
+   table blocks below carry the coverage. */
+
+/* Containers — broad attribute coverage. Excludes the four canonical card
+   classes (handled above), badges/chips (too small for a wobble radius),
+   .slide / .slide-pane (the deck presentation surface — see proto-deck.css —
+   which must stay crisp and is expensive to filter on scroll-snap pages), and
+   the fixed-position framework chrome panels (.wf-dn-panel / .wf-settings-panel)
+   which must stay crisp. */
+html.wireframe[data-wf-fidelity="napkin"] [class*="card"]:not([data-fidelity-skip]):not([class*="badge"]):not([class*="chip"]):not(.wf-card):not(.ds-card):not(.ds-kpi-card):not(.sfdc-card),
+html.wireframe[data-wf-fidelity="napkin"] [class*="panel"]:not([data-fidelity-skip]):not(.wf-dn-panel):not(.wf-settings-panel),
+html.wireframe[data-wf-fidelity="napkin"] [class*="-box"]:not([data-fidelity-skip]),
+html.wireframe[data-wf-fidelity="napkin"] [class$="box"]:not([data-fidelity-skip]),
+html.wireframe[data-wf-fidelity="napkin"] [class*="tile"]:not([data-fidelity-skip]),
+html.wireframe[data-wf-fidelity="napkin"] [class*="sheet"]:not([data-fidelity-skip]),
+html.wireframe[data-wf-fidelity="napkin"] [class*="-frame"]:not([data-fidelity-skip]),
+html.wireframe[data-wf-fidelity="napkin"] [class*="-pane"]:not([data-fidelity-skip]):not(.slide):not(.slide-pane) {
+  border-radius: var(--wf-wobble-radius);
+  filter: url(#wf-line-wobble);
+}
+
+/* Tables — wobble at the <table> level only. The filter rasterizes the whole
+   table (borders + text + cells) in a single pass, roughening the rule lines
+   without breaking per-cell alignment math. Suppress per-cell inheritance so
+   the same content is not double-processed. */
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) {
+  filter: url(#wf-line-wobble);
+}
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) th,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) td,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) p,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h1,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h2,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h3,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h4,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h5,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) h6,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) li {
+  filter: none;
+}

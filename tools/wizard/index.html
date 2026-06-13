@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Nib — Setup</title>
+  <link rel="stylesheet" href="wizard.css">
+</head>
+<body>
+  <header class="hd">
+    <div class="hd-logo">📐 Nib</div>
+    <div class="hd-name" id="proj-name">your-project</div>
+  </header>
+
+  <main class="wiz">
+    <!-- Panel 1: choose path -->
+    <section class="panel" id="panel-choose">
+      <h1 id="welcome">Set up your project</h1>
+      <p class="sub">Pick how you want to start. You can change anything later.</p>
+
+      <div class="cards">
+        <button class="card" data-go="workbook">
+          <div class="card-emoji">📊</div>
+          <div class="card-title">From a workbook</div>
+          <div class="card-desc">Upload an Excel file or paste a Google Sheets URL. Pages, personas, blueprints, and tokens all generate from the workbook.</div>
+        </button>
+        <button class="card" data-go="template">
+          <div class="card-emoji">🎨</div>
+          <div class="card-title">From a template</div>
+          <div class="card-desc">Service blueprint, feedback triage, research study, multi-step flow… pick a working scaffold to copy and edit.</div>
+        </button>
+        <button class="card" data-go="blank">
+          <div class="card-emoji">✨</div>
+          <div class="card-title">Start blank</div>
+          <div class="card-desc">A minimal one-page scaffold. Add pages by hand, or run <code>nib-ingest</code> later if you want.</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- Panel 2: workbook -->
+    <section class="panel" id="panel-workbook" hidden>
+      <button class="back" data-back>← Back</button>
+      <h1>From a workbook</h1>
+
+      <div class="row">
+        <div class="row-item">
+          <h2>Upload .xlsx</h2>
+          <label class="dropzone" id="drop">
+            <span id="drop-text">Drop a workbook here or click to choose</span>
+            <input type="file" id="file" accept=".xlsx" hidden>
+          </label>
+          <div class="hint">The file is sent to the local server and stays in the project as the source of truth for re-syncing.</div>
+        </div>
+
+        <div class="row-or">or</div>
+
+        <div class="row-item">
+          <h2>Paste a Google Sheets URL</h2>
+          <input type="text" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/…">
+          <div class="hint">Sharing URL works for public sheets. For private sheets, scaffold with <code>--auth creds.json</code> on the CLI.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="ingest-btn" disabled>Ingest →</button>
+      </div>
+    </section>
+
+    <!-- Panel 3: template -->
+    <section class="panel" id="panel-template" hidden>
+      <button class="back" data-back>← Back</button>
+      <h1>From a template</h1>
+      <p class="sub">Each template is a working multi-file project you can clone whole.</p>
+      <div class="tmpl-list" id="tmpl-list">Loading templates…</div>
+      <div class="actions">
+        <button class="btn btn-primary" id="tmpl-btn" disabled>Use template →</button>
+      </div>
+    </section>
+
+    <!-- Panel 4: progress / done -->
+    <section class="panel" id="panel-progress" hidden>
+      <h1 id="progress-h">Setting up…</h1>
+      <p class="sub" id="progress-sub">Running nib-ingest, writing data files…</p>
+      <div class="spinner"></div>
+      <pre class="log" id="log"></pre>
+    </section>
+
+    <section class="panel" id="panel-done" hidden>
+      <h1>✓ Ready</h1>
+      <p class="sub" id="done-sub">Your project is set up.</p>
+      <div class="actions">
+        <a class="btn btn-primary" id="open-btn" href="/project/">Open project →</a>
+      </div>
+      <div class="hint" style="margin-top:24px;">
+        Edit your workbook (or files in the project), then re-run <code>node tools/nib-sync.js --project &lt;path&gt;</code> to pick up changes.
+      </div>
+    </section>
+  </main>
+
+  <script src="wizard.js"></script>
+</body>
+</html>

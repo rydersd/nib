@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" class="wireframe">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card sort — Nib Research Study</title>
+<link rel="stylesheet" href="../../core/proto-tokens.css">
+<link rel="stylesheet" href="../../core/proto-core.css">
+<link rel="stylesheet" href="card-sort.css">
+</head>
+<body class="card-sort-page">
+
+<div id="card-sort-root">
+  <div class="card-sort-loading">Loading study…</div>
+</div>
+
+<div class="wf-design-notes" hidden>
+  <h3>Summary</h3>
+  <p>Closed card-sort study runner, built on React Flow. Default study is the partner-taxonomy sort defined in <code>data/card-sort-taxonomy.json</code>; participants drag cards from the tray on the left into one of four buckets on the right. On submit, all placements POST to <code>/api/card-sort</code> on the Cloudflare Worker.</p>
+
+  <h3>Jobs to Be Done</h3>
+  <ul>
+    <li>Run the closed card sort the taxonomy backlog calls for (UT-1 in research-backlog.html) without paying for Optimal Workshop.</li>
+    <li>Stash data in our existing pipeline (Cloudflare Worker → GitHub issue) so reviewers can audit individual responses.</li>
+    <li>Reuse the same React Flow + card pattern for any future closed-sort study by adding another <code>card-sort-&lt;name&gt;.json</code> file and linking with <code>?study=&lt;name&gt;</code>.</li>
+  </ul>
+
+  <h3>Design Spec</h3>
+  <ul>
+    <li>Tray on the left (unsorted cards stack vertically), buckets on the right (each grows as you drop cards in).</li>
+    <li>Drag a card → snap to whichever bucket its center is in on drag-stop. Drop outside any bucket → it returns to the tray.</li>
+    <li>Progress count in the topbar: "X / Y sorted." Submit button enabled once at least 1 card is placed; label warns if any remain in the tray.</li>
+    <li>On submit, success state replaces the canvas with a thank-you message.</li>
+    <li>Open card-sort variant (let participants create their own buckets) is a future iteration.</li>
+  </ul>
+
+  <h3>Technical Details</h3>
+  <ul>
+    <li>React 18 + ReactFlow 12 from esm.sh, no build step.</li>
+    <li>Study definition fetched from <code>data/card-sort-&lt;id&gt;.json</code> — defaults to <code>taxonomy</code>, override with <code>?study=foo</code>.</li>
+    <li>Submission payload: <code>{study_id, started_at, finished_at, placements: {card_id: bucket_id|null}, user_agent}</code>.</li>
+    <li>Worker route <code>POST /api/card-sort</code> stores each submission as a GitHub issue with label <code>card-sort:&lt;study_id&gt;</code> for downstream aggregation.</li>
+    <li>Aggregation page (compute the &gt;70% threshold per card) is on the backlog.</li>
+  </ul>
+</div>
+
+<script type="module" src="card-sort.js"></script>
+<script src="wf-nav.js"></script>
+</body>
+</html>

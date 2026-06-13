@@ -1,6 +1,10 @@
 # New Project Bootstrap
 
-> Read when starting a project from scratch. Follow these 6 steps in order.
+> Read when starting a project from scratch. Two paths:
+>
+> **Path A — From a spreadsheet (recommended).** If you have an Excel workbook or Google Sheet describing the project's pages, personas, blueprints, etc., read [`spreadsheet-authoring.md`](spreadsheet-authoring.md) and run `node tools/nib-ingest.js <workbook> --out ./my-project`. The CLI generates `data/*.js` files that this guide's Step 2 hand-authors. Then continue from Step 1 below to set up the directory layout (skipping Step 2 since it's already generated).
+>
+> **Path B — From scratch.** Follow all 6 steps below.
 
 ## Step 1: Create Project Directory
 

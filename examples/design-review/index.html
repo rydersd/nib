@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" class="deck" data-role="deck">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Review · Beacon Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../core/proto-deck.css">
+</head>
+<body>
+
+<nav class="slidenav" aria-label="Slides"></nav>
+<div class="kbd-hint">Use <kbd>↓</kbd> <kbd>↑</kbd> or <kbd>Space</kbd> · <kbd>E</kbd> exports SVG</div>
+
+<!-- Worked example: a weekly design-review deck for a fictional product,
+     "Beacon Analytics". Fluid scroll-deck mode (no .slides--fit). All people,
+     companies and link targets are placeholders. -->
+<main class="slides">
+
+  <!-- ============ Cover ============ -->
+  <section class="slide cover" id="s1" data-title="Cover">
+    <div class="cover-stamp">
+      <span class="dot"></span>
+      <span>Design Review</span>
+      <span class="seq">№ 007</span>
+      <span class="dot"></span>
+      <span>Week of 18 May</span>
+    </div>
+
+    <h1>Making the dashboard <span class="accent">make sense.</span></h1>
+
+    <p class="cover-deck">
+      Two weeks on Beacon's reporting surface — less building, more deciding
+      where the complexity should live. A reworked metric drill-down, the new
+      saved-views model, an empty-state pass, and a question about chart
+      defaults that still isn't settled. A check-in, and a framing.
+    </p>
+
+    <div class="cover-mark" aria-hidden="true"></div>
+
+    <div class="cover-meta">
+      <div><div class="k">Presenter</div><div class="v">Design Lead</div></div>
+      <div><div class="k">Audience</div><div class="v">Product &amp; Engineering</div></div>
+      <div><div class="k">Sections</div><div class="v">9 · keyboard navigable</div></div>
+      <div><div class="k">Cadence</div><div class="v">Weekly going forward</div></div>
+    </div>
+  </section>
+
+  <!-- ============ The arc ============ -->
+  <section class="slide" id="s2" data-title="The arc">
+    <div class="slide-body single">
+      <div class="slide-text">
+        <h2>Two weeks, <span class="accent">in one paragraph.</span></h2>
+        <p class="lede">
+          We started from the support-ticket review — three of the top ten
+          themes traced back to the reporting dashboard being hard to read.
+          So the fortnight became a focused pass on Beacon's reporting surface:
+          a metric drill-down that opens the rows behind any number, a
+          saved-views model so a team can keep its own slice of the data, and
+          an empty-state sweep so a fresh workspace never shows a blank panel.
+          Underneath all of it, an unsettled question — what the default chart
+          should be when a user has not chosen one — which we could not close
+          alone.
+        </p>
+        <div class="stats">
+          <div class="stat"><div class="num">18</div><div class="l">Reporting screens reworked or annotated</div></div>
+          <div class="stat"><div class="num">3</div><div class="l">Support themes traced to the dashboard</div></div>
+          <div class="stat"><div class="num">4</div><div class="l">Empty states added where panels were blank</div></div>
+          <div class="stat"><div class="num">1</div><div class="l">Open question carried into next review</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Inputs ============ -->
+  <section class="slide" id="s3" data-title="Inputs">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>The conversations that <span class="accent">set the agenda.</span></h2>
+        <p>Three inputs from outside the design team shaped what we worked on.
+          Some settled, some still open. Worth naming each so the rest of this
+          review lands in context.</p>
+      </div>
+      <div class="inputs">
+        <div class="input-card">
+          <div class="who">Two weeks ago · Support sync</div>
+          <h4>Top-ten ticket themes</h4>
+          <p>The support team's monthly review surfaced that "I can't tell what
+            this number means" is one of the most common reasons people open a
+            ticket. That anchored the agenda.</p>
+        </div>
+        <div class="input-card">
+          <div class="who">Last week · Product ask</div>
+          <h4>Make the dashboard self-serve</h4>
+          <p>The brief: a new user should be able to read the reporting surface
+            without a walkthrough. Reduce the questions before they reach
+            support.</p>
+        </div>
+        <div class="input-card unresolved">
+          <div class="who">Last week · Data team</div>
+          <h4>Chart-default refresher</h4>
+          <p>A refresher with the data team on what each metric actually
+            measures. It confirmed the importance of a sensible default chart —
+            and surfaced that no one owns that decision yet.</p>
+        </div>
+        <div class="input-card">
+          <div class="who">Ongoing · Engineering</div>
+          <h4>Saved-views feasibility</h4>
+          <p>Early feasibility check with engineering: saved views can ship
+            without a schema change if they are stored per-user. Confirmed,
+            and it shaped the design.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ The work · drill-down ============ -->
+  <section class="slide" id="s4" data-title="Metric drill-down">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>Every number <span class="accent">opens.</span></h2>
+        <p>The core change: a metric is no longer a dead end. Click any KPI
+          tile or chart segment and the rows behind it slide in — the same
+          records, filtered to exactly that number. A chart that cannot be
+          opened is a claim you have to take on faith.</p>
+        <p>The reworked screens are linked below as live previews.</p>
+      </div>
+      <div class="screens">
+        <a href="#" class="screen">
+          <div class="screen-frame">
+            <iframe src="about:blank" loading="lazy" tabindex="-1" title="reporting-dashboard"></iframe>
+            <span class="open-cue">Open ↗</span>
+          </div>
+          <div class="screen-meta"><div class="name">reporting-dashboard</div><div class="desc">The KPI strip — every tile is now a filter into the rows behind it</div></div>
+        </a>
+        <a href="#" class="screen">
+          <div class="screen-frame">
+            <iframe src="about:blank" loading="lazy" tabindex="-1" title="metric-drilldown"></iframe>
+            <span class="open-cue">Open ↗</span>
+          </div>
+          <div class="screen-meta"><div class="name">metric-drilldown</div><div class="desc">The slide-in record list, scoped to the clicked number</div></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ The work · saved views + empty states ============ -->
+  <section class="slide" id="s5" data-title="Saved views">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>A team keeps <span class="accent">its own slice.</span></h2>
+        <p>Saved views let a team pin the filters, columns, and date range it
+          actually works against. Stored per-user, so no schema change and no
+          shared-state collisions. Paired with an empty-state pass — a fresh
+          workspace now explains itself instead of showing a blank panel.</p>
+      </div>
+      <div class="screens">
+        <a href="#" class="screen">
+          <div class="screen-frame">
+            <iframe src="about:blank" loading="lazy" tabindex="-1" title="saved-views"></iframe>
+            <span class="open-cue">Open ↗</span>
+          </div>
+          <div class="screen-meta"><div class="name">saved-views</div><div class="desc">The view switcher — create, rename, set a default</div></div>
+        </a>
+        <a href="#" class="screen">
+          <div class="screen-frame">
+            <iframe src="about:blank" loading="lazy" tabindex="-1" title="reporting-empty"></iframe>
+            <span class="open-cue">Open ↗</span>
+          </div>
+          <div class="screen-meta"><div class="name">reporting-empty</div><div class="desc">The first-run empty state — guidance plus one clear action</div></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Asks ============ -->
+  <section class="slide" id="s6" data-title="What we need">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>Two asks. <span class="accent">Each scoped.</span></h2>
+        <p>If you only do one thing in this review — do these.</p>
+      </div>
+      <div class="asks">
+        <div class="ask">
+          <div class="ask-eye">Ask 01 · Decision needed</div>
+          <h4>Default chart <span class="accent">ownership</span></h4>
+          <p>The data team confirmed each metric needs a sensible default
+            chart, but no one owns that call. We need an owner and a date —
+            otherwise the drill-down ships against an inconsistent baseline.</p>
+          <div class="ask-meta"><strong>Want by:</strong> next review · <strong>Blocks:</strong> drill-down rollout</div>
+        </div>
+        <div class="ask">
+          <div class="ask-eye">Ask 02 · Review &amp; sign-off</div>
+          <h4>Saved-views model — <span class="accent">is per-user right?</span></h4>
+          <p>Per-user storage avoids a schema change but means views are not
+            shareable. Need a yes / no / "make them shareable later" from
+            product before we wire it.</p>
+          <div class="ask-meta"><strong>Want by:</strong> end of week · <strong>Format:</strong> 20-min walkthrough</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Where we're stuck ============ -->
+  <section class="slide" id="s7" data-title="Where we're stuck">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>Honest list. <span class="accent">Things we can't move alone.</span></h2>
+        <p>Each of these depends on someone outside the design team.</p>
+      </div>
+      <div class="stuck-grid">
+        <div class="stuck">
+          <h4>Default chart per metric</h4>
+          <p>The drill-down works, but the baseline chart it opens against is
+            inconsistent. Needs a data-team owner. Tracked as Ask 01.</p>
+        </div>
+        <div class="stuck">
+          <h4>Shareable views</h4>
+          <p>Per-user views ship fast; team-shared views need a small schema
+            addition. Trade-off call belongs to product. Tracked as Ask 02.</p>
+        </div>
+        <div class="stuck">
+          <h4>Historical data depth</h4>
+          <p>Drill-downs older than 90 days are slow because the warehouse
+            archives. A performance call for engineering, not design.</p>
+        </div>
+        <div class="stuck">
+          <h4>Mobile reporting</h4>
+          <p>The reworked surface assumes a wide viewport. Whether reporting
+            needs a real mobile layout is a roadmap question.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Next up ============ -->
+  <section class="slide" id="s8" data-title="Next up">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>What deserves the <span class="accent">next sprint.</span></h2>
+        <p>Provisional ordering. The sprint commit is the conversation, not the spec.</p>
+      </div>
+      <div class="pi-stack pi-grid">
+        <div class="pi-line">
+          <div class="pi-when">Wk 1</div>
+          <div class="pi-what">
+            <h4>Default-chart decision follow-through</h4>
+            <p>Confirm the owner from Ask 01, then lock the baseline chart for
+              each metric so the drill-down has a stable foundation.</p>
+          </div>
+        </div>
+        <div class="pi-line">
+          <div class="pi-when">Wk 1–2</div>
+          <div class="pi-what">
+            <h4>Saved-views build (conditional on Ask 02)</h4>
+            <p>If per-user is signed off, wire the view switcher end to end.</p>
+          </div>
+        </div>
+        <div class="pi-line">
+          <div class="pi-when">Wk 2–3</div>
+          <div class="pi-what">
+            <h4>Empty-state rollout</h4>
+            <p>Extend the empty-state pattern from reporting to the remaining
+              workspace surfaces.</p>
+          </div>
+        </div>
+        <div class="pi-line">
+          <div class="pi-when">Throughout</div>
+          <div class="pi-what">
+            <h4>Support-theme tracking</h4>
+            <p>Watch whether dashboard tickets drop after the drill-down ships —
+              the real measure of whether this fortnight worked.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Closing ============ -->
+  <section class="slide closing" id="s9" data-title="Closing">
+    <div class="slide-body single" style="justify-content:center;align-items:center;text-align:center;flex:1;">
+      <div class="closing-block">
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="glyph">§</span>
+          <span class="line"></span>
+        </div>
+        <h2>That's the <span class="accent">check-in.</span></h2>
+        <p>Next review lands in two weeks. Per-page feedback on any of the
+          linked work goes through the standard feedback panel — we read every one.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="../../core/proto-deck.js"></script>
+<!-- Optional Nib context bar — uncomment to add breadcrumb chrome:
+<script src="project-data.js"></script>
+<script src="../../core/proto-nav.js"></script>
+-->
+
+</body>
+</html>

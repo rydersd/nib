@@ -1,0 +1,42 @@
+// Wrangler config for the nib feedback Worker.
+//
+// Replace the placeholders marked TODO and run:
+//   npx wrangler deploy
+//
+// Secrets (set via `npx wrangler secret put <NAME>`):
+//   GITHUB_TOKEN  — GitHub PAT with `repo` scope (required)
+{
+  "name": "TODO-your-worker-name",
+  "compatibility_date": "2026-04-01",
+  "main": "index.js",
+
+  // Serves the prototype's static HTML from this Worker. Point this at
+  // the directory containing your wireframe pages.
+  "assets": {
+    "directory": "../../prototype",
+    "binding": "ASSETS"
+  },
+
+  // Public config — readable by the Worker via env.GITHUB_REPO.
+  // Keep the token itself as a secret, not here.
+  "vars": {
+    "GITHUB_REPO": "TODO-your-org/TODO-your-repo"
+  },
+
+  // R2 bucket for screenshots. Create with:
+  //   npx wrangler r2 bucket create <bucket-name>
+  // Enable public access on the bucket and set SCREENSHOTS_PUBLIC_BASE
+  // to the resulting URL (either the *.r2.dev one or a custom domain).
+  "r2_buckets": [
+    {
+      "bucket_name": "TODO-your-screenshots-bucket",
+      "binding": "SCREENSHOTS"
+    }
+  ]
+
+  // After enabling public access on the bucket, uncomment and fill in:
+  // "vars": {
+  //   "GITHUB_REPO": "TODO-your-org/TODO-your-repo",
+  //   "SCREENSHOTS_PUBLIC_BASE": "https://pub-TODO.r2.dev"
+  // }
+}

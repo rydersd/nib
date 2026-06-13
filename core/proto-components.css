@@ -197,9 +197,9 @@ html.wireframe .wf-textarea {
   border-radius: var(--wf-wobble-radius);
   filter: var(--wf-wobble-filter);
   box-shadow:
-    0 0.5px 0.5px rgba(30, 35, 60, 0.08),
-    0 1px 2px rgba(30, 35, 60, 0.06),
-    0 2px 4px rgba(30, 35, 60, 0.04);
+    0 0.5px 0.5px rgba(26, 27, 30, 0.08),
+    0 1px 2px rgba(26, 27, 30, 0.06),
+    0 2px 4px rgba(26, 27, 30, 0.04);
 }
 
 /* --- Buttons ------------------------------------------------------------- */
@@ -281,9 +281,9 @@ html.wireframe .btn {
   border-radius: var(--wf-wobble-radius);
   filter: var(--wf-wobble-filter);
   box-shadow:
-    0 0.5px 0.5px rgba(30, 35, 60, 0.08),
-    0 1px 2px rgba(30, 35, 60, 0.06),
-    0 2px 4px rgba(30, 35, 60, 0.04);
+    0 0.5px 0.5px rgba(26, 27, 30, 0.08),
+    0 1px 2px rgba(26, 27, 30, 0.06),
+    0 2px 4px rgba(26, 27, 30, 0.04);
 }
 
 /* --- Badges -------------------------------------------------------------- */
@@ -323,8 +323,8 @@ html.wireframe .btn {
 /* Light contact shadow for badges in wireframe mode */
 html.wireframe .wf-badge {
   box-shadow:
-    0 0.5px 0.5px rgba(30, 35, 60, 0.08),
-    0 1px 2px rgba(30, 35, 60, 0.06);
+    0 0.5px 0.5px rgba(26, 27, 30, 0.08),
+    0 1px 2px rgba(26, 27, 30, 0.06);
 }
 
 /* Wobble radius inherited from parent; no filter to keep text crisp */
@@ -487,8 +487,8 @@ html.wireframe[data-wf-fidelity="polished"] img {
 /* Light contact shadow on active tab in wireframe mode */
 html.wireframe .wf-tabs {
   box-shadow:
-    0 1px 2px rgba(30, 35, 60, 0.06),
-    0 2px 4px rgba(30, 35, 60, 0.04);
+    0 1px 2px rgba(26, 27, 30, 0.06),
+    0 2px 4px rgba(26, 27, 30, 0.04);
 }
 
 /* --- Section Utilities --------------------------------------------------- */
@@ -1341,3 +1341,493 @@ html.wireframe[data-wf-fidelity="napkin"] .btn-ghost:hover {
 .wf-ds-accordion-body.open {
   display: block;
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   Wave 3 back-port — net-new shared components
+   Wizard help column · Intelligence signal layer · AI nudge callout
+   All colors via Nib design tokens.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* ── Wizard help column ───────────────────────────────────────────────
+   Companion to core/proto-wizard-help.js. A 2-state aside that sits
+   alongside a wizard form: a quiet helper card (default) or a pre-seeded
+   AI chat thread (active). proto-wizard-help.js flips data-help-state. */
+.wf-wizard-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  align-items: start;
+}
+.wf-wizard-form-col { min-width: 0; }
+.wf-wizard-help-col {
+  position: sticky;
+  top: 76px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+@media (max-width: 980px) {
+  .wf-wizard-grid { grid-template-columns: 1fr; }
+  .wf-wizard-help-col { position: static; max-height: none; }
+}
+
+/* Default state — quiet helper card + ask field */
+.wf-wizard-help-card {
+  border: 1px solid var(--wf-tint);
+  border-radius: 8px;
+  background: var(--wf-white);
+  overflow: hidden;
+}
+.wf-wizard-help-hd {
+  padding: 12px 16px;
+  background: var(--wf-canvas);
+  border-bottom: 1px solid var(--wf-tint);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wf-wizard-help-hd-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--wf-ink);
+  letter-spacing: 0.02em;
+}
+.wf-wizard-help-bd { padding: 14px 16px; }
+.wf-wizard-help-bd p {
+  font-size: 12px;
+  color: var(--wf-text);
+  line-height: 1.55;
+  margin: 0 0 10px;
+}
+.wf-wizard-help-suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wf-wizard-help-suggestion {
+  font-size: 11px;
+  color: var(--wf-accent);
+  background: var(--wf-canvas);
+  border: 1px solid var(--wf-tint);
+  border-radius: 14px;
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  line-height: 1.4;
+  transition: background 0.12s, border-color 0.12s;
+}
+.wf-wizard-help-suggestion:hover {
+  background: var(--wf-accent-lt);
+  border-color: var(--wf-accent);
+}
+.wf-wizard-help-ask {
+  border: 1px solid var(--wf-tint);
+  border-radius: 8px;
+  background: var(--wf-white);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wf-wizard-help-ask-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--wf-ink);
+  letter-spacing: 0.02em;
+}
+.wf-wizard-help-ask-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.wf-wizard-help-ask-textarea {
+  flex: 1;
+  width: 100%;
+  border: 1px solid var(--wf-line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--wf-ink);
+  background: var(--wf-white);
+  resize: vertical;
+  min-height: 56px;
+}
+.wf-wizard-help-ask-textarea:focus {
+  outline: none;
+  border-color: var(--wf-accent);
+}
+.wf-wizard-help-ask-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.wf-wizard-help-ask-submit {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background: var(--wf-accent);
+  color: var(--wf-white);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Active state — chat thread replaces helper card */
+[data-help-state="active"] .wf-wizard-help-card { display: none; }
+[data-help-state="default"] .wf-wizard-help-thread { display: none; }
+.wf-wizard-help-thread {
+  border: 1px solid var(--wf-tint);
+  border-radius: 8px;
+  background: var(--wf-white);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 320px;
+}
+.wf-wizard-help-thread-hd {
+  padding: 10px 14px;
+  background: var(--wf-accent-fill);
+  border-bottom: 1px solid var(--wf-purple);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.wf-wizard-help-thread-hd-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--wf-purple);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.wf-wizard-help-thread-hd-close {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--wf-purple);
+  cursor: pointer;
+  padding: 0 4px;
+  font-family: inherit;
+}
+.wf-wizard-help-thread-bd {
+  padding: 14px 14px 8px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+}
+.wf-wizard-help-msg-user {
+  align-self: flex-end;
+  max-width: 90%;
+  background: var(--wf-ink);
+  color: var(--wf-white);
+  padding: 8px 12px;
+  border-radius: 12px 12px 4px 12px;
+  line-height: 1.5;
+}
+.wf-wizard-help-msg-af {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  max-width: 100%;
+}
+.wf-wizard-help-msg-af-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--wf-purple);
+  color: var(--wf-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.wf-wizard-help-msg-af-bubble {
+  flex: 1;
+  background: var(--wf-accent-fill);
+  border: 1px solid var(--wf-tint);
+  border-radius: 12px 12px 12px 4px;
+  padding: 8px 12px;
+  color: var(--wf-text);
+  line-height: 1.5;
+}
+.wf-wizard-help-msg-af-bubble strong { color: var(--wf-purple); }
+.wf-wizard-help-thread-composer {
+  border-top: 1px solid var(--wf-tint);
+  padding: 8px 10px;
+  display: flex;
+  gap: 6px;
+  background: var(--wf-canvas);
+}
+.wf-wizard-help-thread-composer input {
+  flex: 1;
+  border: 1px solid var(--wf-line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: inherit;
+  font-size: 12px;
+}
+.wf-wizard-help-thread-composer input:focus {
+  outline: none;
+  border-color: var(--wf-accent);
+}
+.wf-wizard-help-thread-composer button {
+  background: var(--wf-accent);
+  color: var(--wf-white);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* ── Intelligence signal layer ────────────────────────────────────────
+   Companion to core/proto-signals.js. A dark collapsible strip
+   (wf-signal-bar) that expands into a panel of insight cards
+   (wf-signal-panel). 4 generic signal types: program / risk /
+   opportunity / insight. The dark base reads as a distinct
+   "intelligence" surface against the light page chrome. */
+.wf-signal-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px;
+  height: 36px;
+  background: var(--wf-ink);
+  border-bottom: 1px solid var(--wf-text);
+  font-size: 12px;
+  color: var(--wf-tint);
+  cursor: pointer;
+  user-select: none;
+  transition: filter 0.15s;
+}
+.wf-signal-bar:hover { filter: brightness(1.25); }
+.wf-signal-bar-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--wf-line);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.wf-signal-bar-label .wf-signal-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+.wf-signal-pills {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  overflow: hidden;
+}
+.wf-signal-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.wf-signal-pill.program     { color: var(--wf-accent); }
+.wf-signal-pill.risk        { color: var(--wf-amber); }
+.wf-signal-pill.insight     { color: var(--wf-line); }
+.wf-signal-pill.opportunity { color: var(--wf-green); }
+.wf-signal-bar-toggle {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--wf-line);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+}
+
+.wf-signal-panel {
+  display: none;
+  background: var(--wf-ink);
+  border-bottom: 2px solid var(--wf-text);
+  padding: 16px 24px;
+}
+.wf-signal-panel.open { display: block; }
+.wf-signal-panel-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.wf-signal-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--wf-line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.wf-signal-panel-context {
+  font-size: 11px;
+  color: var(--wf-muted);
+}
+.wf-signal-panel-close {
+  font-size: 11px;
+  color: var(--wf-line);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.wf-signal-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+.wf-signal-card {
+  border-radius: 6px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+.wf-signal-card.program     { border-left: 3px solid var(--wf-accent); }
+.wf-signal-card.risk        { border-left: 3px solid var(--wf-amber); }
+.wf-signal-card.insight     { border-left: 3px solid var(--wf-line); }
+.wf-signal-card.opportunity { border-left: 3px solid var(--wf-green); }
+
+.wf-signal-card-type {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.wf-signal-card.program     .wf-signal-card-type { color: var(--wf-accent); }
+.wf-signal-card.risk        .wf-signal-card-type { color: var(--wf-amber); }
+.wf-signal-card.insight     .wf-signal-card-type { color: var(--wf-line); }
+.wf-signal-card.opportunity .wf-signal-card-type { color: var(--wf-green); }
+
+.wf-signal-card-headline {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wf-white);
+  line-height: 1.3;
+}
+.wf-signal-card-body {
+  font-size: 12px;
+  color: var(--wf-tint);
+  line-height: 1.5;
+}
+.wf-signal-card-metric {
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  margin: 2px 0;
+  color: var(--wf-white);
+}
+.wf-signal-card-metric-label {
+  font-size: 10px;
+  color: var(--wf-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.wf-signal-card-action {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.wf-signal-card.program     .wf-signal-card-action { color: var(--wf-accent); }
+.wf-signal-card.risk        .wf-signal-card-action { color: var(--wf-amber); }
+.wf-signal-card.insight     .wf-signal-card-action { color: var(--wf-line); }
+.wf-signal-card.opportunity .wf-signal-card-action { color: var(--wf-green); }
+.wf-signal-card-action:hover { text-decoration: underline; }
+
+/* ── AI nudge callout (.wf-af-callout) ────────────────────────────────
+   A generic contextual AI nudge mid-flow — duplicate detection,
+   missing-field hints, recommended next steps, etc. Icon + body +
+   optional action buttons. Tinted with the purple "AI" token. */
+.wf-af-callout {
+  margin: 16px 0;
+  background: var(--wf-accent-fill);
+  border: 1.5px solid var(--wf-purple);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: var(--wf-text);
+  line-height: 1.5;
+}
+.wf-af-callout .wf-af-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.wf-af-callout strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--wf-purple);
+  font-size: 13px;
+}
+.wf-af-callout-body { flex: 1; }
+.wf-af-callout-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.wf-af-callout-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--wf-purple);
+  background: var(--wf-white);
+  color: var(--wf-purple);
+  cursor: pointer;
+  font-family: inherit;
+  text-decoration: none;
+}
+.wf-af-callout-btn--primary {
+  background: var(--wf-purple);
+  border-color: var(--wf-purple);
+  color: var(--wf-white);
+}
+.wf-af-callout-btn:hover { filter: brightness(1.08); }

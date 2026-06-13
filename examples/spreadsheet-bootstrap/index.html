@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spreadsheet Bootstrap — Nib Example</title>
+  <link rel="stylesheet" href="../../core/proto-tokens.css">
+  <link rel="stylesheet" href="../../core/proto-core.css">
+  <link rel="stylesheet" href="../../core/proto-components.css">
+  <link rel="stylesheet" href="../../core/proto-chrome.css">
+  <link rel="stylesheet" href="../../core/proto-blueprint.css">
+  <link rel="stylesheet" href="../../core/proto-feedback.css">
+  <link rel="stylesheet" href="data/tokens.css">
+</head>
+<body>
+  <main class="wf-main" style="padding:24px;max-width:960px;margin:0 auto;">
+    <h1 id="proj-title" style="margin:0 0 4px;"></h1>
+    <p style="color:var(--wf-muted);margin:0 0 24px;">
+      Generated from <code>example.xlsx</code> via <code>nib-ingest</code>.
+      Open the workbook, edit any tab, run <code>node tools/nib-ingest.js examples/spreadsheet-bootstrap/example.xlsx --out examples/spreadsheet-bootstrap</code>, refresh.
+    </p>
+
+    <section>
+      <h2>Pages</h2>
+      <ul id="pages-list"></ul>
+    </section>
+
+    <section>
+      <h2>Personas</h2>
+      <div id="personas-list" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));"></div>
+    </section>
+
+    <section>
+      <h2>Blueprint hierarchy</h2>
+      <p style="color:var(--wf-muted);">
+        The leadership Overview view. Click a blueprint to see its summary card; child blueprints drill in.
+      </p>
+      <div id="blueprint-tree"></div>
+    </section>
+
+    <section>
+      <h2>Stories</h2>
+      <ul id="stories-list"></ul>
+    </section>
+
+    <section>
+      <h2>Initiatives (registry)</h2>
+      <ul id="initiatives-list"></ul>
+    </section>
+  </main>
+
+  <script src="data/wireframe-config.js"></script>
+  <script src="data/sections.js"></script>
+  <script src="data/personas.js"></script>
+  <script src="data/stories.js"></script>
+  <script src="data/blueprints/_index.js"></script>
+  <script src="data/blueprints/program.js"></script>
+  <script src="data/blueprints/deal-reg.js"></script>
+  <script src="data/blueprints/onboarding.js"></script>
+  <script src="data/registries/initiatives.js"></script>
+
+  <script>
+    document.getElementById('proj-title').textContent = WIREFRAME_CONFIG.title;
+    document.title = WIREFRAME_CONFIG.title;
+
+    var pagesList = document.getElementById('pages-list');
+    SECTIONS.forEach(function (s) {
+      var li = document.createElement('li');
+      li.innerHTML = '<strong>' + s.label + '</strong>';
+      var sub = document.createElement('ul');
+      s.items.forEach(function (it) {
+        var sli = document.createElement('li');
+        sli.textContent = it.label + ' (' + it.file + ')';
+        sub.appendChild(sli);
+      });
+      li.appendChild(sub);
+      pagesList.appendChild(li);
+    });
+
+    var personasEl = document.getElementById('personas-list');
+    Object.keys(PERSONAS).forEach(function (id) {
+      var p = PERSONAS[id];
+      var card = document.createElement('div');
+      card.className = 'wf-card';
+      card.style.padding = '12px';
+      card.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<div style="width:32px;height:32px;border-radius:50%;background:' + (p.color || '#888') +
+            ';color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;">' +
+            (p.initials || '') + '</div>' +
+          '<div><div style="font-weight:600;">' + p.label + '</div>' +
+          '<div style="color:var(--wf-muted);font-size:12px;">' + (p.role || '') + '</div></div>' +
+        '</div>' +
+        '<p style="margin:8px 0 0;font-size:13px;">' + (p.summary || '') + '</p>';
+      personasEl.appendChild(card);
+    });
+
+    var treeEl = document.getElementById('blueprint-tree');
+    function renderTreeNode(node, depth) {
+      var bp = NIB_BLUEPRINTS[node.id];
+      if (!bp) return;
+      var div = document.createElement('div');
+      div.style.marginLeft = (depth * 24) + 'px';
+      div.style.padding = '12px';
+      div.style.border = '1px solid var(--wf-line)';
+      div.style.borderRadius = '6px';
+      div.style.marginBottom = '8px';
+      div.style.background = '#fff';
+      div.innerHTML =
+        '<div style="font-weight:600;">' + (bp.meta.title || node.id) + '</div>' +
+        (bp.meta.summary ? '<p style="margin:4px 0 8px;color:var(--wf-text);font-size:13px;">' + bp.meta.summary + '</p>' : '') +
+        (bp.meta.whatChanges && bp.meta.whatChanges.length
+          ? '<ul style="margin:0;padding-left:18px;font-size:12px;color:var(--wf-muted);">' +
+              bp.meta.whatChanges.map(function (c) { return '<li>' + c + '</li>'; }).join('') +
+            '</ul>'
+          : '') +
+        '<div style="margin-top:6px;font-size:11px;color:var(--wf-muted);">' +
+          'Owner: ' + (bp.meta.ownerPersonaId || '—') + ' · Status: ' + (bp.meta.status || '—') +
+        '</div>';
+      treeEl.appendChild(div);
+      (node.children || []).forEach(function (c) { renderTreeNode(c, depth + 1); });
+    }
+    NIB_BLUEPRINT_INDEX.tree.forEach(function (n) { renderTreeNode(n, 0); });
+
+    var storiesEl = document.getElementById('stories-list');
+    DESIGN_STORIES.forEach(function (s) {
+      var li = document.createElement('li');
+      li.innerHTML = '<strong>' + s.title + '</strong> ' +
+        '<span style="color:var(--wf-muted);font-size:12px;">[' + s.kind + (s.status ? ' · ' + s.status : '') + ']</span>' +
+        (s.summary ? '<br><span style="font-size:13px;">' + s.summary + '</span>' : '');
+      storiesEl.appendChild(li);
+    });
+    Object.keys(STORY_TITLES).forEach(function (id) {
+      if (DESIGN_STORIES.find(function (d) { return d.id === id; })) return;
+      var li = document.createElement('li');
+      li.style.color = 'var(--wf-muted)';
+      li.style.fontSize = '13px';
+      li.textContent = id + ' — ' + STORY_TITLES[id] + ' (jtbd)';
+      storiesEl.appendChild(li);
+    });
+
+    var initEl = document.getElementById('initiatives-list');
+    var inits = (window.NIB_REGISTRIES && NIB_REGISTRIES.initiatives) || {};
+    Object.keys(inits).forEach(function (id) {
+      var i = inits[id];
+      var li = document.createElement('li');
+      li.innerHTML = '<strong>' + (i.title || id) + '</strong> ' +
+        '<span style="color:var(--wf-muted);">— ' + (i.status || '') + ', owner: ' + (i.owner || '—') + '</span>' +
+        (i.summary ? '<br><span style="font-size:13px;">' + i.summary + '</span>' : '');
+      initEl.appendChild(li);
+    });
+  </script>
+</body>
+</html>

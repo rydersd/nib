@@ -29,6 +29,11 @@ var WF_CONFIG = Object.assign({
   emailPrefix: '[WF]',
   emailFooter: 'Sent from wireframe prototype',
   emailRecipient: '',
+  // When set, wfFbSubmit POSTs JSON to this endpoint instead of opening
+  // mailto:. The matching Cloudflare Worker lives in
+  // examples/cloudflare-worker/ and creates a GitHub issue (optionally
+  // with a screenshot uploaded to R2). Leave blank to keep mailto behavior.
+  feedbackEndpoint: '',
   defaultTheme: 'nib',
   themes: {},
   logo: ''
@@ -117,16 +122,22 @@ function findPage(file) {
 }
 
 /**
- * Format current date/time for timestamp display
- * E.g., "2026-03-04 14:32"
+ * Format last-modified date for timestamp display.
+ * E.g., "2026-03-04 14:32".
+ *
+ * Uses document.lastModified — this is the HTML's last-edited stamp from
+ * the server, not the user's view time. That makes the timestamp meaningful
+ * for "did the prototype change since I last looked?" review questions.
+ * Falls back to "now" when lastModified is unavailable.
  */
 function formatTimestamp() {
-  var now = new Date();
-  var year = now.getFullYear();
-  var month = String(now.getMonth() + 1).padStart(2, '0');
-  var day = String(now.getDate()).padStart(2, '0');
-  var hours = String(now.getHours()).padStart(2, '0');
-  var mins = String(now.getMinutes()).padStart(2, '0');
+  var src = document.lastModified ? new Date(document.lastModified) : new Date();
+  if (isNaN(src.getTime())) src = new Date();
+  var year = src.getFullYear();
+  var month = String(src.getMonth() + 1).padStart(2, '0');
+  var day = String(src.getDate()).padStart(2, '0');
+  var hours = String(src.getHours()).padStart(2, '0');
+  var mins = String(src.getMinutes()).padStart(2, '0');
   return year + '-' + month + '-' + day + ' ' + hours + ':' + mins;
 }
 
@@ -148,11 +159,40 @@ function buildBreadcrumbs(file) {
       section.label +
     '</a>' +
     '<span class="wf-ctx-breadcrumb-sep">›</span>' +
-    '<span class="wf-ctx-breadcrumb-current">' +
+    '<span class="wf-ctx-breadcrumb-current" onclick="wfCopyDeepLink()" ' +
+      'title="Click to copy a deep link to this page" role="button" tabindex="0" ' +
+      'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();wfCopyDeepLink();}">' +
       item.label +
     '</span>'
   );
 }
+
+/**
+ * Copy the current page URL (as an absolute deep link) to the clipboard
+ * and toast confirmation. Bound to the current-page breadcrumb crumb.
+ */
+function wfCopyDeepLink() {
+  var url = window.location.href;
+  function done() { wfToast('Link copied'); }
+  function fail() { wfToast('Could not copy link'); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(done, fail);
+    return;
+  }
+  // Legacy fallback for older browsers — most still support execCommand.
+  try {
+    var ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    done();
+  } catch (e) { fail(); }
+}
+window.wfCopyDeepLink = wfCopyDeepLink;
 
 /**
  * Detect the surface type for the current page from SECTIONS
@@ -239,6 +279,26 @@ function buildContextBar() {
   var file = currentFile();
   var timestamp = formatTimestamp();
 
+  // Recent-changes badge — counts changelog entries < 14 days old.
+  var wfClRecentBadge = '';
+  (function () {
+    var entries = (typeof wfReadChangelog === 'function') ? wfReadChangelog() : [];
+    var RECENT_DAYS = 14;
+    var recent = 0;
+    for (var i = 0; i < entries.length; i++) {
+      var t = new Date(entries[i].date).getTime();
+      if (!isNaN(t) && (Date.now() - t) < RECENT_DAYS * 864e5) recent++;
+    }
+    if (recent > 0) {
+      wfClRecentBadge =
+        '<span class="wf-ctx-changelog-badge" ' +
+        'onclick="wfDnOpen();wfDnSwitchTab(\'changelog\');" ' +
+        'title="' + recent + ' change' + (recent > 1 ? 's' : '') +
+        ' in the last ' + RECENT_DAYS + ' days — click to view">' +
+        recent + ' change' + (recent > 1 ? 's' : '') + '</span>';
+    }
+  })();
+
   var contextBarHTML = (
     '<div class="wf-ctx-bar">' +
       '<div class="wf-ctx-inner">' +
@@ -254,6 +314,7 @@ function buildContextBar() {
         '</div>' +
         '<div class="wf-ctx-right">' +
           '<span class="wf-ctx-timestamp">' + timestamp + '</span>' +
+          wfClRecentBadge +
           '<button class="wf-ctx-btn" id="wf-story-mode-btn" onclick="wfStoryModeToggle()" title="Story mode — guided scenario walkthroughs">📖 Stories</button>' +
           '<button class="wf-ctx-btn" onclick="wfDnToggle()" title="Show notes">📋 Notes</button>' +
           '<button class="wf-ctx-btn wf-ctx-feedback-btn" onclick="wfFbOpen()" title="Send feedback on this page">💬 Feedback</button>' +
@@ -423,12 +484,14 @@ function buildDesignNotesPanel() {
       '<button class="wf-dn-tab" role="tab" aria-selected="false" aria-controls="wf-dn-tab-design" id="wf-dn-tab-btn-design" onclick="wfDnSwitchTab(\'design\')">Design</button>' +
       '<button class="wf-dn-tab" role="tab" aria-selected="false" aria-controls="wf-dn-tab-impl" id="wf-dn-tab-btn-impl" onclick="wfDnSwitchTab(\'impl\')">Technical</button>' +
       '<button class="wf-dn-tab" role="tab" aria-selected="false" aria-controls="wf-dn-tab-reviews" id="wf-dn-tab-btn-reviews" onclick="wfDnSwitchTab(\'reviews\')">Reviews</button>' +
+      '<button class="wf-dn-tab" role="tab" aria-selected="false" aria-controls="wf-dn-tab-changelog" id="wf-dn-tab-btn-changelog" onclick="wfDnSwitchTab(\'changelog\')">Changelog</button>' +
     '</div>' +
     '<div class="wf-dn-body" id="wf-dn-body">' +
       '<div class="wf-dn-tab-content active" id="wf-dn-tab-context" role="tabpanel" aria-labelledby="wf-dn-tab-btn-context"></div>' +
       '<div class="wf-dn-tab-content" id="wf-dn-tab-design" role="tabpanel" aria-labelledby="wf-dn-tab-btn-design"></div>' +
       '<div class="wf-dn-tab-content" id="wf-dn-tab-impl" role="tabpanel" aria-labelledby="wf-dn-tab-btn-impl"></div>' +
       '<div class="wf-dn-tab-content" id="wf-dn-tab-reviews" role="tabpanel" aria-labelledby="wf-dn-tab-btn-reviews"></div>' +
+      '<div class="wf-dn-tab-content" id="wf-dn-tab-changelog" role="tabpanel" aria-labelledby="wf-dn-tab-btn-changelog"></div>' +
     '</div>';
 
   document.body.appendChild(overlay);
@@ -471,6 +534,18 @@ function wfDnToggle() {
   } else {
     wfDnOpen();
   }
+}
+
+/**
+ * Read the optional per-page changelog: a <script id="wf-changelog"
+ * type="application/json"> block holding an array of { date, note }.
+ * Returns [] when absent or malformed.
+ */
+function wfReadChangelog() {
+  var el = document.querySelector('script#wf-changelog[type="application/json"]');
+  if (!el) return [];
+  try { return JSON.parse(el.textContent) || []; }
+  catch (e) { return []; }
 }
 
 /**
@@ -582,6 +657,28 @@ function wfDnOpen() {
   var reviewsTab = document.getElementById('wf-dn-tab-reviews');
   if (reviewsTab) {
     wfReviewPopulateTab(reviewsTab);
+  }
+
+  // Populate Changelog tab — per-page JSON, newest first.
+  var changelogTab = document.getElementById('wf-dn-tab-changelog');
+  if (changelogTab) {
+    var clEntries = wfReadChangelog();
+    if (!clEntries.length) {
+      changelogTab.innerHTML =
+        '<p class="wf-dn-placeholder">No changelog entries for this page.</p>';
+    } else {
+      clEntries.sort(function (a, b) {
+        return String(b.date).localeCompare(String(a.date));
+      });
+      changelogTab.innerHTML = clEntries.map(function (e) {
+        var date = String(e.date || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        var note = String(e.note || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return '<div class="wf-dn-changelog-entry">' +
+          '<span class="wf-dn-changelog-date">' + date + '</span>' +
+          '<span class="wf-dn-changelog-note">' + note + '</span>' +
+        '</div>';
+      }).join('');
+    }
   }
 
   panel.classList.add('open');
@@ -1105,7 +1202,8 @@ function buildFeedbackPanel() {
               '<img id="wf-fb-img-preview" class="wf-fb-img-preview" alt="Screenshot preview" style="display:none">' +
             '</div>' +
             '<div class="wf-fb-img-actions">' +
-              '<button type="button" class="wf-fb-paste-btn" onclick="wfFbPasteClipboard()">\u2318V Paste screenshot</button>' +
+              '<button type="button" class="wf-fb-paste-btn" onclick="wfFbCaptureScreen()" id="wf-fb-capture-btn">\ud83d\udcf7 Capture this page</button>' +
+              '<button type="button" class="wf-fb-paste-btn" onclick="wfFbPasteClipboard()">\u2318V Paste</button>' +
               '<button type="button" class="wf-fb-clear-btn" id="wf-fb-clear-btn" ' +
                 'onclick="wfFbClearImage()" style="display:none">\u00d7 Remove</button>' +
             '</div>' +
@@ -1217,10 +1315,86 @@ function wfFbPasteClipboard() {
 }
 
 /**
- * Submit feedback via mailto with page context
+ * Capture the current page as a PNG and stash it in _wfFbScreenshot.
+ * Uses html2canvas, lazy-loaded from jsdelivr on first use (~50 KB).
+ * The feedback overlay is hidden during capture so it doesn't appear
+ * in the snapshot.
+ */
+var _wfHtml2canvasPromise = null;
+function wfFbLoadHtml2Canvas() {
+  if (typeof window.html2canvas === 'function') {
+    return Promise.resolve(window.html2canvas);
+  }
+  if (_wfHtml2canvasPromise) return _wfHtml2canvasPromise;
+  _wfHtml2canvasPromise = new Promise(function(resolve, reject) {
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    s.async = true;
+    s.onload = function() {
+      if (typeof window.html2canvas === 'function') resolve(window.html2canvas);
+      else reject(new Error('html2canvas loaded but global not available'));
+    };
+    s.onerror = function() { reject(new Error('Failed to load html2canvas from CDN')); };
+    document.head.appendChild(s);
+  });
+  return _wfHtml2canvasPromise;
+}
+
+function wfFbCaptureScreen() {
+  var btn = document.getElementById('wf-fb-capture-btn');
+  var origLabel = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Capturing…'; btn.disabled = true; }
+  var panel = document.getElementById('wf-fb-overlay');
+  var prevDisplay = panel ? panel.style.display : '';
+  if (panel) panel.style.display = 'none';
+
+  wfFbLoadHtml2Canvas()
+    .then(function(h2c) {
+      return new Promise(function(res) { setTimeout(function() { res(h2c); }, 80); });
+    })
+    .then(function(h2c) {
+      return h2c(document.body, {
+        backgroundColor: '#ffffff',
+        scale: Math.min(window.devicePixelRatio || 1, 2),
+        logging: false,
+        useCORS: true,
+        allowTaint: false
+      });
+    })
+    .then(function(canvas) {
+      if (panel) panel.style.display = prevDisplay;
+      _wfFbScreenshot = canvas.toDataURL('image/png');
+      var preview  = document.getElementById('wf-fb-img-preview');
+      var hint     = document.getElementById('wf-fb-img-drop-text');
+      var clearBtn = document.getElementById('wf-fb-clear-btn');
+      if (preview)  { preview.src = _wfFbScreenshot; preview.style.display = ''; }
+      if (hint)     { hint.style.display = 'none'; }
+      if (clearBtn) { clearBtn.style.display = ''; }
+      if (btn)      { btn.textContent = origLabel; btn.disabled = false; }
+      wfToast('Captured ✓');
+    })
+    .catch(function(err) {
+      if (panel) panel.style.display = prevDisplay;
+      if (btn)   { btn.textContent = origLabel; btn.disabled = false; }
+      console.warn('[feedback] capture failed:', err);
+      wfToast('Capture failed — try Paste or upload');
+    });
+}
+
+/**
+ * Submit feedback. Two modes, selected by WF_CONFIG.feedbackEndpoint:
+ *   - Endpoint set: POST JSON to the endpoint (e.g. a Cloudflare Worker
+ *     that creates a GitHub issue). Payload includes screenshot_base64
+ *     when a screenshot has been captured/pasted. Falls back to mailto
+ *     on network or server error (when emailRecipient is also set) so
+ *     feedback is never dropped.
+ *   - Endpoint empty: open a mailto: with full page context.
+ *
+ * See examples/cloudflare-worker/ for a reference Worker implementation
+ * and docs/Feedback.md for endpoint / payload shape.
  */
 function wfFbSubmit(e) {
-  e.preventDefault();
+  if (e && e.preventDefault) e.preventDefault();
   var typeEl = document.querySelector('input[name="wf-fb-type"]:checked');
   var descEl = document.getElementById('wf-fb-desc');
 
@@ -1228,6 +1402,72 @@ function wfFbSubmit(e) {
   var desc = descEl ? descEl.value.trim() : '';
   if (!desc) { if (descEl) descEl.focus(); return; }
 
+  if (WF_CONFIG.feedbackEndpoint) {
+    _wfFbSubmitToEndpoint(type, desc, descEl);
+    return;
+  }
+  _wfFbSubmitViaMailto(type, desc, descEl);
+}
+
+function _wfFbResetForm(descEl) {
+  if (descEl) descEl.value = '';
+  wfFbClearImage();
+  var defaultType = document.querySelector('input[name="wf-fb-type"][value="question"]');
+  if (defaultType) defaultType.checked = true;
+}
+
+function _wfFbSubmitToEndpoint(type, desc, descEl) {
+  var file = currentFile();
+  var chip = document.querySelector('.wf-ctx-persona-chip, .persona-badge');
+  var payload = {
+    type: type,
+    description: desc,
+    page_url: window.location.href,
+    page_file: file,
+    persona: chip ? chip.textContent.trim() : '',
+    user_agent: navigator.userAgent,
+    // Data URL; Worker decodes and uploads to R2 when bound.
+    screenshot_base64: _wfFbScreenshot || null,
+    // When the user opens feedback from a blueprint canvas node, the canvas
+    // sets window._wfActiveNodeId so the Worker can label the issue node:<id>.
+    node_id: (typeof window._wfActiveNodeId === 'string') ? window._wfActiveNodeId : ''
+  };
+
+  wfToast('Sending…');
+
+  fetch(WF_CONFIG.feedbackEndpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.text().then(function(txt) {
+          throw new Error('HTTP ' + res.status + ': ' + txt.slice(0, 200));
+        });
+      }
+      return res.json();
+    })
+    .then(function(json) {
+      if (json && json.issue_number) {
+        wfToast('Issue #' + json.issue_number + ' created ✓');
+      } else {
+        wfToast('Feedback sent ✓');
+      }
+      _wfFbResetForm(descEl);
+      setTimeout(wfFbClose, 600);
+    })
+    .catch(function(err) {
+      console.warn('[feedback] endpoint failed, falling back to mailto:', err);
+      if (WF_CONFIG.emailRecipient) {
+        _wfFbSubmitViaMailto(type, desc, descEl);
+      } else {
+        wfToast('Could not send feedback. Please try again later.');
+      }
+    });
+}
+
+function _wfFbSubmitViaMailto(type, desc, descEl) {
   var context = wfFbPageContext();
   var typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
   var file = currentFile();
@@ -1248,7 +1488,6 @@ function wfFbSubmit(e) {
     encodeURIComponent(subject) + '&body=' +
     encodeURIComponent(bodyParts.join('\n'));
 
-  // If we have a screenshot, copy it to clipboard so user can paste into email
   if (_wfFbScreenshot && navigator.clipboard && navigator.clipboard.write) {
     fetch(_wfFbScreenshot)
       .then(function(r) { return r.blob(); })
@@ -1259,7 +1498,7 @@ function wfFbSubmit(e) {
       })
       .then(function() {
         window.open(mailtoUrl, '_blank');
-        wfToast('Screenshot copied to clipboard — paste into email with \u2318V');
+        wfToast('Screenshot copied to clipboard — paste into email with ⌘V');
       })
       .catch(function() {
         window.open(mailtoUrl, '_blank');
@@ -1268,13 +1507,8 @@ function wfFbSubmit(e) {
     window.open(mailtoUrl, '_blank');
   }
 
-  // Reset form
-  if (descEl) descEl.value = '';
-  wfFbClearImage();
-  var defaultType = document.querySelector('input[name="wf-fb-type"][value="question"]');
-  if (defaultType) defaultType.checked = true;
-
-  wfToast('Feedback sent \u2713');
+  _wfFbResetForm(descEl);
+  wfToast('Feedback sent ✓');
   setTimeout(wfFbClose, 500);
 }
 

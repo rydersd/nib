@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" class="deck" data-role="deck">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck Title — Project Name</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="core/proto-deck.css">
+</head>
+<body>
+
+<nav class="slidenav" aria-label="Slides"></nav>
+<div class="kbd-hint">Use <kbd>↓</kbd> <kbd>↑</kbd> or <kbd>Space</kbd> · <kbd>E</kbd> exports SVG</div>
+
+<!-- Fluid scroll-deck: each .slide is a viewport-tall scroll-snap section.
+     Set data-deck-home="index.html" on <main> to add an "All slides →" link
+     to every slide header; omit it and no link is shown. -->
+<main class="slides">
+
+  <!-- ============ Cover ============ -->
+  <section class="slide cover" id="s1" data-title="Cover">
+    <div class="cover-stamp">
+      <span class="dot"></span>
+      <span>Deck Kind</span>
+      <span class="seq">№ 001</span>
+      <span class="dot"></span>
+      <span>Date or context</span>
+    </div>
+
+    <h1>The headline goes <span class="accent">here.</span></h1>
+
+    <p class="cover-deck">
+      A one-paragraph framing of what this deck covers and why it exists.
+      Keep it to two or three sentences — the cover sets the room, the
+      content slides do the work.
+    </p>
+
+    <div class="cover-mark" aria-hidden="true"></div>
+
+    <div class="cover-meta">
+      <div><div class="k">Presenter</div><div class="v">Name</div></div>
+      <div><div class="k">Audience</div><div class="v">Who it's for</div></div>
+      <div><div class="k">Sections</div><div class="v">3 · keyboard navigable</div></div>
+      <div><div class="k">Cadence</div><div class="v">One-off or recurring</div></div>
+    </div>
+  </section>
+
+  <!-- ============ Content slide · single column ============ -->
+  <section class="slide" id="s2" data-title="The setup">
+    <div class="slide-body single">
+      <div class="slide-text">
+        <h2>One idea, <span class="accent">stated plainly.</span></h2>
+        <p class="lede">
+          The lede paragraph carries the slide. Make the claim, then support
+          it with a row of stats or a few cards below.
+        </p>
+        <div class="stats">
+          <div class="stat"><div class="num">12</div><div class="l">A measurable thing worth naming</div></div>
+          <div class="stat"><div class="num">3<sup>+</sup></div><div class="l">Another count, with a superscript qualifier</div></div>
+          <div class="stat"><div class="num">90%</div><div class="l">A percentage that frames the problem</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Content slide · two column with cards ============ -->
+  <section class="slide" id="s3" data-title="The detail">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>Break it into <span class="accent">a few parts.</span></h2>
+        <p>The left column carries the framing; the right column holds the
+          cards. Use <code>.input-card</code> for context, <code>.ask</code> for
+          requests, <code>.stuck</code> for blockers.</p>
+      </div>
+      <div class="inputs">
+        <div class="input-card">
+          <div class="who">First part</div>
+          <h4>A short card title</h4>
+          <p>Two or three sentences describing this part. Cards keep dense
+            content scannable.</p>
+        </div>
+        <div class="input-card">
+          <div class="who">Second part</div>
+          <h4>Another card title</h4>
+          <p>Add the <code>unresolved</code> class to flag a card that is still
+            open.</p>
+        </div>
+        <div class="input-card unresolved">
+          <div class="who">Third part</div>
+          <h4>An open question</h4>
+          <p>This card carries the <code>unresolved</code> badge in the corner.</p>
+        </div>
+        <div class="input-card">
+          <div class="who">Fourth part</div>
+          <h4>The last card</h4>
+          <p>Four cards fill the 2×2 grid; the layout reflows to one column on
+            narrow viewports.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Content slide · asks ============ -->
+  <section class="slide" id="s4" data-title="What we need">
+    <div class="slide-body">
+      <div class="slide-text">
+        <h2>What we're <span class="accent">asking for.</span></h2>
+        <p>If you only do one thing in this deck — do these.</p>
+      </div>
+      <div class="asks">
+        <div class="ask">
+          <div class="ask-eye">Ask 01 · Decision</div>
+          <h4>A scoped <span class="accent">request</span></h4>
+          <p>Describe exactly what you need decided and why it is blocking.</p>
+          <div class="ask-meta"><strong>Want by:</strong> a date · <strong>Blocks:</strong> what it unblocks</div>
+        </div>
+        <div class="ask">
+          <div class="ask-eye">Ask 02 · Review</div>
+          <h4>A second <span class="accent">request</span></h4>
+          <p>One ask per card keeps each one actionable.</p>
+          <div class="ask-meta"><strong>Want by:</strong> a date · <strong>Format:</strong> how</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Closing ============ -->
+  <section class="slide closing" id="s5" data-title="Closing">
+    <div class="slide-body single" style="justify-content:center;align-items:center;text-align:center;flex:1;">
+      <div class="closing-block">
+        <div class="ornament">
+          <span class="line"></span>
+          <span class="glyph">§</span>
+          <span class="line"></span>
+        </div>
+        <h2>That's the <span class="accent">deck.</span></h2>
+        <p>A closing line — the next step, the follow-up, or how to give feedback.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="core/proto-deck.js"></script>
+<!-- Optional: Nib context bar. Include project-data.js + proto-nav.js to add
+     the breadcrumb chrome; proto-deck.css restyles it for the deck. -->
+<!-- <script src="project-data.js"></script> -->
+<!-- <script src="core/proto-nav.js"></script> -->
+
+</body>
+</html>

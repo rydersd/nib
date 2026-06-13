@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Service Blueprint Canvas — Nib Example</title>
+  <link rel="stylesheet" href="../../core/proto-tokens.css">
+  <link rel="stylesheet" href="../../core/proto-core.css">
+  <link rel="stylesheet" href="../../core/blueprint/canvas.css">
+  <link rel="stylesheet" href="data/tokens.css">
+  <style>
+    html, body { margin: 0; height: 100%; background: var(--wf-canvas); }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+    .page-hd { padding: 12px 20px; background: #fff; border-bottom: 1px solid var(--wf-line); }
+    .page-hd h1 { margin: 0; font-size: 16px; font-weight: 700; color: var(--wf-ink); }
+    .page-hd p { margin: 2px 0 0; font-size: 12px; color: var(--wf-muted); }
+    #canvas { flex: 1; min-height: 0; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="page-hd">
+      <h1>Service Blueprint — Acme Partner Channel Program</h1>
+      <p>Edit lanes/phases/nodes inline · drag to move · ⌘Z undo · click ↳ Open to drill into a sub-blueprint · Export → XLSX to round-trip back to the workbook</p>
+    </div>
+    <div id="canvas"></div>
+  </div>
+
+  <!-- Generated data — produced by `node tools/nib-ingest.js example.xlsx --out .` -->
+  <script src="data/wireframe-config.js"></script>
+  <script src="data/personas.js"></script>
+  <script src="data/blueprints/_index.js"></script>
+  <script src="data/blueprints/program.js"></script>
+  <script src="data/blueprints/deal-reg.js"></script>
+  <script src="data/blueprints/onboarding.js"></script>
+
+  <script type="module">
+    import { mountCanvas, debounced, localStorageAdapter } from '../../core/blueprint/canvas.js';
+
+    mountCanvas(document.getElementById('canvas'), {
+      blueprints: window.NIB_BLUEPRINTS,
+      index: window.NIB_BLUEPRINT_INDEX,
+      rootFlowId: 'program',
+      adapter: debounced(localStorageAdapter('nib-bp-svc-example')),
+      // ── viewer features (additive, optional) ──────────────────────
+      search: true,         // text search + browser-find nav
+      filterRail: true,     // popover filter rail in the toolbar
+      personaKey: true,     // persona-key raise/knock-back panel
+      personas: window.PERSONAS,   // data-driven persona colours + labels
+    });
+  </script>
+</body>
+</html>

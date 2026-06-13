@@ -23,18 +23,21 @@
 
   // Auto-inject slide-header + section watermark on every non-cover/non-closing slide,
   // so per-review HTML stays slim (data-num + data-title + body content only).
-  const total = slides.length;
-  slides.forEach((s, i) => {
+  // Section numbering counts CONTENT slides only — decks without a closing
+  // (or without a cover) still number correctly. Without this, total-2 / raw
+  // index produces "Section 4 of 3" or "Section 0 of 5" on non-canonical decks.
+  const contentSlides = slides.filter(s =>
+    !s.classList.contains('cover') && !s.classList.contains('closing'));
+  const totalContent = contentSlides.length;
+  slides.forEach((s) => {
     if (s.classList.contains('cover') || s.classList.contains('closing')) return;
     // In fixed-canvas mode the chrome lives inside the scaled stage.
     const host = s.querySelector('.slide-stage') || s;
     // Skip if author already supplied a slide-header (allow override)
     if (host.querySelector('.slide-header')) return;
-    const num = s.dataset.num || String(i).padStart(2, '0');
+    const sectionNum = contentSlides.indexOf(s) + 1;
+    const num = s.dataset.num || String(sectionNum).padStart(2, '0');
     const title = s.dataset.title || '';
-    const oneBased = i + 1;
-    const totalContent = total - slides.filter(x => x.classList.contains('cover') || x.classList.contains('closing')).length;
-    const numForUser = num.replace(/^0/, '') || num;
 
     const watermark = document.createElement('div');
     watermark.className = 'slide-numwatermark';
@@ -45,10 +48,10 @@
     header.className = 'slide-header';
     header.innerHTML =
       '<div class="left">' +
-        '<span class="pill">' + num + ' / ' + String(total - 2).padStart(2, '0') + '</span>' +
+        '<span class="pill">' + num + ' / ' + String(totalContent).padStart(2, '0') + '</span>' +
         '<span class="dim">' + title + '</span>' +
       '</div>' +
-      '<div class="right">Section ' + (i) + ' of ' + (total - 2) + ' · <a href="index.html">All reviews →</a></div>';
+      '<div class="right">Section ' + sectionNum + ' of ' + totalContent + ' · <a href="index.html">All reviews →</a></div>';
 
     host.insertBefore(header, host.firstChild);
     host.insertBefore(watermark, host.firstChild);
@@ -82,6 +85,13 @@
 
   // Keyboard navigation — arrow keys, page up/down, space, home/end
   function currentIdx() {
+    // Prefer the IntersectionObserver-driven active dot — works correctly in
+    // .slides--fit mode where offsetTop is pre-transform (CSS-scaled) and the
+    // scrollY math no longer matches the visible slide.
+    if (dots.length) {
+      const i = dots.findIndex(d => d.classList.contains('active'));
+      if (i >= 0) return i;
+    }
     const top = window.scrollY + window.innerHeight / 2;
     let idx = 0;
     slides.forEach((s, i) => { if (s.offsetTop <= top) idx = i; });
@@ -92,7 +102,8 @@
     slides[idx].scrollIntoView({ behavior: 'smooth' });
   }
   document.addEventListener('keydown', (e) => {
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' ||
+        e.target.tagName === 'SELECT' || e.target.isContentEditable) return;
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || (e.key === ' ' && !e.shiftKey)) {
       e.preventDefault(); jump(currentIdx() + 1);
     } else if (e.key === 'ArrowUp' || e.key === 'PageUp' || (e.key === ' ' && e.shiftKey)) {
@@ -118,7 +129,8 @@
   // ============================================================
   if (document.querySelector('.slides--fit')) {
     const CW = 1600, CH = 900;
-    const barH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h'), 10) || 36;
+    const barHRaw = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h'), 10);
+    const barH = isNaN(barHRaw) ? 36 : barHRaw;
     const setScale = () => {
       const scale = Math.min(window.innerWidth / CW, (window.innerHeight - barH) / CH);
       document.documentElement.style.setProperty('--deck-scale', scale.toFixed(4));
@@ -190,10 +202,24 @@
       f.replaceWith(ph);
     });
 
-    // Inline all <style> blocks + fetched stylesheet contents so the SVG renders standalone
+    // Inline all <style> blocks + stylesheet contents so the SVG renders standalone.
+    // On file:// fetch() throws on local stylesheet hrefs — we fall back to
+    // reading rules directly from document.styleSheets (works same-origin
+    // without the network round-trip, throws on cross-origin which we swallow).
     const styleParts = [];
     document.querySelectorAll('style').forEach(s => styleParts.push(s.textContent));
     const sheetLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    let sheetsInlined = 0;
+    function readSheetRules(href) {
+      try {
+        for (const s of Array.from(document.styleSheets)) {
+          if (s.href === href) {
+            return Array.from(s.cssRules).map(r => r.cssText).join('\n');
+          }
+        }
+      } catch (_) { /* opaque cross-origin sheet — caller falls through */ }
+      return '';
+    }
     await Promise.all(sheetLinks.map(async link => {
       try {
         const r = await fetch(link.href);
@@ -207,10 +233,15 @@
             catch (_) { return m; }
           });
           styleParts.push(css);
+          sheetsInlined++;
+          return;
         }
-      } catch (_) { /* ignore */ }
+      } catch (_) { /* fetch failed (likely file://) — fall through to styleSheets */ }
+      const rules = readSheetRules(link.href);
+      if (rules) { styleParts.push(rules); sheetsInlined++; }
     }));
     const allCSS = styleParts.join('\n');
+    const exportIncomplete = sheetLinks.length > 0 && sheetsInlined === 0;
 
     // Build the SVG document. The width/height attribute are explicit so SVG viewers can size it.
     const xhtmlNS = 'http://www.w3.org/1999/xhtml';
@@ -237,7 +268,9 @@
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 1500);
 
-    showToast('Downloaded ' + fname);
+    showToast(exportIncomplete
+      ? 'Export incomplete — serve the deck over http:// for full styling'
+      : 'Downloaded ' + fname);
   }
 
   // Tiny toast for export feedback

@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Feedback Triage — Nib</title>
+<style>
+  /* ── Reset & Base ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink:     #1a1a1a;
+    --muted:   #6b7280;
+    --line:    #e5e7eb;
+    --surface: #f9fafb;
+    --bg:      #ffffff;
+    --accent:  #2563eb;
+    --red:     #dc2626;
+    --amber:   #d97706;
+    --green:   #16a34a;
+    --radius:  6px;
+    --shadow:  0 1px 4px rgba(0,0,0,.08), 0 0 0 1px rgba(0,0,0,.04);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    background: var(--surface);
+    min-height: 100vh;
+  }
+
+  /* ── Header ──────────────────────────────────────────────── */
+  .fr-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .fr-header-title {
+    font-weight: 600;
+    font-size: 15px;
+    flex: 1;
+  }
+  .fr-header-folder {
+    font-size: 12px;
+    color: var(--muted);
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .fr-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--red);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 1px 7px;
+    min-width: 20px;
+  }
+  .fr-badge--zero { background: var(--line); color: var(--muted); }
+
+  /* ── Buttons ─────────────────────────────────────────────── */
+  .fr-btn {
+    font-size: 12px;
+    font-family: inherit;
+    border-radius: var(--radius);
+    padding: 5px 12px;
+    cursor: pointer;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    transition: background .12s;
+    white-space: nowrap;
+  }
+  .fr-btn:hover { background: var(--surface); }
+  .fr-btn--primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .fr-btn--primary:hover { background: #1d4ed8; }
+  .fr-btn--sm { font-size: 11px; padding: 3px 8px; }
+
+  /* ── Connect Screen ──────────────────────────────────────── */
+  #fr-connect-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 24px;
+    text-align: center;
+    gap: 16px;
+  }
+  .fr-connect-icon { font-size: 40px; }
+  .fr-connect-head { font-size: 18px; font-weight: 600; }
+  .fr-connect-sub  { color: var(--muted); max-width: 380px; line-height: 1.6; }
+
+  /* ── Main content ────────────────────────────────────────── */
+  #fr-main {
+    display: none;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+    gap: 16px;
+    flex-direction: column;
+  }
+  #fr-main.visible { display: flex; }
+
+  /* ── Filter bar ──────────────────────────────────────────── */
+  .fr-filter-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .fr-filter-label { font-size: 12px; color: var(--muted); }
+  .fr-filter-btn {
+    font-size: 11px;
+    font-family: inherit;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .fr-filter-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+  /* ── Page card ───────────────────────────────────────────── */
+  .fr-page-card {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .fr-page-hd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+  .fr-page-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    flex: 1;
+  }
+  .fr-page-counts { font-size: 11px; color: var(--muted); }
+
+  /* ── Section label ───────────────────────────────────────── */
+  .fr-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    padding: 8px 14px 4px;
+  }
+
+  /* ── Feedback item ───────────────────────────────────────── */
+  .fr-item {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: 8px;
+    align-items: start;
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--line);
+    transition: background .1s;
+  }
+  .fr-item:last-child { border-bottom: none; }
+  .fr-item:hover { background: var(--surface); }
+  .fr-item--done { opacity: .55; }
+
+  .fr-item-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 1.5px solid var(--line);
+    background: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    transition: background .12s, border-color .12s;
+  }
+  .fr-item-check.done { background: var(--green); border-color: var(--green); color: #fff; }
+  .fr-item-check:hover { border-color: var(--green); }
+
+  .fr-item-body { min-width: 0; }
+  .fr-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+    flex-wrap: wrap;
+  }
+  .fr-type-badge {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--line);
+    color: var(--muted);
+  }
+  .fr-type-badge--issue { background: #fee2e2; color: #991b1b; }
+  .fr-type-badge--question { background: #ede9fe; color: #5b21b6; }
+  .fr-type-badge--note { background: #e0f2fe; color: #075985; }
+  .fr-sev {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .fr-sev--high   { color: var(--red); }
+  .fr-sev--medium { color: var(--amber); }
+  .fr-item-ts { font-size: 10px; color: var(--muted); }
+
+  .fr-item-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    word-break: break-word;
+  }
+
+  .fr-item-img {
+    margin-top: 6px;
+    max-width: 260px;
+    max-height: 140px;
+    border-radius: 4px;
+    border: 1px solid var(--line);
+    cursor: pointer;
+    display: block;
+    object-fit: cover;
+  }
+  .fr-item-img.expanded { max-width: 100%; max-height: none; }
+
+  /* ── Resolution row (how a done item was resolved) ──────── */
+  .fr-item-resolution {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+  }
+  .fr-res-badge {
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--accent);
+    border-radius: 3px;
+    padding: 1px 6px;
+    letter-spacing: .3px;
+  }
+  .fr-res-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  /* Agent annotation — written by watch shortcut */
+  .fr-agent-note {
+    margin-top: 5px;
+    padding: 5px 8px;
+    background: #f0f4ff;
+    border-left: 2px solid var(--accent);
+    border-radius: 0 4px 4px 0;
+    font-size: 11px;
+    color: #444;
+    white-space: pre-wrap;
+  }
+
+  /* ── Empty state ─────────────────────────────────────────── */
+  .fr-empty { padding: 24px 14px; color: var(--muted); font-size: 13px; font-style: italic; }
+
+  /* ── Toast ───────────────────────────────────────────────── */
+  #fr-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(8px);
+    background: var(--ink);
+    color: #fff;
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    opacity: 0;
+    transition: opacity .2s, transform .2s;
+    pointer-events: none;
+    z-index: 100;
+  }
+  #fr-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+  <link rel="stylesheet" href="wireframe.css">
+</head>
+<body>
+
+<!-- Header ─────────────────────────────────────────────────── -->
+<header class="fr-header" id="fr-header">
+  <span class="fr-header-title">Feedback Review</span>
+  <span class="fr-header-folder" id="fr-folder-name">Not connected</span>
+  <span class="fr-badge fr-badge--zero" id="fr-open-count">0 open</span>
+  <button class="fr-btn fr-btn--sm" id="fr-refresh-btn" onclick="frRefresh()" style="display:none">↻ Refresh</button>
+  <button class="fr-btn fr-btn--sm" id="fr-change-btn" onclick="frConnect()" style="display:none">📁 Change</button>
+</header>
+
+<!-- Connect screen ─────────────────────────────────────────── -->
+<div id="fr-connect-screen">
+  <div class="fr-connect-icon">📁</div>
+  <div class="fr-connect-head">Connect your feedback folder</div>
+  <div class="fr-connect-sub">Select the folder where your wireframe feedback JSON files are saved.
+    This is the same folder you connected inside any wireframe page.</div>
+  <button class="fr-btn fr-btn--primary" onclick="frConnect()">Choose folder…</button>
+</div>
+
+<!-- Main content ───────────────────────────────────────────── -->
+<div id="fr-main">
+  <div class="fr-filter-bar">
+    <span class="fr-filter-label">Show:</span>
+    <button class="fr-filter-btn active" data-filter="all"    onclick="frSetFilter('all')">All</button>
+    <button class="fr-filter-btn"        data-filter="open"   onclick="frSetFilter('open')">Open</button>
+    <button class="fr-filter-btn"        data-filter="done"   onclick="frSetFilter('done')">Done</button>
+  </div>
+  <div id="fr-pages"></div>
+</div>
+
+<div id="fr-toast"></div>
+
+<script>
+'use strict';
+var _frDir    = null;
+var _frFilter = 'all';
+var _frData   = []; // flat array of all items with page slug attached
+
+/* ── Connect ──────────────────────────────────────────────── */
+async function frConnect() {
+  if (!window.showDirectoryPicker) {
+    frToast('File System Access API not available in this browser');
+    return;
+  }
+  try {
+    _frDir = await window.showDirectoryPicker({ id: 'nib-feedback', mode: 'readwrite' });
+    document.getElementById('fr-connect-screen').style.display = 'none';
+    document.getElementById('fr-main').classList.add('visible');
+    document.getElementById('fr-refresh-btn').style.display = '';
+    document.getElementById('fr-change-btn').style.display  = '';
+    document.getElementById('fr-folder-name').textContent   = '📁 ' + _frDir.name;
+    await frWriteLastChecked();
+    await frLoad();
+  } catch (e) { /* cancelled */ }
+}
+
+/* ── Write timestamp ─────────────────────────────────────── */
+async function frWriteLastChecked() {
+  if (!_frDir) { return; }
+  try {
+    var fh  = await _frDir.getFileHandle('.agent-last-checked', { create: true });
+    var w   = await fh.createWritable();
+    await w.write(String(Date.now()));
+    await w.close();
+  } catch (e) { /* ignore */ }
+}
+
+/* ── Load all feedback from folder ─────────────────────────── */
+// Reads from {page}/feedback/ (open) and {page}/resolved/ (done) subfolders.
+// Stores _subFolder on each item so frToggle knows where to delete from.
+// Also reads legacy files directly in {page}/ for backward-compatibility.
+async function frLoad() {
+  if (!_frDir) { return; }
+  _frData = [];
+  try {
+    for await (var entry of _frDir.values()) {
+      if (entry.kind !== 'directory') { continue; }
+      var pageSlug = entry.name;
+      if (pageSlug.startsWith('.')) { continue; }
+      try {
+        var pageDir = await _frDir.getDirectoryHandle(pageSlug, { create: false });
+        // feedback/ subfolder — open items
+        try {
+          var fbDir = await pageDir.getDirectoryHandle('feedback', { create: false });
+          for await (var fe of fbDir.values()) {
+            if (fe.kind !== 'file' || !fe.name.endsWith('.json')) { continue; }
+            try {
+              var fbItem = JSON.parse(await (await fe.getFile()).text());
+              fbItem._pageSlug  = pageSlug;
+              fbItem._subFolder = 'feedback';
+              _frData.push(fbItem);
+            } catch (e) { }
+          }
+        } catch (e) { /* feedback/ not yet created */ }
+        // resolved/ subfolder — done items
+        try {
+          var resDir = await pageDir.getDirectoryHandle('resolved', { create: false });
+          for await (var re of resDir.values()) {
+            if (re.kind !== 'file' || !re.name.endsWith('.json')) { continue; }
+            try {
+              var resItem = JSON.parse(await (await re.getFile()).text());
+              resItem._pageSlug  = pageSlug;
+              resItem._subFolder = 'resolved';
+              _frData.push(resItem);
+            } catch (e) { }
+          }
+        } catch (e) { /* resolved/ not yet created */ }
+        // Legacy: direct .json files in page dir (pre-two-folder items)
+        for await (var legEntry of pageDir.values()) {
+          if (legEntry.kind !== 'file' || !legEntry.name.endsWith('.json')) { continue; }
+          try {
+            var legItem = JSON.parse(await (await legEntry.getFile()).text());
+            legItem._pageSlug  = pageSlug;
+            legItem._subFolder = null; // legacy — no subfolder
+            _frData.push(legItem);
+          } catch (e) { }
+        }
+      } catch (e) { /* page dir unreadable */ }
+    }
+  } catch (e) { frToast('Error reading folder: ' + e.message); }
+
+  frRender();
+}
+
+/* ── Refresh ─────────────────────────────────────────────── */
+async function frRefresh() {
+  var btn = document.getElementById('fr-refresh-btn');
+  btn.textContent = '↻ …'; btn.disabled = true;
+  await frWriteLastChecked();
+  await frLoad();
+  btn.textContent = '↻ Refresh'; btn.disabled = false;
+  frToast('Refreshed');
+}
+
+/* ── Filter ──────────────────────────────────────────────── */
+function frSetFilter(f) {
+  _frFilter = f;
+  document.querySelectorAll('.fr-filter-btn').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.filter === f);
+  });
+  frRender();
+}
+
+/* ── Render ──────────────────────────────────────────────── */
+function frRender() {
+  var pagesEl = document.getElementById('fr-pages');
+
+  // Group by page slug
+  var byPage = {};
+  _frData.forEach(function (item) {
+    var slug = item._pageSlug || item.page || 'unknown';
+    if (!byPage[slug]) { byPage[slug] = []; }
+    byPage[slug].push(item);
+  });
+
+  // Sort pages alphabetically
+  var slugs = Object.keys(byPage).sort();
+
+  // Compute total open
+  var totalOpen = _frData.filter(function (i) { return i.status !== 'done'; }).length;
+  var countEl   = document.getElementById('fr-open-count');
+  countEl.textContent = totalOpen + ' open';
+  countEl.className   = 'fr-badge' + (totalOpen === 0 ? ' fr-badge--zero' : '');
+
+  if (slugs.length === 0) {
+    pagesEl.innerHTML = '<div class="fr-empty" style="padding:32px 0">No feedback found in this folder.</div>';
+    return;
+  }
+
+  var html = '';
+  slugs.forEach(function (slug) {
+    var items = byPage[slug];
+    var open  = items.filter(function (i) { return i.status !== 'done'; });
+    var done  = items.filter(function (i) { return i.status === 'done'; });
+
+    var showOpen = _frFilter !== 'done';
+    var showDone = _frFilter !== 'open';
+    var visOpen  = showOpen ? open : [];
+    var visDone  = showDone ? done : [];
+    if (visOpen.length === 0 && visDone.length === 0) { return; }
+
+    html += '<div class="fr-page-card">';
+    html += '<div class="fr-page-hd">';
+    html += '<span class="fr-page-name">' + frEscape(slug) + '</span>';
+    html += '<span class="fr-page-counts">' + open.length + ' open · ' + done.length + ' done</span>';
+    html += '</div>';
+
+    if (visOpen.length > 0) {
+      html += '<div class="fr-section-label">Open</div>';
+      visOpen.sort(function (a, b) { return a.createdAt > b.createdAt ? -1 : 1; });
+      visOpen.forEach(function (item) { html += frItemHTML(item); });
+    }
+    if (visDone.length > 0) {
+      html += '<div class="fr-section-label">Done</div>';
+      visDone.sort(function (a, b) { return a.createdAt > b.createdAt ? -1 : 1; });
+      visDone.forEach(function (item) { html += frItemHTML(item); });
+    }
+
+    html += '</div>';
+  });
+
+  pagesEl.innerHTML = html || '<div class="fr-empty" style="padding:32px 0">No items match the current filter.</div>';
+}
+
+/* ── Item HTML ───────────────────────────────────────────── */
+function frItemHTML(item) {
+  var isDone   = item.status === 'done';
+  var checkCls = isDone ? 'fr-item-check done' : 'fr-item-check';
+  var checkLbl = isDone ? '✓' : '';
+  var typeCls  = 'fr-type-badge fr-type-badge--' + (item.type || 'note');
+  var sevHtml  = '';
+  if (item.severity) {
+    var sevCls = 'fr-sev' + (item.severity === 'high' ? ' fr-sev--high' : item.severity === 'medium' ? ' fr-sev--medium' : '');
+    sevHtml = '<span class="' + sevCls + '">' + frEscape(item.severity) + '</span>';
+  }
+  var ts = item.createdAt ? frRelativeTime(item.createdAt) : '';
+  var imgHtml = '';
+  if (item.screenshot) {
+    imgHtml = '<img class="fr-item-img" src="' + item.screenshot + '" alt="screenshot"'
+            + ' onclick="this.classList.toggle(\'expanded\')" title="Click to expand">';
+  }
+  // Resolution row for done items
+  var resHtml = '';
+  if (isDone) {
+    var resLabels = { fixed: 'Fixed', wontdo: "Won't do", deferred: 'Deferred', noted: 'Noted' };
+    if (item.resolutionType || item.resolutionNote) {
+      resHtml = '<div class="fr-item-resolution">';
+      if (item.resolutionType) {
+        resHtml += '<span class="fr-res-badge">' + frEscape(resLabels[item.resolutionType] || item.resolutionType) + '</span>';
+      }
+      if (item.resolutionNote) {
+        resHtml += '<span class="fr-res-note">' + frEscape(item.resolutionNote) + '</span>';
+      }
+      resHtml += '</div>';
+    }
+    if (item.agentNote) {
+      resHtml += '<div class="fr-agent-note">' + frEscape(item.agentNote) + '</div>';
+    }
+  }
+
+  return '<div class="fr-item' + (isDone ? ' fr-item--done' : '') + '" data-id="' + frEscape(item.id) + '">'
+       + '<button class="' + checkCls + '" onclick="frToggle(\'' + frEscape(item.id) + '\')">' + checkLbl + '</button>'
+       + '<div class="fr-item-body">'
+       +   '<div class="fr-item-meta">'
+       +     '<span class="' + typeCls + '">' + frEscape(item.type || 'note') + '</span>'
+       +     sevHtml
+       +     '<span class="fr-item-ts">' + frEscape(ts) + '</span>'
+       +   '</div>'
+       +   '<div class="fr-item-desc">' + frEscape(item.desc || '') + '</div>'
+       +   imgHtml
+       +   resHtml
+       + '</div>'
+       + '</div>';
+}
+
+/* ── Toggle done/open ────────────────────────────────────── */
+// Moves file between feedback/ and resolved/ subfolders when status changes.
+async function frToggle(id) {
+  var item = _frData.find(function (i) { return i.id === id; });
+  if (!item) { return; }
+  var oldSubfolder = item._subFolder;
+  item.status = (item.status === 'done') ? 'open' : 'done';
+  if (item.status === 'done') {
+    if (!item.resolvedAt) { item.resolvedAt = new Date().toISOString(); }
+    item._subFolder = 'resolved';
+  } else {
+    delete item.resolvedAt;
+    delete item.resolutionType;
+    delete item.resolutionNote;
+    item._subFolder = 'feedback';
+  }
+  var filename = item.id + '--' + item.type + '.json';
+  // Delete from old location
+  try {
+    var oldPageDir = await _frDir.getDirectoryHandle(item._pageSlug, { create: false });
+    if (oldSubfolder) {
+      var oldSubDir = await oldPageDir.getDirectoryHandle(oldSubfolder, { create: false });
+      await oldSubDir.removeEntry(filename);
+    } else {
+      // Legacy: file was directly in page dir
+      await oldPageDir.removeEntry(filename);
+    }
+  } catch (e) { /* old file may not exist — ok */ }
+  // Write to new location
+  try {
+    var newPageDir = await _frDir.getDirectoryHandle(item._pageSlug, { create: true });
+    var newSubDir  = await newPageDir.getDirectoryHandle(item._subFolder, { create: true });
+    var fh = await newSubDir.getFileHandle(filename, { create: true });
+    var w  = await fh.createWritable();
+    var saved = Object.assign({}, item);
+    delete saved._pageSlug; delete saved._subFolder;
+    await w.write(JSON.stringify(saved, null, 2));
+    await w.close();
+  } catch (e) { frToast('Write failed: ' + e.message); }
+  frRender();
+}
+
+/* ── Helpers ─────────────────────────────────────────────── */
+function frEscape(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function frRelativeTime(iso) {
+  var ms = Date.now() - new Date(iso).getTime();
+  if (ms < 60000)    { return 'just now'; }
+  if (ms < 3600000)  { return Math.floor(ms / 60000) + 'm ago'; }
+  if (ms < 86400000) { return Math.floor(ms / 3600000) + 'h ago'; }
+  return Math.floor(ms / 86400000) + 'd ago';
+}
+
+var _frToastTimer;
+function frToast(msg) {
+  var el = document.getElementById('fr-toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_frToastTimer);
+  _frToastTimer = setTimeout(function () { el.classList.remove('show'); }, 2200);
+}
+</script>
+<script src="wf-nav.js"></script>
+</body>
+</html>

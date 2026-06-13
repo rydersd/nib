@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="deck" data-role="deck">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deck Title — Project Name</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500;600;700&family=Hanken+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="core/proto-deck.css">
+</head>
+<body>
+
+<nav class="slidenav" aria-label="Slides"></nav>
+<div class="kbd-hint">Use <kbd>↓</kbd> <kbd>↑</kbd> or <kbd>Space</kbd> · <kbd>E</kbd> exports SVG</div>
+
+<!-- Fixed-canvas deck: <main class="slides slides--fit"> and every slide's
+     content wrapped in <div class="slide-stage">. Each stage is a fixed
+     1600x900 canvas scaled uniformly to fill the viewport, so the composition
+     is identical at every resolution. Use this mode when the deck must look
+     pixel-consistent (projector, exported SVG, screenshot). -->
+<main class="slides slides--fit">
+
+  <!-- ============ Cover ============ -->
+  <section class="slide cover" id="s1" data-title="Cover">
+    <div class="slide-stage">
+      <div class="cover-stamp">
+        <span class="dot"></span>
+        <span>Deck Kind</span>
+        <span class="seq">Subtitle or context</span>
+        <span class="dot"></span>
+        <span>For whom</span>
+      </div>
+      <h1>The headline goes <span class="accent">here.</span></h1>
+      <p class="cover-deck">
+        A one-paragraph framing of what this deck covers and why it exists.
+        In fixed-canvas mode the cover holds its proportions at any size.
+      </p>
+      <div class="cover-mark" aria-hidden="true"></div>
+      <div class="cover-meta">
+        <div><div class="k">Presenter</div><div class="v">Name</div></div>
+        <div><div class="k">Audience</div><div class="v">Who it's for</div></div>
+        <div><div class="k">Scope</div><div class="v">3 sections</div></div>
+        <div><div class="k">Purpose</div><div class="v">What it's for</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Content slide ============ -->
+  <section class="slide" id="s2" data-title="The setup">
+    <div class="slide-stage">
+      <div class="slide-body single">
+        <div class="slide-text">
+          <h2>One idea, <span class="accent">stated plainly.</span></h2>
+          <p class="lede">The lede carries the slide. In fixed-canvas mode the
+            slide-header chrome overlays the top of the stage automatically.</p>
+        </div>
+        <div class="inputs" style="grid-template-columns:1fr 1fr 1fr;">
+          <div class="input-card">
+            <div class="who">First</div>
+            <h4>A card title</h4>
+            <p>Three cards across reads well on the 1600-wide canvas.</p>
+          </div>
+          <div class="input-card">
+            <div class="who">Second</div>
+            <h4>Another title</h4>
+            <p>Keep card copy tight — two or three sentences each.</p>
+          </div>
+          <div class="input-card">
+            <div class="who">Third</div>
+            <h4>The last card</h4>
+            <p>Override the grid inline when a slide needs a different column count.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Diagram slide ============ -->
+  <section class="slide" id="s3" data-title="The diagram">
+    <div class="slide-stage">
+      <div class="dia-wrap">
+        <div class="dia-cap">
+          <div class="dia-eyebrow">Section label</div>
+          <div class="t">A framed schematic</div>
+          <div class="d">Pair a content slide with a diagram slide to show the anatomy of what was just discussed.</div>
+        </div>
+        <div class="dia-frame">
+          <svg viewBox="0 0 760 200" aria-hidden="true">
+            <rect x="20" y="20" width="220" height="160" rx="6" fill="#fafbfd" stroke="#c9bfac"/>
+            <rect x="270" y="20" width="220" height="160" rx="6" fill="#fafbfd" stroke="#c9bfac"/>
+            <rect x="520" y="20" width="220" height="160" rx="6" fill="#fafbfd" stroke="#c9bfac"/>
+            <text x="32" y="44" font-family="monospace" font-size="10" fill="#6b1a26">STEP ONE</text>
+            <text x="282" y="44" font-family="monospace" font-size="10" fill="#6b1a26">STEP TWO</text>
+            <text x="532" y="44" font-family="monospace" font-size="10" fill="#6b1a26">STEP THREE</text>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Closing ============ -->
+  <section class="slide closing" id="s4" data-title="Closing">
+    <div class="slide-stage">
+      <div class="slide-body single" style="justify-content:center;align-items:center;text-align:center;flex:1;">
+        <div class="closing-block">
+          <div class="ornament">
+            <span class="line"></span>
+            <span class="glyph">§</span>
+            <span class="line"></span>
+          </div>
+          <h2>That's the <span class="accent">deck.</span></h2>
+          <p>A closing line — the next step, the follow-up, or how to give feedback.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="core/proto-deck.js"></script>
+<!-- Optional: Nib context bar. Include project-data.js + proto-nav.js to add
+     the breadcrumb chrome; proto-deck.css restyles it for the deck. -->
+<!-- <script src="project-data.js"></script> -->
+<!-- <script src="core/proto-nav.js"></script> -->
+
+</body>
+</html>

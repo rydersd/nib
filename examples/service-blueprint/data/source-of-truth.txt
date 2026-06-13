@@ -1,0 +1,4 @@
+Source: xlsx
+Location: /Users/rybooth/Github/nib/examples/service-blueprint/example.xlsx
+Last modified: 2026-04-30T15:10:43.138Z
+Tabs ingested: meta, pages, tokens, personas, stories, program, deal-reg, onboarding, _initiatives

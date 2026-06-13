@@ -1,12 +1,66 @@
 # Nib
 
-**Plan the experience before you build it. Get alignment. Build it right the first time.**
+**Plan, document, and maintain a project from one workbook.**
 
-Nib is a wireframe prototyping framework designed to be read by AI agents — specifically [Claude Code](https://claude.ai/claude-code). You define your project data — pages, personas, user flows, design stories — and Claude reads the framework's reference docs to generate a complete, navigable prototype with design notes, implementation tracking, and living documentation. The output is HTML that anyone on the team can open in a browser and understand.
+Nib is a wireframe prototyping framework that turns a single Excel or Google Sheets workbook into a working multi-page prototype **and** a fully cross-referenced project wiki — both auto-generated, both kept in sync as the workbook (or the project) evolves.
 
-**Nib is the instruction set. Claude Code is the engine.** The framework alone doesn't generate anything — it provides the design system, components, tokens, and conventions that an agent needs to produce consistent, self-documenting wireframes.
+The wiki is the project's living documentation: personas, blueprints, page index, design stories, decisions, architecture, glossary, lessons-learned. Some pages are derived from the workbook (Personas, Blueprints, Pages, Stories) and regenerate on every sync. Others are narrative and hand-authored (Decisions, Architecture, Glossary, README, Lessons-Learned). An LLM working on the project — Claude Code or otherwise — gets a `CLAUDE.md` with the maintenance contract: which pages are auto vs hand, when to run sync, how to keep wikilinks fresh.
 
-Think of it as a functional Google Design Sprint that lives in a repo.
+Think of it as a Google Design Sprint that lives in a repo, where the spreadsheet is the source of truth and the wiki is the human-readable face.
+
+## 60-second start
+
+```sh
+npm create nib lead-to-cash
+# or:  npx create-nib lead-to-cash
+```
+
+A browser window opens. Pick one of three paths:
+
+- **📊 From a workbook** — drop in an Excel file or paste a Google Sheets URL. Pages, personas, journeys, blueprints, tokens, and stories all generate from the workbook — and a wiki documenting all of them.
+- **🎨 From a template** — clone a working scaffold (service blueprint canvas, feedback triage, research study, multi-step flow, …) with the wiki pre-populated.
+- **✨ Start blank** — minimal one-page scaffold + an empty wiki ready for narrative.
+
+The same server keeps serving so you can keep clicking. `Ctrl-C` to stop. The new project is fully self-contained — `cd lead-to-cash && python3 -m http.server` works without any further setup.
+
+Headless flags skip the picker:
+
+```sh
+npx create-nib partner-program --workbook ./brief.xlsx
+npx create-nib q3-research --template research-study
+npx create-nib service-design --sheet 'https://docs.google.com/spreadsheets/d/...'
+```
+
+What you get inside `./lead-to-cash/`:
+
+```
+lead-to-cash/
+├── CLAUDE.md              ← Wiki maintenance contract for any LLM working on this
+├── example.xlsx           ← Source of truth (or your own workbook name)
+├── index.html             ← Working prototype entry
+├── data/                  ← Generated JS — refreshed by `npx nib-sync`
+├── docs/                  ← The wiki
+│   ├── Home.md            ← Index of every page (auto)
+│   ├── _Sidebar.md        ← Wiki nav (auto)
+│   ├── Pages.md           ← Sitemap (auto)
+│   ├── Personas.md        ← Persona index (auto)
+│   ├── Persona-{id}.md    ← One per persona (auto)
+│   ├── Blueprints.md      ← Service blueprint hierarchy (auto)
+│   ├── Blueprint-{id}.md  ← One per flow with drill-in points (auto)
+│   ├── Stories.md         ← Design stories + JTBDs (auto)
+│   ├── Story-{id}.md      ← One per story (auto)
+│   ├── Tokens.md          ← CSS variable overrides (auto)
+│   ├── README.md          ← Project pitch (yours)
+│   ├── Decisions.md       ← Decision log (yours)
+│   ├── Architecture.md    ← System shape (yours)
+│   ├── Glossary.md        ← Terminology (yours)
+│   └── Lessons-Learned.md ← Retrospective (yours)
+└── nib/                   ← Bundled framework runtime (CSS + JS)
+```
+
+Auto pages start with `<!-- nib:auto -->` and regenerate on every `npx nib-sync`. Hand pages have no marker and are never overwritten — they're yours and the LLM's to author.
+
+Full reference: [`docs/Create-Project.md`](docs/Create-Project.md) · [`docs/Project-Wiki.md`](docs/Project-Wiki.md).
 
 ## The Problem It Solves
 
@@ -20,16 +74,22 @@ I needed a prototype that explained itself.
 
 ## What It Produces
 
-A nib project generates a set of linked HTML pages that anyone can open in a browser:
+A nib project generates two artifacts side-by-side:
+
+**1. The prototype** — linked HTML pages anyone can open in a browser:
 
 - **Sitemap** — visual information architecture showing every page, organized by section
 - **Wireframe pages** — interactive layouts with real labels, real data patterns, and design notes explaining every decision
-- **Jobs to Be Done** — persona-specific user goals consolidated from design notes across all pages
-- **User Flows** — step-by-step journey visualizations showing how personas move through the system
 - **Personas** — character cards and organizational context for guided walkthroughs
+- **User Flows / Service Blueprints** — step-by-step journeys; the React Flow canvas in `examples/service-blueprint/` supports nested blueprints with leadership Overview + drill-down
 - **Design Stories** — living implementation tracking with phased delivery, acceptance criteria, platform approach, and decision logs
 
-Every page has a design notes panel that explains *why* it exists, *who* it serves, and *how* it should be built. Agents read the framework's reference docs and generate pages that are consistent with your design tokens, component library, and project conventions — without you having to re-explain the standards every time.
+**2. The wiki** — a fully cross-referenced Markdown wiki at `docs/`:
+
+- **Auto pages** (regenerated on every sync from the workbook): `Home`, `Pages`, `Personas`, `Persona-{id}`, `Blueprints`, `Blueprint-{id}`, `Stories`, `Story-{id}`, `Tokens`, `Registries`, `_Sidebar`, `_Footer`. They open with a `<!-- nib:auto -->` marker — your edits get overwritten.
+- **Hand pages** (yours and the LLM's): `README`, `Decisions`, `Architecture`, `Glossary`, `Lessons-Learned`, plus any custom narrative pages you create. Sync never touches them.
+
+Cross-references use `[[Page-Name]]` wikilinks — Obsidian / Foam / Dendron compatible. The project's `CLAUDE.md` documents the maintenance contract so any LLM working on the project (Claude Code or otherwise) knows when to run sync and where to put narrative.
 
 ## Who It's For
 
@@ -41,118 +101,114 @@ Every page has a design notes panel that explains *why* it exists, *who* it serv
 
 ## How It Works
 
-You need [Claude Code](https://claude.ai/claude-code) (or another frontier model agent) to generate pages. The framework provides three things the agent reads:
+The framework is built around **one canonical project shape** that flows through three transformations:
 
-1. **Reference docs** (`ref/`) — agent-readable documentation covering design tokens, components, layouts, navigation, and platform conventions. Claude reads these before generating any page.
-2. **Core CSS + JS** (`core/`) — shared design system with a fidelity slider (napkin sketch → blueprint → polished), paper aesthetic, and interactive chrome (navigation drawer, design notes panel, guided walkthroughs).
-3. **Starters** (`starters/`) — copy-paste HTML templates for every page type. Define your project data, copy a starter, and Claude generates the rest.
+```
+   ┌─────────────┐
+   │  Workbook   │  Excel / Google Sheets — one tab per resource type
+   │ (or data/)  │  (the source of truth)
+   └──────┬──────┘
+          │  nib-ingest (or nib-sync)
+          ▼
+   ┌─────────────┐
+   │  Project    │  Canonical shape (validated against workbook.schema.json)
+   │   shape     │  — meta, pages, tokens, personas, stories, blueprints,
+   └──────┬──────┘    registries
+          │
+   ┌──────┴──────┬──────────────────────┐
+   ▼             ▼                      ▼
+data/*.js   docs/*.md (auto)      docs/*.md (hand stubs, only on first run)
+prototype   project wiki          README, Decisions, Architecture, …
+```
+
+The mechanical part — workbook → data + auto wiki — is the npm package. The narrative part — hand-authored wiki pages — is yours and the LLM's. The project's `CLAUDE.md` is the contract between them.
+
+### Three ways to start a project
+
+| Path | When | Read |
+|---|---|---|
+| `npx create-nib <name>` | Most common — wizard guides you | [`docs/Create-Project.md`](docs/Create-Project.md) |
+| `nib-ingest <workbook>.xlsx --out <dir>` | You already have a brief in a spreadsheet | [`docs/Spreadsheet-Authoring.md`](docs/Spreadsheet-Authoring.md) |
+| Copy a template + author by hand | You want full control | [`docs/New-Project.md`](docs/New-Project.md) |
 
 ### Project data drives everything
 
-Your project is defined in one file — `project-data.js` — which sets up:
+Whether scaffolded from a workbook or hand-authored, every project sets up these globals (some optional):
 
 ```javascript
-SECTIONS        // Pages and navigation structure
-STORY_MAP       // Which design stories apply to which pages
-DESIGN_STORIES  // Rich implementation tracking (phases, acceptance criteria, decisions)
-JOURNEYS        // User flow definitions
-SCENARIOS       // Guided walkthrough scripts
+WIREFRAME_CONFIG   // Project title, surface defaults, feedback endpoint, portal header / search opt-ins
+SECTIONS           // Pages and navigation structure
+PERSONAS           // Persona records (drives STORY_MAP + persona pages)
+DESIGN_STORIES     // Rich implementation tracking (phases, AC, decisions)
+JOURNEYS           // User flow definitions
+SCENARIOS          // Guided walkthrough scripts
+NIB_BLUEPRINTS     // Service blueprint flows (drives the React Flow canvas)
+NIB_REGISTRIES     // Controlled vocab (initiatives, tags, etc.)
 ```
 
-Agents read this data and the reference docs to generate pages that are internally consistent — the sitemap reflects SECTIONS, the design notes reference the right personas, the AC badges link to the right design stories.
+Agents read this data and the reference docs to generate pages that are internally consistent — the sitemap reflects SECTIONS, design notes reference the right personas, the AC badges link to the right design stories, and blueprint canvases drill into nested sub-blueprints.
 
-## Quick Start
+### Spreadsheet as source of truth
 
-### Recommended: Git submodule
+The fastest path is letting Excel or Google Sheets drive the project. One workbook, one tab per resource type:
 
-Nib lives as a submodule inside your project. Your pages reference its CSS and JS via relative paths. When nib ships new features — new surfaces, new components, bug fixes — you pull them with one command.
+| Tab | Drives data | Drives wiki |
+|---|---|---|
+| `meta` | `WIREFRAME_CONFIG` | `Home.md` title + status |
+| `pages` | `SECTIONS` | `Pages.md` |
+| `tokens` | CSS variable overrides | `Tokens.md` |
+| `personas` | Persona records | `Personas.md` + `Persona-{id}.md` per row |
+| `stories` | `DESIGN_STORIES` + JTBDs | `Stories.md` + `Story-{id}.md` per row |
+| `<flow-id>` | One service blueprint per non-reserved tab | `Blueprints.md` + `Blueprint-{id}.md` per tab |
+| `_<name>` | Registries (controlled vocab) | `Registries.md` |
 
-#### New project setup
+`nib-ingest` reads the workbook, writes `data/*.js`, **and** regenerates the wiki's auto pages. Edit the workbook, run `nib-sync`, refresh the page; the wiki reflects the change. The blueprint canvas in `examples/service-blueprint/` also round-trips canvas edits back to xlsx.
+
+## Other ways to set up
+
+### Submodule (long-lived projects that want to track upstream nib)
+
+`npx create-nib` bundles a runtime subset of nib into your project so it's self-contained — that's the right shape for a one-off prototype or a project that may diverge from upstream. For long-lived projects that should always track the latest nib, use a git submodule instead:
 
 ```bash
 mkdir my-project && cd my-project && git init
 git submodule add https://github.com/rydersd/nib.git nib
-git commit -m "Add nib framework"
+mkdir pages
 ```
 
-```
-my-project/
-├── nib/                ← submodule (don't modify — updates from upstream)
-│   ├── core/
-│   ├── surfaces/
-│   ├── starters/
-│   └── ref/
-├── pages/
-│   ├── project-data.js ← your project's data
-│   ├── project.css     ← your project's custom styles
-│   └── [pages].html    ← generated from starters
-└── reviews/            ← review annotations (pulled from API)
-```
-
-1. Add nib as a submodule (above)
-2. Copy `nib/starters/project-data.js` to `pages/` and define your `SECTIONS`
-3. Copy a starter page from `nib/starters/` to `pages/` and customize
-4. Pages reference `../nib/core/proto-core.css` and `../nib/core/proto-nav.js`
-5. Open in a browser — navigation, design notes, and fidelity controls work immediately
-
-#### Migrating an existing project (zero refactoring)
-
-If you already have `core/` and `surfaces/` copied into your project, you can switch to the submodule without changing any HTML paths:
+Pages reference `../nib/core/proto-tokens.css` and `../nib/core/proto-nav.js`. Pull updates with:
 
 ```bash
-cd my-project
+git submodule update --remote nib
+git add nib && git commit -m "Update nib framework"
+```
 
-# Remove the copied directories
+Clone a project that uses the submodule with `git clone --recurse-submodules <url>`.
+
+### Migrating an existing project to the submodule
+
+If you already copied `core/` and `surfaces/` into a project, swap them for a submodule + symlinks so existing paths keep working:
+
+```bash
 rm -rf core/ surfaces/
-
-# Add nib as a submodule
 git submodule add https://github.com/rydersd/nib.git nib
-
-# Create symlinks so existing paths still work
 ln -s nib/core core
 ln -s nib/surfaces surfaces
-
-# Commit
 git add .gitmodules nib core surfaces
 git commit -m "Migrate nib from copy to submodule"
 ```
 
-All your existing `core/proto-nav.js` and `surfaces/salesforce.css` paths resolve through the symlinks. No pages need editing.
+### Copy (no-git environments)
 
-#### Getting updates
+Copy `core/` and `surfaces/` directly into your project. Pages reference `core/proto-core.css` with no `nib/` prefix. Manual re-copy required when nib updates.
 
-Nib submodules are pinned to a specific commit — your project won't change until you explicitly pull new updates. When you're ready:
-
-```bash
-cd my-project
-git submodule update --remote nib    # fetch latest from nib's main branch
-git add nib
-git commit -m "Update nib framework"
-```
-
-**Important:** `git submodule update` (without `--remote`) only checks out whatever commit was already pinned — it won't fetch new changes from nib. You need `--remote` to pull the latest.
-
-#### Cloning a project that uses the submodule
-
-```bash
-# Option 1: clone with submodules in one step
-git clone --recurse-submodules <project-url>
-
-# Option 2: if already cloned without submodules
-git submodule init && git submodule update
-```
-
-### Alternative: Copy (for simple projects or no-git environments)
-
-Copy `core/` and `surfaces/` directly into your project. Pages reference `core/proto-core.css` etc. with no `nib/` prefix. You'll need to manually re-copy when nib updates.
-
-For the full bootstrap process, read `ref/new-project.md`.
+For the full bootstrap process, read [`ref/new-project.md`](ref/new-project.md).
 
 ## Agent Compatibility
 
-Nib is built and tested with [Claude Code](https://claude.ai/claude-code). The reference docs, CLAUDE.md instructions, and prompting conventions are written for Claude's agent loop. Other frontier models can read the reference docs and generate pages, but you'll need to adapt the agent instructions and prompting patterns for your model of choice.
+Nib is built and tested with [Claude Code](https://claude.ai/claude-code), but the contract is in plain Markdown. Every scaffolded project ships with a `CLAUDE.md` that explains the wiki maintenance contract — which `docs/*.md` are auto vs hand, when to run `nib-sync`, where narrative belongs. Any frontier model that reads `CLAUDE.md`-style instructions (Cursor, Continue, GitHub Copilot Workspace, etc.) can pick up the contract.
 
-If you get Nib working with another agent or model, please contribute your adapter instructions back. The goal is for this framework to work everywhere — PRs with agent-specific guidance (Cursor rules, Copilot instructions, etc.) are very welcome.
+If you get Nib working with another agent and want to adapt the project `CLAUDE.md` template for a different agent's conventions, PRs welcome.
 
 ## Key Concepts
 
@@ -166,22 +222,51 @@ If you get Nib working with another agent or model, please contribute your adapt
 
 **Everything explains itself.** Every wireframe page includes a design notes panel with context (what and why), design specification (how it works), and technical details (how to build it). Stakeholders don't need a walkthrough — they can read the notes.
 
+**Spreadsheets are first-class.** Service designers usually have an Excel workbook or a Google Sheet long before they have a project. Nib reads the workbook directly — `nib-ingest` materializes the project from it, `nib-sync` keeps them in sync, and the React Flow blueprint canvas in `examples/service-blueprint/` round-trips edits back to xlsx. The same canonical schema (`core/schema/workbook.schema.json`) validates Excel, Sheets, and hand-authored JS.
+
+**Service blueprints are nested.** Leadership gets a bird's-eye Overview card per blueprint (one-line outcome plus a "what changes" list); clicking a node with a `childBlueprintId` drills into the sub-blueprint and updates the breadcrumb. One workbook can express a multi-level program → sub-process → step hierarchy without leaving the spreadsheet.
+
+**The wiki is the documentation surface.** Every Nib project includes a `docs/` wiki — auto-generated pages from the workbook (Personas, Blueprints, Pages, Stories, …) plus hand-authored narrative (Decisions, Architecture, Glossary, …). Auto pages have a `<!-- nib:auto -->` marker; sync overwrites only those. Hand pages with no marker are immune. The project's `CLAUDE.md` documents the contract so any LLM working on the project knows when to run sync and where narrative belongs.
+
 ## Structure
 
 ```
 nib/
-├── core/           Shared CSS modules + JS (do not modify per-project)
-│   ├── proto-core.css        Design tokens + base components
-│   ├── proto-nav.js          Navigation engine, design notes, walkthroughs
-│   ├── proto-gen.js          Declarative page renderer
-│   └── proto-stories.js      Design stories page renderer
+├── core/           Shared CSS + JS runtime (do not modify per-project)
+│   ├── proto-core.css         Design tokens + base components
+│   ├── proto-nav.js           Navigation engine, design notes, walkthroughs, deep-link copy
+│   ├── proto-search.js        Opt-in portal header + search + Ask AI mode
+│   ├── proto-gen.js           Declarative page renderer
+│   ├── proto-compose.js       COMPOSE → PAGE_BLUEPRINT transformation
+│   ├── proto-stories.js       Design stories page renderer
+│   ├── compose-flow.js        Multi-page flow wiring (wizard, scenarios)
+│   ├── schema/                JSON Schema for the canonical Nib project shape
+│   ├── ingest/                Adapter-agnostic Excel/Sheets → project pipeline
+│   └── blueprint/             React Flow service blueprint canvas + exporters
 ├── surfaces/       Platform CSS overlays
-│   ├── salesforce.css        SFDC record pages, path bar, feed
-│   ├── slack.css             Slack app shell, messages, threads
-│   └── internal-ds.css       Portal KPIs, form groups, cards
+│   ├── salesforce.css         SFDC record pages, path bar, feed
+│   ├── slack.css              Slack app shell, messages, threads
+│   └── internal-ds.css        Portal KPIs, form groups, cards
+├── tools/          Node CLIs
+│   ├── nib-create.js          Browser-based project scaffolder
+│   ├── nib-ingest.js          Excel / Sheets → Nib project
+│   ├── nib-sync.js            Idempotent re-ingest with diff
+│   ├── wizard/                UI served by nib-create
+│   └── nib-cli.js             Validation / pull-reviews / brief / dashboard
+├── packages/
+│   └── create-nib/            Thin npm wrapper so `npm create nib <name>` resolves
 ├── ref/            Agent reference docs (read before building)
-├── starters/       Copy-paste templates for every page type
-└── examples/       Reference implementations
+├── docs/           Wiki — human-facing companion to ref/
+├── starters/       Single-file copy-paste HTML templates
+└── examples/       Multi-file project templates (clone whole)
+    ├── spreadsheet-bootstrap/ 9-tab worked example with nested blueprints
+    ├── service-blueprint/     Editable React Flow canvas
+    ├── feedback-triage/       File System Access API review tool
+    ├── research-study/        Card-sort runner + persona/JTBD scaffolds
+    ├── deal-registration/     Multi-step business flow
+    ├── cloudflare-worker/     Backend for feedback + comment counts + card-sort
+    ├── kanban-board/ · charts-dashboard/ · data-table/ · agent-chat/
+    └── pinterest-board/ · newspaper/ · test-project/
 ```
 
 ## Design Token Palette

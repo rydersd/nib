@@ -2837,6 +2837,15 @@ function buildTeaStainSVG(leaf) {
         '<feComposite in="gt" in2="soft" operator="in" result="sp"/>' +
         '<feBlend in="soft" in2="sp" mode="multiply"/>' +
       '</filter>' +
+      // Bag tide — same turbulence as #bag so the rim rides the same
+      // displaced boundary, but near-zero blur: pigment concentrates
+      // where the water stops at the imprint edge, the same crisp
+      // transition the seep outline has (stakeholder 2026-06-12).
+      '<filter id="bagEdge" x="-25%" y="-25%" width="150%" height="150%">' +
+        '<feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="' + s2 + '" result="t"/>' +
+        '<feDisplacementMap in="SourceGraphic" in2="t" scale="13"/>' +
+        '<feGaussianBlur stdDeviation="0.25"/>' +
+      '</filter>' +
       '<filter id="seam" x="-30%" y="-30%" width="160%" height="160%">' +
         '<feTurbulence type="turbulence" baseFrequency="0.06 0.09" numOctaves="2" seed="' + s3 + '" result="t"/>' +
         '<feDisplacementMap in="SourceGraphic" in2="t" scale="7"/>' +
@@ -2854,6 +2863,9 @@ function buildTeaStainSVG(leaf) {
       // 2 — bag body: fabric-mottled imprint
       '<rect x="' + bx + '" y="' + by + '" width="' + r1(bw) + '" height="' + r1(bh) + '" rx="8" ' +
         'fill="hsl(' + hue + ',' + (sat - 4) + '%,58%)" fill-opacity="' + (0.26 * boost).toFixed(2) + '" style="mix-blend-mode:multiply" filter="url(#bag)"/>' +
+      // 2b — bag tide: crisp rim on the imprint boundary
+      '<rect x="' + bx + '" y="' + by + '" width="' + r1(bw) + '" height="' + r1(bh) + '" rx="8" fill="none" ' +
+        'stroke="hsl(' + hue + ',' + (sat + 6) + '%,48%)" stroke-opacity="' + (0.4 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.2, 1.8)) + '" style="mix-blend-mode:multiply" filter="url(#bagEdge)"/>' +
       // 3 — bag edge: the dark seam where pigment concentrated
       '<rect x="' + sx + '" y="' + sy + '" width="11" height="' + sh + '" rx="5.5" ' +
         'fill="hsl(' + (hue - 3) + ',' + (sat + 18) + '%,43%)" fill-opacity="' + (0.42 * boost).toFixed(2) + '" style="mix-blend-mode:multiply" filter="url(#seam)"/>' +
@@ -2879,10 +2891,14 @@ function buildCoffeeRingSVG() {
   var rx = rnd(44, 62), ry = rx * rnd(0.93, 1.0);
   var rot = r1(rnd(0, 180));
   // band style: thin crisp / medium / heavy annulus
+  // Tighter edge noise — rings now render at 490-551px (2x+ the old
+  // size), which magnified the displacement into big smooth lobes.
+  // Less excursion + higher frequency keeps the wobble in scale
+  // (stakeholder note on the 225% lab sample, 2026-06-12).
   var roll = Math.random(), w, disp, blur;
-  if (roll < 0.3)      { w = rnd(3, 6);   disp = 5;  blur = 0.4; }
-  else if (roll < 0.7) { w = rnd(8, 14);  disp = 9;  blur = 0.7; }
-  else                 { w = rnd(15, 24); disp = 13; blur = 1.0; }
+  if (roll < 0.3)      { w = rnd(3, 6);   disp = 4; blur = 0.4; }
+  else if (roll < 0.7) { w = rnd(8, 14);  disp = 6; blur = 0.7; }
+  else                 { w = rnd(15, 24); disp = 8; blur = 1.0; }
   var circ = Math.PI * (rx + ry);
   // broken arcs — the lifted-cup look (~45% of rings)
   var dash = '';
@@ -2929,7 +2945,7 @@ function buildCoffeeRingSVG() {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">' +
     '<defs><filter id="rg" x="-20%" y="-20%" width="140%" height="140%">' +
-    '<feTurbulence type="turbulence" baseFrequency="0.06 0.08" numOctaves="2" seed="' + s1 + '" result="t"/>' +
+    '<feTurbulence type="turbulence" baseFrequency="0.09 0.12" numOctaves="2" seed="' + s1 + '" result="t"/>' +
     '<feDisplacementMap in="SourceGraphic" in2="t" scale="' + disp + '" result="d"/>' +
     '<feGaussianBlur in="d" stdDeviation="' + blur + '" result="soft"/>' +
     '<feTurbulence type="fractalNoise" baseFrequency="0.4" numOctaves="2" seed="' + (s1 + 17) + '" result="g"/>' +
@@ -2938,7 +2954,7 @@ function buildCoffeeRingSVG() {
     '<feBlend in="soft" in2="sp" mode="multiply"/>' +
     '</filter>' +
     '<filter id="rt" x="-20%" y="-20%" width="140%" height="140%">' +
-    '<feTurbulence type="turbulence" baseFrequency="0.06 0.08" numOctaves="2" seed="' + s1 + '" result="t"/>' +
+    '<feTurbulence type="turbulence" baseFrequency="0.09 0.12" numOctaves="2" seed="' + s1 + '" result="t"/>' +
     '<feDisplacementMap in="SourceGraphic" in2="t" scale="' + disp + '"/>' +
     '<feGaussianBlur stdDeviation="0.2"/>' +
     '</filter></defs>' +
@@ -3316,9 +3332,14 @@ function spawnNapkinStencils() {
       ring.setAttribute('aria-hidden', 'true');
       ring.setAttribute('decoding', 'async');   // never block the main thread
       var big = stain.spill || stain.gen === 'tea';
-      // Smaller marks (stakeholder 2026-06-12) — a ring is a mug base,
-      // not a dinner plate.
-      var size = Math.round((big ? 250 : 180) + Math.random() * (big ? 160 : 130));
+      // Sizes locked from the scale lab (eqPartners notes/stain-scale-lab
+      // .html, stakeholder pick 2026-06-12): rings 200-225% of the 245px
+      // base, tea 175-200% of the 330px base. Spill unchanged.
+      var size = stain.gen === 'ring'
+        ? Math.round(490 + Math.random() * 61)
+        : stain.gen === 'tea'
+          ? Math.round(577 + Math.random() * 83)
+          : Math.round(250 + Math.random() * 160);
       ring.style.width = size + 'px';
       ring.style.height = size + 'px';
       ring.style.transform = 'rotate(' + Math.floor(Math.random() * 360) + 'deg)';

@@ -93,6 +93,17 @@ html, body { margin: 0; }
     var(--rs-line-soft) calc(var(--rs-baseline, 24px) - 1px), var(--rs-line-soft) var(--rs-baseline, 24px));
 }
 
+/* ── Primitive: graph grid (square) — a canvas to place cut-out widgets on ── */
+.rs-graphgrid {
+  height: 100%;
+  border: 1px solid var(--rs-line);
+  background-image:
+    repeating-linear-gradient(to right, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-graph, 42px)),
+    repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-graph, 42px));
+}
+/* Blank band at the top of a canvas — write the title by hand. */
+.rs-blank-head { flex: 0 0 var(--rs-head-h, 56px); border-bottom: 1px solid var(--rs-line-soft); margin-bottom: 14px; }
+
 /* ── Primitive: ruled rows (pure CSS, infinite) ─────────────────────────── */
 .rs-rows {
   height: 100%;

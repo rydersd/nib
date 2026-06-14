@@ -155,7 +155,14 @@
         // follows the flow vector) and its center offsets down-flow.
         var flow = bh * rnd(0.22, 0.35);                    // how far the water ran
         var tilt = r1((seamLeft ? -1 : 1) * rnd(18, 45));   // negative = flow swings right, away from a left seam
-        var seepD = blob(145, r1(104 + flow), rnd(62, 78), rnd(70, 84), 9, 0.22);
+        // Seep ALWAYS encloses the bag: the wet halo wicks OUT from the bag, so
+        // it surrounds it. Short axis clears the bag half-diagonal + the tide-line
+        // displacement; long axis adds the down-flow bulge. Centered on the bag
+        // (only a slight down-flow nudge) so the imprint can never poke outside.
+        var diag = Math.sqrt(bw * bw + bh * bh) / 2;
+        var seepRx = r1(diag + rnd(40, 54));
+        var seepRy = r1(seepRx + flow);
+        var seepD = blob(145, r1(104 + flow * 0.25), seepRx, seepRy, 10, 0.16);
         var bx = r1(145 - bw / 2 + rnd(-6, 6)), by = r1(104 - bh / 2 + rnd(-4, 4));
         var sx = r1(seamLeft ? bx - 3 : bx + bw - 6);
         var sh = r1(bh * rnd(0.75, 1.0) + 6), sy = r1(by - 3 + rnd(0, bh - sh + 6));
@@ -732,14 +739,16 @@
   function spawnStains(){
     if (isNapkin()) {
       spawnNapkinStencils();
-      if (window.WFDoodles && WFDoodles.scatterPage) { try { WFDoodles.scatterPage(); } catch (e) {} }
     }
     document.documentElement.classList.add('wf-napkin-ready');
   }
   // Public: re-run both passes (used by the live fidelity toggle). Idempotent —
   // spawnNapkinStencils self-guards on .wf-stencil-layer, stampInkFrames skips
   // cards that already carry --wf-ink-frame.
-  function runAssetsPass(){ stampFrames(); spawnStains(); }
+  function spawnDoodles(){
+    if (isNapkin() && window.WFDoodles && WFDoodles.scatterDoodles) { try { WFDoodles.scatterDoodles(); } catch (e) {} }
+  }
+  function runAssetsPass(){ stampFrames(); spawnStains(); spawnDoodles(); }
 
   var _scheduled = false;
   function schedule(){

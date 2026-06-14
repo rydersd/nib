@@ -43,9 +43,20 @@ var PRIMS = {
     return out;
   },
   starburst:function(pen,cx,cy,S){
-    var spokes=ri(7,12), out='', a0=rnd(0,TAU);
-    for(var i=0;i<spokes;i++){ var ang=a0+i*TAU/spokes, len=S*rnd(.26,.46);
-      out+=gesture([[cx,cy],[cx+Math.cos(ang)*len, cy+Math.sin(ang)*len]],pen,{poolMul:0,noEnd:Math.random()<.5}); }
+    var spokes=ri(7,12), out='', a0=rnd(0,TAU), step=TAU/spokes;
+    for(var i=0;i<spokes;i++){
+      var ang=a0+i*step+rnd(-step*0.45, step*0.45);            // jittered angle, not evenly spaced
+      var len=S*rnd(.16,.5);                                    // wider length spread
+      var ox=cx+rnd(-S*.035,S*.035), oy=cy+rnd(-S*.035,S*.035); // scattered origins, not one point
+      var ex=cx+Math.cos(ang)*len, ey=cy+Math.sin(ang)*len;
+      var pts;
+      if(Math.random()<0.45){                                  // a human curves some rays
+        var bend=rnd(-0.24,0.24);
+        pts=[[ox,oy],[(ox+ex)/2 - Math.sin(ang)*len*bend, (oy+ey)/2 + Math.cos(ang)*len*bend],[ex,ey]];
+      } else { pts=[[ox,oy],[ex,ey]]; }
+      out+=gesture(pts,pen,{poolMul:0,noEnd:true});
+      if(Math.random()<0.35) out+=dot(ex,ey, rnd(pen.w[0],pen.w[1])*rnd(1.3,2.4), pen, rnd(.5,.75)); // pen sat at the end and pooled
+    }
     return out;
   },
   scribble:function(pen,cx,cy,S){
@@ -254,8 +265,9 @@ function renderAll(){ renderCatalog(); renderSheet(); }
   // ── on-page sparse placement — a few faint margin doodles, biased to the
   //    side gutters so they don't bury content. Called from WFNapkin's gated
   //    asset pass at napkin fidelity only; self-guards against double-run. ──
-  function scatterPage(opts) {
+  function scatterDoodles(opts) {
     opts = opts || {};
+    if (document.documentElement.getAttribute('data-wf-fidelity') !== 'napkin') return;
     if (document.querySelector('.wf-doodle-layer')) return;
     var docH = Math.max(document.body.offsetHeight, window.innerHeight);
     var bodyW = document.body.clientWidth || window.innerWidth;
@@ -263,15 +275,32 @@ function renderAll(){ renderCatalog(); renderSheet(); }
     layer.className = 'wf-doodle-layer';
     layer.setAttribute('aria-hidden', 'true');
     layer.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:' + docH +
-      'px;pointer-events:none;overflow:hidden;z-index:-1;';
-    var count = opts.count != null ? opts.count : ri(2, 4);
+      'px;pointer-events:none;overflow:hidden;z-index:50;';
+    // Count: 0 to n — often a couple, sometimes none, occasionally a flurry.
+    var count = opts.count != null ? opts.count : (Math.random() < 0.25 ? 0 : ri(1, 8));
+    // Sometimes the doodles CLUSTER — a person sitting on one side of the board,
+    // doodling in one spot while others talk — rather than scattered around it.
+    var clustered = count > 2 && Math.random() < 0.5, ccx, ccy, sx, sy;
+    if (clustered) {
+      ccx = (Math.random() < 0.5 ? rnd(0.04, 0.24) : rnd(0.76, 0.96)) * bodyW; // one side
+      ccy = rnd(0.08, 0.92) * docH;
+      sx = bodyW * rnd(0.07, 0.15); sy = docH * rnd(0.04, 0.11);
+    }
     for (var i = 0; i < count; i++) {
       var S = rnd(54, 104), kind = pick(ORDER), pen = penFor(S);
       var svg = wrap(S, S, PRIMS[kind](pen, S / 2, S / 2, S * 0.9), { w: S, h: S });
-      var leftSide = Math.random() < 0.5;
-      var x = leftSide ? rnd(-S * 0.3, bodyW * 0.10) : rnd(bodyW * 0.90 - S, bodyW - S * 0.7);
-      x = Math.max(-S * 0.4, Math.min(x, bodyW - S * 0.6));
-      var y = rnd(S, Math.max(S, docH - S));
+      var x, y;
+      if (clustered) { x = ccx + rnd(-sx, sx) - S / 2; y = ccy + rnd(-sy, sy) - S / 2; }
+      else {
+        // bias to the left/right margins (off to the sides), occasionally central
+        var zr = Math.random();
+        if (zr < 0.42) x = rnd(-S * 0.35, bodyW * 0.18);
+        else if (zr < 0.84) x = rnd(bodyW * 0.82 - S, bodyW - S * 0.55);
+        else x = rnd(bodyW * 0.18, Math.max(bodyW * 0.18, bodyW * 0.82 - S));
+        y = rnd(-S * 0.3, Math.max(S, docH - S * 0.5));
+      }
+      x = Math.max(-S * 0.3, Math.min(x, bodyW - S * 0.6));
+      y = Math.max(0, Math.min(y, docH - S * 0.6));
       var d = document.createElement('div');
       d.className = 'wf-doodle';
       d.style.cssText = 'position:absolute;left:' + Math.round(x) + 'px;top:' + Math.round(y) +
@@ -287,11 +316,11 @@ function renderAll(){ renderCatalog(); renderSheet(); }
   window.WFDoodles = {
     DOODLE_PENS: DOODLE_PENS, PRIMS: PRIMS, ORDER: ORDER, penFor: penFor,
     cellSVG: cellSVG, renderCatalog: renderCatalog, renderSheet: renderSheet,
-    renderAll: renderAll, scatterPage: scatterPage
+    renderAll: renderAll, scatterDoodles: scatterDoodles, scatterPage: scatterDoodles
   };
 
   // If the napkin asset pass already ran before this tenant finished loading
   // (common when this script is injected async after window 'load'), scatter
   // now — scatterPage self-guards against a double .wf-doodle-layer.
-  if (document.querySelector('.wf-stencil-layer')) { try { scatterPage(); } catch (e) {} }
+  if (document.documentElement.classList.contains('wf-napkin-ready')) { try { scatterDoodles(); } catch (e) {} }
 })();

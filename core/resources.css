@@ -247,16 +247,16 @@ html, body { margin: 0; }
 /* Compact chart-card: small FPO example art + a ~9pt usage guideline. Keeps
    charts from hogging space and teaches the right tool for the job. */
 .rs-chartw .rs-w-body { gap: 8px; }
-/* Draw area fills the card; FPO example marks sit on a faint grid; write your
-   real data over it. Guideline is a small footer (below). */
-.rs-chart-area {
-  flex: 1 1 auto; min-height: 96px; position: relative; border: 1px solid var(--rs-line); border-radius: 4px;
-  background-image:
-    repeating-linear-gradient(to right, var(--rs-line-soft) 0 1px, transparent 1px 26px),
-    repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px 26px);
-}
-.rs-chart-area--plain { background-image: none; }            /* donut / gauge — no grid */
-.rs-fpo { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); display: block; }
+/* Draw area: horizontal value rules only + a left gutter to write the vertical
+   axis label + a clear band at the bottom to draw in (x-axis / freeform).
+   Filled cards drop a faint FPO example on it; blank cards leave it empty. */
+.rs-chart-area { display: flex; flex: 1 1 auto; min-height: 120px; border: 1px solid var(--rs-line); border-radius: 4px; overflow: hidden; }
+.rs-chart-area .rs-yaxis { flex: 0 0 20px; border-right: 1px solid var(--rs-line); }   /* write the vertical-axis label here */
+.rs-chart-area .rs-plot { flex: 1 1 auto; position: relative;
+  background-image: repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-grid, 26px));
+  background-repeat: no-repeat; background-size: 100% calc(100% - 24px); }            /* clear band at bottom to draw in */
+.rs-chart-area--plain { display: block; position: relative; }                          /* donut / gauge — no rules */
+.rs-fpo { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); display: block; }
 .rs-fpo .ax  { stroke: var(--rs-line-strong); stroke-width: 1.4; fill: none; }
 .rs-fpo .ln  { stroke: #b8c0cc; stroke-width: 2; fill: none; }
 .rs-fpo .fill{ fill: #e7ebf1; }
@@ -269,6 +269,10 @@ html, body { margin: 0; }
 .rs-guide { font-size: 9px; line-height: 1.35; color: #5a6678; margin: 0; }    /* ~7pt in 1:1 print */
 .rs-guide b { color: var(--rs-ink); font-weight: 600; }
 .rs-guide .nng { color: #8a93a3; }
+/* Filled (example) | blank (write-on) pair per chart type, with note below. */
+.rs-chart-pair { display: flex; flex-direction: column; gap: 6px; }
+.rs-cp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; flex: 1 1 auto; }
+.rs-cp-tag { font-size: 9px; letter-spacing: .05em; text-transform: uppercase; color: #9aa3b2; font-weight: 400; }
 
 /* Small loose cut-outs — pills, headers, notes, arrows, priority stars */
 .rs-cutrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 8px; }

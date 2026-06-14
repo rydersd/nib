@@ -1,0 +1,218 @@
+/* ============================================================================
+   resources.css — printable workshop starter sheets (clean ink-light)
+   ============================================================================
+   Blank structural sheets you print and draw on by hand. Light-gray guides so
+   your pen reads on top; white ground; safe print margins. Each sheet is a
+   paper-sized .sheet; sizes match the PDF export's paper presets.
+
+   Engine = this file + resources.js (expands data-cols / data-cells / data-ticks
+   into guide elements). Sheets are thin declarative HTML and carry NO
+   eqPartners-specific deps, so the whole set backports to nib/core as-is.
+   Intentionally independent of wireframe.css / fidelity — sheets stay clean at
+   every fidelity (they don't use class="wireframe").
+   ============================================================================ */
+
+:root {
+  --rs-line: #d9dde3;          /* standard guide line */
+  --rs-line-soft: #e8ebef;     /* faint fills / column bands */
+  --rs-line-strong: #c2c8d0;   /* axes, frame borders */
+  --rs-ink: #98a0ab;           /* labels, placeholder text */
+  --rs-ground: #ffffff;
+  --rs-margin: 0.45in;         /* safe print margin (printers clip ~0.25in) */
+  --rs-radius: 4px;
+  --rs-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* ── Paper ──────────────────────────────────────────────────────────────── */
+/* Sheets carry no class="wireframe", so wireframe.css's html.wireframe body
+   rules don't apply — these stay clean at every fidelity. Soft canvas (screen
+   only) makes the sheet read as paper. */
+html, body { margin: 0; }
+@media screen { body { background: #eceff3; } }
+
+.sheet {
+  background: var(--rs-ground);
+  box-sizing: border-box;
+  padding: var(--rs-margin);
+  margin: 18px auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: var(--rs-ink);
+  font-family: var(--rs-font);
+}
+/* 96dpi pixel dimensions */
+.paper--letter  { width: 816px;  height: 1056px; }
+.paper--tabloid { width: 1056px; height: 1632px; }
+.paper--a4      { width: 794px;  height: 1123px; }
+.paper--a3      { width: 1123px; height: 1587px; }
+.paper--letter.landscape  { width: 1056px; height: 816px; }
+.paper--tabloid.landscape { width: 1632px; height: 1056px; }
+.paper--a4.landscape      { width: 1123px; height: 794px; }
+.paper--a3.landscape      { width: 1587px; height: 1123px; }
+
+/* On-screen affordance only */
+@media screen { .sheet { box-shadow: 0 2px 10px rgba(30, 42, 58, 0.14); } }
+
+/* Print / export: full-bleed sheet, no chrome */
+@page { margin: 0; }
+@media print {
+  html, body { margin: 0; background: #fff; }
+  .sheet { box-shadow: none; margin: 0; }
+  .wf-ctx-bar, #wf-story-bar, #spec-panel, [class^="wf-feedback"] { display: none !important; }
+}
+
+/* ── Sheet header (title + optional subtitle) ───────────────────────────── */
+.rs-title {
+  position: absolute;
+  top: 14px; right: var(--rs-margin);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rs-ink);
+}
+.rs-head { flex: 0 0 auto; margin-bottom: 14px; }
+.rs-head h1 { margin: 0; font-size: 15px; font-weight: 600; color: #6b7280; letter-spacing: 0.02em; }
+
+/* A region that fills the remaining sheet height */
+.rs-fill { flex: 1 1 auto; min-height: 0; }
+
+/* ── Primitive: column grid (data-cols=N) ───────────────────────────────── */
+.rs-colgrid {
+  display: grid;
+  grid-template-columns: repeat(var(--rs-cols, 12), 1fr);
+  gap: var(--rs-gutter, 16px);
+  height: 100%;
+}
+.rs-colgrid > .rs-col {
+  background: var(--rs-line-soft);
+  border-radius: 2px;
+}
+/* optional baseline overlay behind a grid (horizontal rhythm) */
+.rs-baseline {
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent calc(var(--rs-baseline, 24px) - 1px),
+    var(--rs-line-soft) calc(var(--rs-baseline, 24px) - 1px), var(--rs-line-soft) var(--rs-baseline, 24px));
+}
+
+/* ── Primitive: ruled rows (pure CSS, infinite) ─────────────────────────── */
+.rs-rows {
+  height: 100%;
+  background-image: repeating-linear-gradient(
+    to bottom, transparent 0, transparent calc(var(--rs-row-h, 40px) - 1px),
+    var(--rs-line) calc(var(--rs-row-h, 40px) - 1px), var(--rs-line) var(--rs-row-h, 40px));
+  border-top: 1px solid var(--rs-line);
+}
+
+/* ── Primitive: box frame ───────────────────────────────────────────────── */
+.rs-frame {
+  border: 1.5px solid var(--rs-line-strong);
+  border-radius: var(--rs-radius);
+  box-sizing: border-box;
+}
+.rs-frame--label::before {
+  content: attr(data-label);
+  display: block;
+  padding: 7px 10px;
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--rs-ink);
+  border-bottom: 1px solid var(--rs-line);
+}
+
+/* ── Dashboard tiles (grid of frames) ───────────────────────────────────── */
+.rs-tiles {
+  display: grid;
+  grid-template-columns: repeat(var(--rs-tile-cols, 2), 1fr);
+  grid-auto-rows: 1fr;
+  gap: 18px;
+  height: 100%;
+}
+
+/* ── Table (header band + ruled body + column dividers) ─────────────────── */
+.rs-table { height: 100%; display: flex; flex-direction: column; border: 1.5px solid var(--rs-line-strong); border-radius: var(--rs-radius); overflow: hidden; }
+.rs-table__head { flex: 0 0 var(--rs-row-h, 44px); border-bottom: 1.5px solid var(--rs-line-strong); background: var(--rs-line-soft);
+  display: grid; grid-template-columns: var(--rs-tcols, repeat(4, 1fr)); }
+.rs-table__head > span { border-right: 1px solid var(--rs-line); }
+.rs-table__head > span:last-child { border-right: 0; }
+.rs-table__body { flex: 1 1 auto; position: relative;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--rs-row-h, 44px) - 1px), var(--rs-line) calc(var(--rs-row-h, 44px) - 1px), var(--rs-line) var(--rs-row-h, 44px)); }
+.rs-table__body .rs-vdiv { position: absolute; top: 0; bottom: 0; width: 0; border-right: 1px solid var(--rs-line); }
+
+/* ── Chart starter (plot with gridlines + L/B axes + gutters) ───────────── */
+.rs-chart { height: 100%; display: grid; grid-template-columns: 40px 1fr; grid-template-rows: 1fr 34px; }
+.rs-chart__y { grid-column: 1; grid-row: 1; border-right: 2px solid var(--rs-line-strong); }
+.rs-chart__plot { grid-column: 2; grid-row: 1; border-bottom: 2px solid var(--rs-line-strong);
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--rs-grid, 48px) - 1px), var(--rs-line) calc(var(--rs-grid, 48px) - 1px), var(--rs-line) var(--rs-grid, 48px)),
+    repeating-linear-gradient(to right, transparent 0, transparent calc(var(--rs-grid, 48px) - 1px), var(--rs-line-soft) calc(var(--rs-grid, 48px) - 1px), var(--rs-line-soft) var(--rs-grid, 48px)); }
+.rs-chart--bars .rs-chart__plot {
+  background-image:
+    repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--rs-grid, 48px) - 1px), var(--rs-line) calc(var(--rs-grid, 48px) - 1px), var(--rs-line) var(--rs-grid, 48px)),
+    repeating-linear-gradient(to right, transparent 0, transparent calc(var(--rs-bar, 64px) - 1px), var(--rs-line-soft) calc(var(--rs-bar, 64px) - 1px), var(--rs-line-soft) var(--rs-bar, 64px)); }
+.rs-chart__x { grid-column: 2; grid-row: 2; }
+.rs-chart__corner { grid-column: 1; grid-row: 2; }
+
+/* ── Cells (frame grid; data-cells=N) — Crazy 8s, thumbnails ─────────────── */
+.rs-cells { display: grid; grid-template-columns: repeat(var(--rs-cell-cols, 4), 1fr); grid-auto-rows: 1fr; gap: 14px; height: 100%; }
+.rs-cells > .rs-cell { border: 1.5px solid var(--rs-line-strong); border-radius: var(--rs-radius); position: relative; }
+.rs-cells > .rs-cell::before { content: attr(data-n); position: absolute; top: 5px; left: 7px; font-size: 10px; color: var(--rs-ink); }
+
+/* ── Mobile device frames ───────────────────────────────────────────────── */
+.rs-phones { display: flex; gap: 36px; justify-content: center; align-items: center; height: 100%; }
+.rs-phone { width: 300px; height: 620px; border: 2px solid var(--rs-line-strong); border-radius: 26px; position: relative; }
+.rs-phone::before { content: ''; position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 56px; height: 5px; border-radius: 3px; background: var(--rs-line); }
+.rs-phone::after { content: ''; position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); width: 120px; height: 4px; border-radius: 2px; background: var(--rs-line); }
+
+/* ── Form rows (label + field) ──────────────────────────────────────────── */
+.rs-form { display: flex; flex-direction: column; gap: 20px; }
+.rs-form .rs-field { display: grid; grid-template-columns: 140px 1fr; gap: 14px; align-items: center; }
+.rs-form .rs-field::before { content: ''; height: 12px; border-radius: 2px; background: var(--rs-line-soft); }
+.rs-form .rs-field > i { height: 38px; border: 1.5px solid var(--rs-line); border-radius: var(--rs-radius); display: block; }
+
+/* ── 2x2 matrix ─────────────────────────────────────────────────────────── */
+.rs-matrix { position: relative; height: 100%; border: 1.5px solid var(--rs-line-strong); border-radius: var(--rs-radius); }
+.rs-matrix::before, .rs-matrix::after { content: ''; position: absolute; background: var(--rs-line); }
+.rs-matrix::before { left: 0; right: 0; top: 50%; height: 1px; }
+.rs-matrix::after { top: 0; bottom: 0; left: 50%; width: 1px; }
+
+/* ── KPI tile (big number + sparkline strip) ────────────────────────────── */
+.rs-kpi { display: flex; flex-direction: column; gap: 16px; }
+.rs-kpi .rs-kpi__num { height: 64px; width: 50%; border-bottom: 2px dashed var(--rs-line); }
+.rs-kpi .rs-kpi__spark { flex: 1 1 auto; border: 1.5px solid var(--rs-line); border-radius: var(--rs-radius);
+  background-image: repeating-linear-gradient(to right, transparent 0, transparent calc(var(--rs-grid, 40px) - 1px), var(--rs-line-soft) calc(var(--rs-grid, 40px) - 1px), var(--rs-line-soft) var(--rs-grid, 40px)); }
+
+/* ── Pills + component stencil ──────────────────────────────────────────── */
+.rs-row-of { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 22px; }
+.rs-pill { width: 96px; height: 30px; border: 1.5px solid var(--rs-line-strong); border-radius: 999px; }
+.rs-btn { width: 120px; height: 40px; border: 1.5px solid var(--rs-line-strong); border-radius: var(--rs-radius); }
+.rs-input { width: 240px; height: 40px; border: 1.5px solid var(--rs-line); border-radius: var(--rs-radius); }
+.rs-toggle { width: 56px; height: 30px; border: 1.5px solid var(--rs-line-strong); border-radius: 999px; position: relative; }
+.rs-toggle::before { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; border: 1.5px solid var(--rs-line); }
+.rs-tabs { display: flex; gap: 0; border-bottom: 1.5px solid var(--rs-line-strong); width: 360px; }
+.rs-tabs > i { flex: 1; height: 34px; border: 1px solid var(--rs-line); border-bottom: 0; }
+.rs-stencil-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--rs-ink); margin: 0 0 8px; }
+
+/* ── Swimlanes (journey / blueprint) ────────────────────────────────────── */
+.rs-swim { display: grid; grid-template-rows: 40px repeat(var(--rs-lanes, 4), 1fr); height: 100%; border: 1.5px solid var(--rs-line-strong); border-radius: var(--rs-radius); overflow: hidden; }
+.rs-swim__stages { display: grid; grid-template-columns: 130px repeat(var(--rs-stages, 5), 1fr); border-bottom: 1.5px solid var(--rs-line-strong); background: var(--rs-line-soft); }
+.rs-swim__stages > span { border-right: 1px solid var(--rs-line); }
+.rs-swim__lane { display: grid; grid-template-columns: 130px repeat(var(--rs-stages, 5), 1fr); border-bottom: 1px solid var(--rs-line); }
+.rs-swim__lane:last-child { border-bottom: 0; }
+.rs-swim__lane > .rs-lane-label { border-right: 1.5px solid var(--rs-line-strong); display: flex; align-items: center; padding: 0 10px; font-size: 11px; color: var(--rs-ink); background: #fbfcfd; }
+.rs-swim__lane > span { border-right: 1px solid var(--rs-line); }
+
+/* ── Resources hub (index page — clean, no class="wireframe") ───────────── */
+.rs-hub { max-width: 1040px; margin: 0 auto; padding: 34px 24px 64px; font-family: var(--rs-font); color: #3b4f68; }
+.rs-hub h1 { font-size: 24px; margin: 0 0 6px; color: #1e2a3a; }
+.rs-hub .rs-hub-sub { color: #4a5f7f; margin: 0 0 24px; max-width: 60ch; }
+.rs-hub h2 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.09em; color: #4a5f7f; margin: 30px 0 12px; border-bottom: 1px solid #d7dbe0; padding-bottom: 7px; }
+.rs-hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.rs-hub-card { display: block; border: 1px solid #c2c8d0; border-radius: 6px; padding: 14px 16px; text-decoration: none; color: inherit; background: #fff; transition: border-color .12s; }
+.rs-hub-card:hover { border-color: #3d6daa; }
+.rs-hub-card b { display: block; color: #1e2a3a; font-size: 14px; margin-bottom: 3px; }
+.rs-hub-card span { font-size: 12px; color: #4a5f7f; }
+.rs-hub-card .rs-hub-size { float: right; font-size: 10px; letter-spacing: .06em; color: #98a0ab; text-transform: uppercase; }
+
+/* ── Flow / storyboard frames ───────────────────────────────────────────── */
+.rs-flow { display: flex; flex-direction: column; gap: 46px; height: 100%; }
+.rs-flow__row { display: flex; align-items: center; gap: 0; flex: 1; }
+.rs-flow__row > .rs-frame { flex: 1; height: 100%; }
+.rs-flow__row > .rs-arrow { flex: 0 0 40px; text-align: center; color: var(--rs-line-strong); font-size: 22px; }

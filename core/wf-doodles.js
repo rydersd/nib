@@ -274,8 +274,11 @@ function renderAll(){ renderCatalog(); renderSheet(); }
     var layer = document.createElement('div');
     layer.className = 'wf-doodle-layer';
     layer.setAttribute('aria-hidden', 'true');
+    // z-index:-1 — doodles sit ON THE BOARD, behind the page content (which is at
+    // the default z:auto), peeking through gutters/margins like the coffee/tea
+    // stains. (Was 50, which rendered them on top of the content.)
     layer.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:' + docH +
-      'px;pointer-events:none;overflow:hidden;z-index:50;';
+      'px;pointer-events:none;overflow:hidden;z-index:-1;';
     // Count: 0 to n — often a couple, rarely none, occasionally a flurry.
     var count = opts.count != null ? opts.count : (Math.random() < 0.10 ? 0 : ri(1, 8));
     // Sometimes the doodles CLUSTER — a person sitting on one side of the board,

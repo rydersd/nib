@@ -58,7 +58,10 @@ html.wireframe {
 }
 
 html.wireframe[data-wf-fidelity="napkin"] {
-  --wf-wobble-radius: 14px 5px 18px 4px / 5px 12px 4px 10px;
+  /* Scissor-cut corners: small and uneven, not organic blobs. A hand cut
+     is straight-ish with tiny angle errors — the roundness belongs to the
+     sharpie line (see the sharpie ::before in wf-fidelity.css), not the cut. */
+  --wf-wobble-radius: 3px 6px 2px 7px / 5px 2px 8px 3px;
   --wf-wobble-filter: none;
   --wf-grain-opacity: 0.4;
   --wf-grid-opacity: 0.06;
@@ -76,13 +79,13 @@ html.wireframe[data-wf-fidelity="napkin"] {
   --wf-accent-lt: #f0f0f0;
   --wf-accent-fill: rgba(0, 0, 0, 0.04);
   /* Semantic colors removed — grayscale(1) filter handles desaturation */
+  /* Pieces LIE FLAT on the board (reference photos) — shadow is soft and
+     short, not floaty. Layered, one light direction, fast falloff. */
   --wf-paper-shadow:
-    0 0.5px 1px rgba(0, 0, 0, 0.12),
-    0 2px 4px rgba(0, 0, 0, 0.08),
-    0 4px 8px rgba(0, 0, 0, 0.06),
-    0 8px 16px rgba(0, 0, 0, 0.04),
-    0 16px 32px rgba(0, 0, 0, 0.025),
-    0 24px 48px rgba(0, 0, 0, 0.015);
+    0 0.5px 0.7px rgba(26, 27, 30, 0.14),
+    0 1.5px 2px rgba(26, 27, 30, 0.09),
+    0 3px 5px rgba(26, 27, 30, 0.055),
+    0 6px 9px rgba(26, 27, 30, 0.03);
 }
 
 html.wireframe[data-wf-fidelity="polished"] {
@@ -179,6 +182,7 @@ html.wireframe[data-wf-fidelity="napkin"] body {
   /* Stacking context so coffee ring stencils at z-index:-1 sit
      behind content but above the body background. */
   z-index: 0;
+  min-height: 100vh;   /* short pages: overlays + bg still cover the viewport */
   /* Plain paper — no grid lines in napkin mode */
   background: var(--wf-canvas);
 }
@@ -217,23 +221,49 @@ html.wireframe::after {
   z-index: 1000;
 }
 
-/* Paper grain texture overlay + grayscale — napkin mode only.
-   Natural paper texture gives the "working on actual paper" feel.
-   backdrop-filter: grayscale(1) desaturates everything behind this overlay
-   without creating a containing block on html/body. Chrome (context bar
-   at z≥1000, drawers at z≥2000) sits above z-800 and stays in color. */
+/* Paper grain texture overlay — napkin mode only.
+   Natural paper texture gives the "working on actual paper" feel; the
+   grayscale comes from the body::before saturation overlay below. Chrome
+   (context bar at z≥1000, drawers at z≥2000) sits above z-800 and stays in
+   color; page surfaces above z-800 (modal overlay, story bar) get their own
+   grayscale(1) in wf-fidelity.css. */
 html.wireframe[data-wf-fidelity="napkin"] body::after {
   content: '';
-  position: fixed;
+  /* Absolute, not fixed: the grain is ON the paper, scrolls with it, and
+     never extends past body's painted background (fixed overlays used to
+     blend against transparency below the content → a raw gray band). */
+  position: absolute;
   inset: 0;
-  background: url(textures/natural-paper.png) repeat;
+  background-image: var(--wf-paper-tex, url(textures/natural-paper.png));
+  background-repeat: repeat;
   mix-blend-mode: multiply;
   opacity: 0.7;
   pointer-events: none;
   z-index: 800; /* Above page content, below framework chrome (context bar ≥1000) */
-  -webkit-backdrop-filter: grayscale(1);
-  backdrop-filter: grayscale(1);
 }
+
+/* Napkin grayscale — a mid-gray overlay in `saturation` blend mode strips
+   color from everything painted beneath it (tones survive, hue doesn't).
+   Chosen over backdrop-filter (inconsistent compositing across engines)
+   and over filter on html/body (creates a containing block for fixed
+   descendants — see warning below). Chrome at z≥1000 stays in color. */
+html.wireframe[data-wf-fidelity="napkin"] body::before {
+  content: '';
+  position: absolute;   /* see ::after note — never past the painted bg */
+  inset: 0;
+  background: #808080;
+  mix-blend-mode: saturation;
+  pointer-events: none;
+  z-index: 799;
+}
+
+/* NOTE: do NOT "fall back" to filter: grayscale(1) on html here. A filter on
+   the root creates a containing block for fixed descendants (coffee rings,
+   stencil layer, chrome) and breaks hit-testing. The body::before saturation
+   overlay above handles the napkin grayscale for everything below z-799; page
+   surfaces stacked higher (modal overlay, story bar) are desaturated
+   individually in wf-fidelity.css. Texture paths are relative to THIS file
+   (nib/core/), so url(textures/…) resolves to nib/core/textures/. */
 
 /* Per-element paper texture — napkin mode only.
    Each card gets its own paper grain so siblings look like different
@@ -244,7 +274,7 @@ html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card,
 html.wireframe[data-wf-fidelity="napkin"] .ds-sidebar-card,
 html.wireframe[data-wf-fidelity="napkin"] .sfdc-card {
   background-color: var(--wf-white);
-  background-image: url(textures/natural-paper.png);
+  background-image: var(--wf-paper-tex, url(textures/natural-paper.png));
   background-repeat: repeat;
   background-blend-mode: overlay;
   background-position: var(--wf-tex-offset, 0 0);
@@ -285,11 +315,25 @@ html.wireframe[data-wf-fidelity="napkin"] .sfdc-card:nth-child(7) { --wf-tex-off
 
 html.wireframe[data-wf-fidelity="napkin"] .wf-stencil-layer {
   display: block;
-  position: fixed;
+  /* Absolute, not fixed — stencils are marks on the BOARD, so they scroll
+     with the page and sit UNDER the paper pieces (z:-1, same as the coffee
+     rings). JS stretches the layer to full document height so the
+     stencils' % offsets distribute down the whole page. */
+  position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
   overflow: hidden;
+}
+
+/* Procedural margin doodles — injected by wf-doodles.js (scatterPage) in napkin
+   mode, sitting UNDER the paper pieces like the stencils so they read as marks
+   on the board peeking through the gutters. Gated off at every other fidelity. */
+.wf-doodle-layer {
+  display: none;
+}
+html.wireframe[data-wf-fidelity="napkin"] .wf-doodle-layer {
+  display: block;
 }
 
 /* Individual stencils — positioned absolutely within the layer.
@@ -308,12 +352,20 @@ html.wireframe[data-wf-fidelity="napkin"] .wf-stencil-layer {
 }
 html.wireframe[data-wf-fidelity="napkin"] .wf-coffee-ring {
   display: block;
-  position: fixed;
+  /* Absolute, not fixed — a stain is on the printout, not the glass; it
+     scrolls away with the content. JS sets top in px across the full
+     document height (and scales the ring count to page length). */
+  position: absolute;
+  /* BELOW the content, always — the stain is on the board, and the paper
+     pieces sit on top of it (stakeholder call, 2026-06-12). z:-1 with the
+     body's stacking context keeps it above the board background but under
+     every piece; it shows in gutters, margins, and between cards. */
   z-index: -1;
+  mix-blend-mode: multiply;
   pointer-events: none;
   /* SVG uses light tan fill + dark contour-following inner shadow.
      CSS opacity controls overall ring visibility. */
-  opacity: 0.22;
+  opacity: 0.3;
 }
 
 /* Scribble stencils — position/rotation/size set by JS per page load */

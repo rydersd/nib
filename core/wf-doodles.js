@@ -276,8 +276,8 @@ function renderAll(){ renderCatalog(); renderSheet(); }
     layer.setAttribute('aria-hidden', 'true');
     layer.style.cssText = 'position:absolute;left:0;top:0;width:100%;height:' + docH +
       'px;pointer-events:none;overflow:hidden;z-index:50;';
-    // Count: 0 to n — often a couple, sometimes none, occasionally a flurry.
-    var count = opts.count != null ? opts.count : (Math.random() < 0.25 ? 0 : ri(1, 8));
+    // Count: 0 to n — often a couple, rarely none, occasionally a flurry.
+    var count = opts.count != null ? opts.count : (Math.random() < 0.10 ? 0 : ri(1, 8));
     // Sometimes the doodles CLUSTER — a person sitting on one side of the board,
     // doodling in one spot while others talk — rather than scattered around it.
     var clustered = count > 2 && Math.random() < 0.5, ccx, ccy, sx, sy;

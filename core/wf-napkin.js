@@ -638,12 +638,12 @@
         document.body.appendChild(layer);
 
         // Coffee + tea stains: probabilistic, like a real desk where people
-        // are hard at work on the paper prototype. ~30% of loads are clean;
-        // the rest collect 1–5 marks (weighted toward 1–2), spread over the
+        // are hard at work on the paper prototype. ~15% of loads are clean;
+        // the rest collect 1–5 marks (weighted toward 2–3), spread over the
         // full page. Rings and tea stains are generated fresh per spawn —
         // geometry, seeds, palette, breaks all vary; position, rotation and
         // saturation vary at placement below.
-        if (Math.random() < 0.7) {
+        if (Math.random() < 0.85) {
           // Whose desk is this today? Humans don't all drink coffee — pick
           // a beverage profile per page: a coffee drinker (all rings + the
           // odd spill), a tea drinker (all tea, brewing the SAME leaf all
@@ -669,9 +669,9 @@
           var stainPool = [];
           STAINS.forEach(function (s) { for (var wi = 0; wi < s.weight; wi++) stainPool.push(s); });
 
-          // 1..5, weighted toward a couple of marks; very long pages nudge up
+          // 1..5, weighted toward 2-3 marks; very long pages nudge up
           var cr = Math.random();
-          var count = cr < 0.32 ? 1 : cr < 0.59 ? 2 : cr < 0.79 ? 3 : cr < 0.92 ? 4 : 5;
+          var count = cr < 0.20 ? 1 : cr < 0.45 ? 2 : cr < 0.68 ? 3 : cr < 0.86 ? 4 : 5;
           if (docH > 3200 && count < 5 && Math.random() < 0.4) count++;
           for (var ci = 0; ci < count; ci++) {
             var stain = stainPool[Math.floor(Math.random() * stainPool.length)];

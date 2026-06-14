@@ -242,6 +242,28 @@ html, body { margin: 0; }
 }
 .rs-donut { width: 92px; height: 92px; border-radius: 50%; border: 15px solid var(--rs-line); margin: auto; }
 
+/* Compact chart-card: small FPO example art + a ~9pt usage guideline. Keeps
+   charts from hogging space and teaches the right tool for the job. */
+.rs-chartw .rs-w-body { gap: 8px; }
+/* Draw area fills the card; FPO example marks sit on a faint grid; write your
+   real data over it. Guideline is a small footer (below). */
+.rs-chart-area {
+  flex: 1 1 auto; min-height: 96px; position: relative; border: 1px solid var(--rs-line); border-radius: 4px;
+  background-image:
+    repeating-linear-gradient(to right, var(--rs-line-soft) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px 26px);
+}
+.rs-chart-area--plain { background-image: none; }            /* donut / gauge — no grid */
+.rs-fpo { position: absolute; inset: 8px; width: calc(100% - 16px); height: calc(100% - 16px); display: block; }
+.rs-fpo .ax  { stroke: var(--rs-line-strong); stroke-width: 1.4; fill: none; }
+.rs-fpo .ln  { stroke: #b8c0cc; stroke-width: 2; fill: none; }
+.rs-fpo .fill{ fill: #e7ebf1; }
+.rs-fpo .bar { fill: #dde2e9; }
+.rs-fpo .dot { fill: #b8c0cc; }
+.rs-guide { font-size: 11px; line-height: 1.34; color: #5a6678; margin: 0; }   /* ~9pt in 1:1 print */
+.rs-guide b { color: var(--rs-ink); font-weight: 600; }
+.rs-guide .nng { color: #8a93a3; }
+
 /* Small loose cut-outs — pills, headers, notes, arrows, priority stars */
 .rs-cutrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 8px; }
 .rs-cut-pill   { width: 104px; height: 32px; border: 1.5px dashed var(--rs-line-strong); border-radius: 999px; }

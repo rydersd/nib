@@ -250,13 +250,19 @@ html, body { margin: 0; }
 /* Draw area: horizontal value rules only + a left gutter to write the vertical
    axis label + a clear band at the bottom to draw in (x-axis / freeform).
    Filled cards drop a faint FPO example on it; blank cards leave it empty. */
-.rs-chart-area { display: flex; flex: 1 1 auto; min-height: 120px; border: 1px solid var(--rs-line); border-radius: 4px; overflow: hidden; }
-.rs-chart-area .rs-yaxis { flex: 0 0 20px; border-right: 1px solid var(--rs-line); }   /* write the vertical-axis label here */
+/* No outer box — just an L-shaped axis: y-axis from top down to the baseline,
+   baseline (x-axis) at 3/4 height so the bottom quarter is free to write in.
+   Value rules sit above the baseline; left gutter is for the vertical label. */
+.rs-chart-area { display: flex; flex: 1 1 auto; min-height: 120px; }
+.rs-chart-area .rs-yaxis { flex: 0 0 18px; }                                           /* write the vertical-axis label here */
 .rs-chart-area .rs-plot { flex: 1 1 auto; position: relative;
   background-image: repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-grid, 26px));
-  background-repeat: no-repeat; background-size: 100% calc(100% - 24px); }            /* clear band at bottom to draw in */
-.rs-chart-area--plain { display: block; position: relative; }                          /* donut / gauge — no rules */
-.rs-fpo { position: absolute; inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); display: block; }
+  background-repeat: no-repeat; background-size: 100% 75%; }                           /* rules in the top 3/4 only */
+.rs-chart-area .rs-plot::before { content: ''; position: absolute; left: 0; top: 0; height: 75%; border-left: 1.5px solid var(--rs-line-strong); }  /* y-axis, ends at baseline */
+.rs-chart-area .rs-plot::after  { content: ''; position: absolute; left: 0; right: 0; top: 75%; border-top: 1.5px solid var(--rs-line-strong); }    /* baseline (x-axis) at 3/4 */
+.rs-chart-area--plain { display: block; position: relative; }                          /* donut / gauge — no axes */
+.rs-fpo { position: absolute; top: 4px; left: 6px; right: 6px; bottom: 25%; display: block; }   /* example sits above the baseline */
+.rs-chart-area--plain .rs-fpo { inset: 8px; }
 .rs-fpo .ax  { stroke: var(--rs-line-strong); stroke-width: 1.4; fill: none; }
 .rs-fpo .ln  { stroke: #b8c0cc; stroke-width: 2; fill: none; }
 .rs-fpo .fill{ fill: #e7ebf1; }

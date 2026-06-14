@@ -210,6 +210,46 @@ html, body { margin: 0; }
 .rs-swim__lane > .rs-lane-label { border-right: 1.5px solid var(--rs-line-strong); display: flex; align-items: center; padding: 0 10px; font-size: 11px; color: var(--rs-ink); background: #fbfcfd; }
 .rs-swim__lane > span { border-right: 1px solid var(--rs-line); }
 
+/* ════ Cut-out widgets — write → cut → place on an 11×17 canvas ═══════════
+   Dashed borders = cut guides. Each widget has a label zone + a write-in body
+   so stakeholders only fill content (minimum layout effort). */
+.rs-cutsheet { display: grid; gap: 20px; align-content: start; }
+.rs-cutsheet--2 { grid-template-columns: repeat(2, 1fr); }
+.rs-cutsheet--3 { grid-template-columns: repeat(3, 1fr); }
+.rs-widget {
+  border: 1.5px dashed var(--rs-line-strong); border-radius: 6px; background: #fff;
+  display: flex; flex-direction: column; min-height: 110px; overflow: hidden;
+}
+.rs-widget > .rs-w-title {
+  flex: 0 0 auto; border-bottom: 1px solid var(--rs-line); padding: 7px 11px;
+  font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--rs-ink);
+}
+.rs-widget > .rs-w-body { flex: 1 1 auto; padding: 11px; display: flex; flex-direction: column; min-height: 0; }
+.rs-w-h { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--rs-ink); margin: 22px 0 12px; }
+.rs-w-h:first-child { margin-top: 0; }
+
+/* KPI card — big-number line + a small trend strip */
+.rs-kpi-card .rs-w-body { gap: 9px; }
+.rs-kpi-card .rs-kpi-figure { flex: 1 1 auto; border-bottom: 2px dashed var(--rs-line); }
+.rs-kpi-card .rs-kpi-trend { flex: 0 0 26px; border: 1px solid var(--rs-line); border-radius: 3px; }
+
+/* Chart card — mini plot (left/bottom axes + gridlines) and a donut variant */
+.rs-chartcard-plot {
+  flex: 1 1 auto; border-left: 2px solid var(--rs-line-strong); border-bottom: 2px solid var(--rs-line-strong);
+  background-image:
+    repeating-linear-gradient(to bottom, var(--rs-line) 0 1px, transparent 1px var(--rs-grid, 26px)),
+    repeating-linear-gradient(to right, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-grid, 26px));
+}
+.rs-donut { width: 92px; height: 92px; border-radius: 50%; border: 15px solid var(--rs-line); margin: auto; }
+
+/* Small loose cut-outs — pills, headers, notes, arrows, priority stars */
+.rs-cutrow { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 8px; }
+.rs-cut-pill   { width: 104px; height: 32px; border: 1.5px dashed var(--rs-line-strong); border-radius: 999px; }
+.rs-cut-header { flex: 1 1 100%; max-width: 540px; height: 46px; border: 1.5px dashed var(--rs-line-strong); border-radius: 5px; }
+.rs-cut-note   { width: 124px; height: 124px; border: 1.5px dashed var(--rs-line-strong); border-radius: 5px; }
+.rs-cut-arrow  { width: 92px; height: 44px; border: 1.5px dashed var(--rs-line-strong); border-radius: 5px; display: flex; align-items: center; justify-content: center; color: var(--rs-line-strong); font-size: 20px; }
+.rs-cut-star   { width: 72px; height: 72px; border: 1.5px dashed var(--rs-line-strong); border-radius: 5px; display: flex; align-items: center; justify-content: center; color: var(--rs-line-strong); font-size: 24px; }
+
 /* ── Resources hub (index page — clean, no class="wireframe") ───────────── */
 .rs-hub { max-width: 1040px; margin: 0 auto; padding: 34px 24px 64px; font-family: var(--rs-font); color: #3b4f68; }
 .rs-hub h1 { font-size: 24px; margin: 0 0 6px; color: #1e2a3a; }

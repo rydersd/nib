@@ -253,21 +253,24 @@ html, body { margin: 0; }
 /* No outer box — just an L-shaped axis: y-axis from top down to the baseline,
    baseline (x-axis) at 3/4 height so the bottom quarter is free to write in.
    Value rules sit above the baseline; left gutter is for the vertical label. */
-.rs-chart-area { display: flex; flex: 1 1 auto; min-height: 120px; }
+/* Fixed height so a chart card is the same size on every sheet (a page with
+   fewer cards just has whitespace below). Baseline at 80% — the bottom fifth
+   is the write band. */
+.rs-chart-area { display: flex; flex: 0 0 auto; height: 146px; }
 .rs-chart-area .rs-yaxis { flex: 0 0 18px; }                                           /* write the vertical-axis label here */
 .rs-chart-area .rs-plot { flex: 1 1 auto; position: relative;
   background-image: repeating-linear-gradient(to bottom, var(--rs-line-soft) 0 1px, transparent 1px var(--rs-grid, 26px));
-  background-repeat: no-repeat; background-size: 100% 75%; }                           /* rules in the top 3/4 only */
-.rs-chart-area .rs-plot::before { content: ''; position: absolute; left: 0; top: 0; height: 75%; border-left: 1.5px solid var(--rs-line-strong); }  /* y-axis, ends at baseline */
-.rs-chart-area .rs-plot::after  { content: ''; position: absolute; left: 0; right: 0; top: 75%; border-top: 1.5px solid var(--rs-line-strong); }    /* baseline (x-axis) at 3/4 */
-.rs-chart-area--plain { display: block; position: relative; }                          /* donut / gauge — no axes */
+  background-repeat: no-repeat; background-size: 100% 80%; }                           /* rules above the baseline */
+.rs-chart-area .rs-plot::before { content: ''; position: absolute; left: 0; top: 0; height: 80%; border-left: 1.5px solid var(--rs-line-strong); }  /* y-axis, ends at baseline */
+.rs-chart-area .rs-plot::after  { content: ''; position: absolute; left: 0; right: 0; top: 80%; border-top: 1.5px solid var(--rs-line-strong); }    /* baseline (x-axis) at 80% */
+.rs-chart-area--plain { display: flex; align-items: center; justify-content: center; overflow: hidden; }   /* donut / gauge — no axes; center, never overflow the fixed-height card */
 /* SVG is a replaced element with an intrinsic ratio: with height:auto + both
    top & bottom set, CSS drops `bottom` and sizes from the ratio, so the art
    overran the baseline. An explicit height:75% fully determines the box, so
    preserveAspectRatio="none" maps the art's bottom (viewBox y=110) onto the
    baseline — the example stays inside the x–y axes. */
-.rs-fpo { position: absolute; top: 3px; left: 6px; right: 6px; height: calc(75% - 3px); display: block; }
-.rs-chart-area--plain .rs-fpo { position: absolute; inset: 8px; height: auto; }
+.rs-fpo { position: absolute; top: 3px; left: 6px; right: 6px; height: calc(80% - 3px); display: block; }
+.rs-chart-area--plain .rs-fpo { position: static; height: 118px; width: auto; max-width: 92%; }   /* proportional donut/gauge fits inside the 146px area */
 /* Horizontal bar: categories on the left (full-height y-axis), value axis at the
    bottom, vertical value rules; bars fill the height (no 3/4 baseline). */
 .rs-chart-area--hbar .rs-yaxis { flex: 0 0 34px; }
@@ -276,7 +279,7 @@ html, body { margin: 0; }
   background-repeat: repeat; background-size: auto; }
 .rs-chart-area--hbar .rs-plot::before { height: 100%; }                 /* y-axis (origin), full height */
 .rs-chart-area--hbar .rs-plot::after  { top: auto; bottom: 0; }         /* value axis at the bottom */
-.rs-chart-area--hbar .rs-fpo { top: 8px; left: 6px; right: 8px; bottom: 8px; }   /* bars fill */
+.rs-chart-area--hbar .rs-fpo { top: 8px; left: 6px; right: 8px; bottom: auto; height: calc(100% - 16px); }   /* bars fill the height */
 .rs-fpo .ax  { stroke: var(--rs-line-strong); stroke-width: 1.4; fill: none; }
 .rs-fpo .ln  { stroke: #b8c0cc; stroke-width: 2; fill: none; }
 .rs-fpo .fill{ fill: #e7ebf1; }

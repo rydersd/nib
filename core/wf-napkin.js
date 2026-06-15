@@ -112,23 +112,18 @@
       function buildTeaStainSVG(leaf) {
         function rnd(a, b) { return a + Math.random() * (b - a); }
         function r1(n) { return Math.round(n * 10) / 10; }
-        // smooth closed blob: n points around an ellipse with radial
-        // jitter, joined with catmull-rom-derived beziers
-        function blob(cx, cy, rx, ry, n, jit) {
-          var pts = [];
-          for (var i = 0; i < n; i++) {
-            var ang = (i / n) * Math.PI * 2;
-            var k = 1 - jit + Math.random() * jit * 2;
-            pts.push([cx + Math.cos(ang) * rx * k, cy + Math.sin(ang) * ry * k]);
-          }
-          var d = 'M' + r1(pts[0][0]) + ',' + r1(pts[0][1]);
-          for (var j = 0; j < n; j++) {
-            var p0 = pts[(j - 1 + n) % n], p1 = pts[j], p2 = pts[(j + 1) % n], p3 = pts[(j + 2) % n];
-            d += 'C' + r1(p1[0] + (p2[0] - p0[0]) / 6) + ',' + r1(p1[1] + (p2[1] - p0[1]) / 6) +
-                 ' ' + r1(p2[0] - (p3[0] - p1[0]) / 6) + ',' + r1(p2[1] - (p3[1] - p1[1]) / 6) +
-                 ' ' + r1(p2[0]) + ',' + r1(p2[1]);
-          }
-          return d + 'Z';
+        // Rounded-rectangle path — the seep is an elongated, semi-rectangular
+        // wet halo that shares the bag's directional vector (its long axis),
+        // not a round blob. The #seep turbulence displacement (scale 22) ragged-
+        // ifies the straight edges, so a clean rounded-rect base reads as an
+        // organic, square-ish stain once filtered.
+        function rrect(x, y, w, h, r) {
+          x = r1(x); y = r1(y); w = r1(w); h = r1(h); r = r1(Math.min(r, w / 2, h / 2));
+          return 'M' + (x + r) + ',' + y +
+            'H' + (x + w - r) + 'Q' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + r) +
+            'V' + (y + h - r) + 'Q' + (x + w) + ',' + (y + h) + ' ' + (x + w - r) + ',' + (y + h) +
+            'H' + (x + r) + 'Q' + x + ',' + (y + h) + ' ' + x + ',' + (y + h - r) +
+            'V' + (y + r) + 'Q' + x + ',' + y + ' ' + (x + r) + ',' + y + 'Z';
         }
 
         var s1 = Math.floor(rnd(1, 99)), s2 = Math.floor(rnd(1, 99)), s3 = Math.floor(rnd(1, 99));
@@ -136,34 +131,30 @@
         // all day); otherwise pick per stain (shared desk, different mugs).
         var tea = leaf || TEA_PALETTE[Math.floor(Math.random() * TEA_PALETTE.length)];
         var hue = tea.h + Math.floor(rnd(-3, 3)), sat = tea.s, boost = tea.boost;
-        // 290x280 canvas, bag pivot (145,104): generous margins so jittered
-        // blob points + displacement never reach the bitmap edge (geometry
-        // past the raster cuts off dead-straight — the clipped-ring look).
-        // The water FLARES OUT along the bag's long axis (reference photo:
-        // the seep runs away from the bag, aligned with its rectangle), so
-        // the seep blob is elongated along that axis and offset down-flow,
-        // and the whole stain shares one rotation so flare and bag stay
-        // aligned. Placement already spins the <img> 0-360deg, so down-flow
-        // in SVG space costs no variety.
-        var bw = rnd(58, 76), bh = bw * rnd(1.15, 1.35);    // tea-bag proportions
+        // 290x280 canvas. Fluid model (annotated reference 2026-06-15): water
+        // POOLS at the BOTTOM of the bag and wicks UP toward the top, so the
+        // seep is an elongated rounded-rect that shares the bag's long axis —
+        // tight at the bottom (the concentrated source), flaring up past the
+        // bag top. The whole stain takes ONE rotation (no diagonal tilt) so the
+        // seep and bag share a single directional vector.
+        var bw = rnd(58, 76), bh = bw * rnd(1.15, 1.35);    // tea-bag proportions (long axis vertical)
         var ang = r1(rnd(-16, 16));
         var seamLeft = Math.random() < 0.5;
-        // Fluid direction (annotated reference 2026-06-12): the water runs
-        // DIAGONALLY away from the seam side, at an angle to the bag
-        // rectangle — not straight down its long axis. The seep gets its
-        // own tilt (rendered as a nested rotation so the blob's elongation
-        // follows the flow vector) and its center offsets down-flow.
-        var flow = bh * rnd(0.22, 0.35);                    // how far the water ran
-        var tilt = r1((seamLeft ? -1 : 1) * rnd(18, 45));   // negative = flow swings right, away from a left seam
-        // Seep ALWAYS encloses the bag: the wet halo wicks OUT from the bag, so
-        // it surrounds it. Short axis clears the bag half-diagonal + the tide-line
-        // displacement; long axis adds the down-flow bulge. Centered on the bag
-        // (only a slight down-flow nudge) so the imprint can never poke outside.
-        var diag = Math.sqrt(bw * bw + bh * bh) / 2;
-        var seepRx = r1(diag + rnd(40, 54));
-        var seepRy = r1(seepRx + flow);
-        var seepD = blob(145, r1(104 + flow * 0.25), seepRx, seepRy, 10, 0.16);
-        var bx = r1(145 - bw / 2 + rnd(-6, 6)), by = r1(104 - bh / 2 + rnd(-4, 4));
+        var flow = r1(bh * rnd(0.34, 0.50));                // how far the water wicked UP (drives the elongation)
+        // The placement layer sizes the stain square and spins it 0-360deg about
+        // the canvas CENTER (145,140), so the bag is dropped into the LOWER half
+        // and the upward flare reaches up toward center — keeping the whole stain
+        // hugging the rotation center instead of clipping at the raster edge.
+        var bcy = r1(140 + flow / 2 + 6);                   // bag center Y (lower half)
+        var bx = r1(145 - bw / 2 + rnd(-5, 5)), by = r1(bcy - bh / 2);
+        // Seep encloses the bag: a small halo at the bottom (concentrated) and a
+        // long upward bulge toward the bag top (the flow direction).
+        var seepHX = r1(bw / 2 + rnd(20, 28));              // half-width: snug to the bag sides so the stain stays narrow + elongated
+        var seepTop = r1(by - flow - rnd(16, 22));          // flares UP past the bag top
+        var seepBot = r1(by + bh + rnd(8, 14));             // tight at the bottom — the concentrated wet source
+        var seepX = r1(145 - seepHX), seepW = r1(seepHX * 2), seepH = r1(seepBot - seepTop);
+        var seepRr = r1(Math.min(seepW, seepH) * rnd(0.18, 0.26));   // gentle corners — still reads as a rectangle
+        var seepD = rrect(seepX, seepTop, seepW, seepH, seepRr);
         var sx = r1(seamLeft ? bx - 3 : bx + bw - 6);
         var sh = r1(bh * rnd(0.75, 1.0) + 6), sy = r1(by - 3 + rnd(0, bh - sh + 6));
 
@@ -206,18 +197,27 @@
               '<feDisplacementMap in="SourceGraphic" in2="t" scale="7"/>' +
               '<feGaussianBlur stdDeviation="1.4"/>' +
             '</filter>' +
+            // Seep wash density — concentrated at the BOTTOM of the bag (the
+            // pooled source) and fading UP toward the top as the water wicks
+            // away. Oriented along the seep bbox: y1=1 (bottom) -> y2=0 (top).
+            '<linearGradient id="seepGrad" x1="0.5" y1="1" x2="0.5" y2="0">' +
+              '<stop offset="0" stop-color="hsl(' + hue + ',' + (sat - 4) + '%,68%)" stop-opacity="' + (0.34 * boost).toFixed(2) + '"/>' +
+              '<stop offset="0.4" stop-color="hsl(' + hue + ',' + (sat - 8) + '%,74%)" stop-opacity="' + (0.17 * boost).toFixed(2) + '"/>' +
+              '<stop offset="1" stop-color="hsl(' + hue + ',' + (sat - 11) + '%,81%)" stop-opacity="' + (0.05 * boost).toFixed(2) + '"/>' +
+            '</linearGradient>' +
           '</defs>' +
           // Outer rotation orients the whole stain; the nested rotation
           // tilts ONLY the seep so its elongation and offset follow the
           // fluid direction, diagonal to the bag rectangle.
-          '<g transform="rotate(' + ang + ' 145 104)">' +
-            '<g transform="rotate(' + tilt + ' 145 104)">' +
-              // 1 — seeping water: pale wash (fainter — stakeholder
-              //     2026-06-12), then the tide line as its own crisp pass
-              '<path d="' + seepD + '" fill="hsl(' + hue + ',' + (sat - 8) + '%,74%)" fill-opacity="' + (0.22 * boost).toFixed(2) + '" filter="url(#seep)"/>' +
-              '<path d="' + seepD + '" fill="none" ' +
-                'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.5 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
-            '</g>' +
+          // ONE rotation orients the whole stain; the seep and bag share this
+          // single directional vector (no diagonal tilt — stakeholder 2026-06-15).
+          '<g transform="rotate(' + ang + ' 145 ' + bcy + ')">' +
+            // 1 — seeping water: an elongated rounded-rect halo, dense at the
+            //     bottom and wicking up toward the bag top, with a ragged
+            //     tide-line edge as its own crisp pass
+            '<path d="' + seepD + '" fill="url(#seepGrad)" filter="url(#seep)"/>' +
+            '<path d="' + seepD + '" fill="none" ' +
+              'stroke="hsl(' + hue + ',' + (sat - 2) + '%,50%)" stroke-opacity="' + (0.42 * boost).toFixed(2) + '" stroke-width="' + r1(rnd(1.4, 2.2)) + '" filter="url(#seepEdge)"/>' +
             // 2 — bag body: fabric-mottled imprint
             '<rect x="' + bx + '" y="' + by + '" width="' + r1(bw) + '" height="' + r1(bh) + '" rx="8" ' +
               'fill="hsl(' + hue + ',' + (sat - 4) + '%,58%)" fill-opacity="' + (0.26 * boost).toFixed(2) + '" style="mix-blend-mode:multiply" filter="url(#bag)"/>' +

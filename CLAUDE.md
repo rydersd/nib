@@ -191,14 +191,14 @@ Phase 2 features (still active):
 
 | Token | Hex | Use |
 |-------|-----|-----|
-| `--wf-ink` | #27282a | Headings, borders |
+| `--wf-ink` | #15110d | Headings, borders |
 | `--wf-text` | #4a4c4e | Body text |
 | `--wf-muted` | #646567 | Secondary text, labels |
 | `--wf-line` | #c4c5c7 | Borders, dividers |
 | `--wf-tint` | #e4e4e6 | Subtle fills |
 | `--wf-surface` | #eeeeef | Card backgrounds |
 | `--wf-canvas` | #f3f3f4 | Page background |
-| `--wf-accent` | #3d6daa | The ONE blue (blueprint grid stays blue) |
+| `--wf-accent` | #2c6af2 | The ONE blue (blueprint grid stays blue) |
 | `--wf-red` | #8b4553 | Errors, overdue |
 | `--wf-amber` | #6b5a2f | Warnings, pending |
 | `--wf-green` | #45785a | Success, confirmed |

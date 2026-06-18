@@ -17,7 +17,7 @@
      itself stay blue (see `html.wireframe body` grid + `--wf-accent`), so
      blueprint mode still reads as a blueprint — only the content neutrals
      went gray. Napkin overrides all of these anyway (see below). */
-  --wf-ink:         #27282a;
+  --wf-ink:         #15110d;
   --wf-text:        #4a4c4e;
   --wf-muted:       #646567;
   --wf-line:        #c4c5c7;
@@ -25,9 +25,9 @@
   --wf-surface:     #eeeeef;
   --wf-canvas:      #f3f3f4;
   --wf-white:       #ffffff;
-  --wf-accent:      #3d6daa;
-  --wf-accent-lt:   #e8eff8;
-  --wf-accent-fill: rgba(61, 109, 170, 0.07);
+  --wf-accent:      #2c6af2;
+  --wf-accent-lt:   #e9f0fe;
+  --wf-accent-fill: rgba(44, 106, 242, 0.07);
   --wf-red:         #8b4553;
   --wf-amber:       #6b5a2f;
   --wf-green:       #45785a;

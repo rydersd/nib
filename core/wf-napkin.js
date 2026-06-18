@@ -358,7 +358,7 @@
           pen: pool[Math.floor(Math.random() * pool.length)],
           seed: Math.floor(1 + Math.random() * 98),
           freq: (0.008 + Math.random() * 0.008).toFixed(3) + ' ' + (0.012 + Math.random() * 0.01).toFixed(3),
-          m: 5 + Math.random() * 4,
+          m: 3 + Math.random() * 2.5,        // frame inset — kept tight so rules hug the div edge
           disc: 0.7 + Math.random() * 0.6   // <1 sloppier, >1 more careful
         };
       }
@@ -382,7 +382,7 @@
         // fragment less; sloppy hands the reverse.
         function c01(v) { return Math.max(0, Math.min(1, v)); }
         var P = {
-          pool: c01(pen.pool * author.disc), endDot: c01(pen.endDot * author.disc),
+          pool: c01(pen.pool * author.disc * 0.45), endDot: c01(pen.endDot * author.disc),
           catch: c01(pen.catch * (1.7 - author.disc)),
           skip: c01(pen.skip * (1.7 - author.disc)), frag: c01(pen.frag * (1.7 - author.disc)),
           tail: pen.tail, twin: pen.twin

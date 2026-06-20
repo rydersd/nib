@@ -533,6 +533,15 @@ html.home-alt[data-wf-fidelity="napkin"] body::before {
   background: #808080; mix-blend-mode: saturation;
   pointer-events: none; z-index: 799;
 }
+/* Keep the reading column opaque so the desk's coffee rings + tea stains (z:-1)
+   don't bleed up THROUGH the content and compete with it. The texture/stains stay
+   on the canvas margins (the page is a centered 1240px column); the content reads
+   clean. Torn-paper cards keep their own #fff ::before paper on top of this. */
+html.home-alt[data-wf-fidelity="napkin"] .pr-page {
+  background: var(--pr-canvas);
+  position: relative;
+  z-index: 1;
+}
 /* Stains and scribbles are marks on the paper — absolute, not fixed, so
    they scroll with the page (body gets position:relative as their anchor;
    wf-nav.js spreads them over the full document height). */

@@ -1,0 +1,20 @@
+/* Sample Pack — static token fallback (packs/sample/tokens.css)
+   Mirror of theme.js token values, as a plain <link>-able stylesheet for
+   contexts that don't run the JS loader (e.g. static export, print). Load
+   AFTER core/proto-tokens.css. The JS theme path is preferred (it also
+   wires the theme switcher + font). Keep this file in sync with theme.js. */
+:root {
+  --wf-ink:     #0f2e2a;
+  --wf-text:    #2c4a46;
+  --wf-muted:   #5b736f;
+  --wf-line:    #bcd2cd;
+  --wf-tint:    #dcebe8;
+  --wf-surface: #eef6f4;
+  --wf-canvas:  #f4faf8;
+  --wf-accent:  #0d8a7a;
+  --wf-red:     #b3424f;
+  --wf-amber:   #8a6a1f;
+  --wf-green:   #2f7a55;
+  --wf-purple:  #5a4d9c;
+  --wf-radius:  6px;
+}

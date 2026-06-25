@@ -54,6 +54,8 @@ ${C.bold}Options:${C.reset}
                       deal-registration, agent-chat, kanban-board, …)
   --workbook <path>   Skip the picker; ingest this xlsx into a fresh project
   --sheet <url>       Skip the picker; ingest this Google Sheet
+  --pack <id|path>    Wire a design-system pack (local id like 'sample', a path
+                      to a pack dir, or an installed npm package name)
   --port <n>          Wizard port (default 5173)
   --no-open           Don't auto-open the browser
   --target <dir>      Override target directory (default: ./<project-name>)
@@ -64,7 +66,7 @@ ${C.bold}Examples:${C.reset}
   npx create-nib partner-program --workbook ./pcp.xlsx`);
     process.exit(argv.length === 0 ? 1 : 0);
   }
-  const flags = { port: 5173, open: true, template: null, workbook: null, sheet: null, target: null };
+  const flags = { port: 5173, open: true, template: null, workbook: null, sheet: null, target: null, pack: null };
   const positional = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
@@ -73,6 +75,7 @@ ${C.bold}Examples:${C.reset}
     else if (a === '--template') flags.template = argv[++i] || fail('--template requires an id');
     else if (a === '--workbook') flags.workbook = argv[++i] || fail('--workbook requires a path');
     else if (a === '--sheet') flags.sheet = argv[++i] || fail('--sheet requires a URL');
+    else if (a === '--pack') flags.pack = argv[++i] || fail('--pack requires an id, path, or package name');
     else if (a === '--target') flags.target = argv[++i] || fail('--target requires a path');
     else if (a.startsWith('--')) fail(`unknown flag: ${a}`);
     else positional.push(a);
@@ -167,6 +170,101 @@ function rewriteAssetPaths(target) {
     }
   }
   walk(target);
+}
+
+// ── Design-system pack wiring (see docs/Design-System-Packs.md) ────────────
+// Resolve a --pack spec to a pack directory: an explicit path, a local pack id
+// under nib/packs/, or an installed npm package.
+function resolvePackDir(spec, target) {
+  const candidates = [
+    path.resolve(spec),
+    path.join(NIB_ROOT, 'packs', spec),
+    path.join(target, 'node_modules', spec),
+    path.join(NIB_ROOT, 'node_modules', spec),
+    path.join(process.cwd(), 'node_modules', spec),
+  ];
+  for (const c of candidates) {
+    if (fs.existsSync(path.join(c, 'pack.json'))) return c;
+  }
+  return null;
+}
+
+// Set WIREFRAME_CONFIG.pack in whichever config file the scaffold produced.
+function patchPackConfig(target, id) {
+  const candidates = [
+    path.join(target, 'data', 'wireframe-config.js'),
+    path.join(target, 'project-data.js'),
+  ];
+  for (const f of candidates) {
+    if (!fs.existsSync(f)) continue;
+    let text = fs.readFileSync(f, 'utf8');
+    if (!/window\.WIREFRAME_CONFIG\s*=\s*\{/.test(text)) continue;
+    if (/\bpack\s*:/.test(text)) {
+      text = text.replace(/(\bpack\s*:\s*)(['"][^'"]*['"]|\{[^}]*\})/, `$1${JSON.stringify(id)}`);
+    } else {
+      text = text.replace(/(window\.WIREFRAME_CONFIG\s*=\s*\{)/, `$1\n  pack: ${JSON.stringify(id)},`);
+    }
+    fs.writeFileSync(f, text);
+    return true;
+  }
+  return false;
+}
+
+// Inject the pack scripts at end-of-body on every HTML page — the robust hook
+// (not every Nib page loads proto-nav.js). They only need to run after
+// WIREFRAME_CONFIG (loaded early) and after any nav; the loader dual-patches
+// the live WF_CONFIG so ordering vs. proto-nav is handled either way. The
+// inline config-ensure activates the pack even when a template ships no config.
+function injectPackScripts(target, id) {
+  const skip = new Set(['nib', 'node_modules', '.git', 'pack']);
+  const ensure = `<script>window.WIREFRAME_CONFIG=window.WIREFRAME_CONFIG||{};window.WIREFRAME_CONFIG.pack=${JSON.stringify(id)};</script>`;
+  const block =
+    `  ${ensure}\n` +
+    `  <script src="pack/theme.js"></script>\n` +
+    `  <script src="nib/core/packs/loader.js"></script>\n`;
+  (function walk(dir) {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (skip.has(e.name)) continue;
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!/\.html?$/i.test(e.name)) continue;
+      let t = fs.readFileSync(full, 'utf8');
+      if (t.includes('pack/theme.js')) continue; // already wired
+      const idx = t.toLowerCase().lastIndexOf('</body>');
+      if (idx === -1) continue;
+      t = t.slice(0, idx) + block + t.slice(idx);
+      fs.writeFileSync(full, t);
+    }
+  })(target);
+}
+
+// Copy a pack's runtime files into <target>/pack/, set the config flag, and
+// inject the script tags. Idempotent. Call AFTER bundle + path-rewrite.
+function wirePackInto(target, spec) {
+  const dir = resolvePackDir(spec, target);
+  if (!dir) {
+    patchPackConfig(target, spec); // set flag so it's ready once the pack is present
+    console.log(`${C.yellow}!${C.reset} pack ${C.bold}${spec}${C.reset} not found locally — set WIREFRAME_CONFIG.pack only. Install it (e.g. ${C.dim}npm i ${spec}${C.reset}) and copy its files into ./pack/.`);
+    return;
+  }
+  const meta = JSON.parse(fs.readFileSync(path.join(dir, 'pack.json'), 'utf8'));
+  const id = meta.id || path.basename(dir);
+  const destPack = path.join(target, 'pack');
+  // Copy the whole pack so bundled assets (e.g. fonts/ + fonts.css) come along,
+  // skipping dev/doc/package cruft.
+  copyDirSync(dir, destPack, { skip: new Set(['node_modules', '.git', '.github', 'docs']) });
+  // The pack now lives under ./pack/. If the theme bundles a RELATIVE fontUrl
+  // (e.g. "fonts.css"), prefix it with pack/ so the <link> resolves from the
+  // project root. (Absolute URLs and already-prefixed paths are left alone.)
+  const themePath = path.join(destPack, 'theme.js');
+  if (fs.existsSync(themePath)) {
+    let tj = fs.readFileSync(themePath, 'utf8');
+    const fixed = tj.replace(/("fontUrl"\s*:\s*")(?!https?:|\/\/|\/|pack\/)([^"]+)(")/g, '$1pack/$2$3');
+    if (fixed !== tj) fs.writeFileSync(themePath, fixed);
+  }
+  patchPackConfig(target, id);
+  injectPackScripts(target, id);
+  console.log(`${C.green}✓${C.reset} Wired pack ${C.bold}${id}${C.reset} → ./pack/ (WIREFRAME_CONFIG.pack set, scripts injected)`);
 }
 
 function writeBlankProject(target, name) {
@@ -309,8 +407,8 @@ function safeJoin(root, requested) {
 }
 
 // ── Server ─────────────────────────────────────────────────────────────────
-function startServer({ target, name, port }) {
-  const state = { setupComplete: false };
+function startServer({ target, name, port, pack }) {
+  const state = { setupComplete: false, packSpec: pack || null };
 
   const server = http.createServer(async (req, res) => {
     const parsed = url.parse(req.url, true);
@@ -320,7 +418,7 @@ function startServer({ target, name, port }) {
       // /api/setup — finalize the project
       if (pathname === '/api/setup' && req.method === 'POST') {
         const body = await readJsonBody(req);
-        await handleSetup(body, target, name);
+        await handleSetup(body, target, name, state.packSpec);
         state.setupComplete = true;
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true, redirect: '/project/' }));
@@ -378,12 +476,15 @@ function startServer({ target, name, port }) {
   });
 }
 
-async function handleSetup(body, target, name) {
+async function handleSetup(body, target, name, packSpec) {
   await _handleSetupInner(body, target, name);
   // Every setup mode lands the project with paths that need rewriting and a
   // bundled nib subset so the project works under any static server.
   bundleNibInto(target);
   rewriteAssetPaths(target);
+  // Wire a design-system pack if requested (after bundle + rewrite so the
+  // proto-nav reference is already in its bundled-nib form).
+  if (packSpec) wirePackInto(target, packSpec);
   // Drop the project's CLAUDE.md — the wiki maintenance contract for any LLM
   // that works on this project later. Never overwrites a pre-existing one.
   writeProjectClaudeMd(target, name, body);
@@ -561,12 +662,13 @@ async function main() {
       writeProjectClaudeMd(target, args.name, { mode: 'workbook', sheetsUrl: args.sheet });
       console.log(`${C.green}✓${C.reset} Ingested Google Sheet into ${args.name}`);
     }
+    if (args.pack) wirePackInto(target, args.pack);
     console.log(`\n${C.dim}cd ${args.name} && python3 -m http.server 8000${C.reset}`);
     process.exit(0);
   }
 
   // Interactive wizard.
-  const server = await startServer({ target, name: args.name, port: args.port });
+  const server = await startServer({ target, name: args.name, port: args.port, pack: args.pack });
   const wizardUrl = `http://127.0.0.1:${args.port}/?name=${encodeURIComponent(args.name)}`;
 
   console.log(`${C.green}✓${C.reset} Setup wizard at ${C.bold}${wizardUrl}${C.reset}`);

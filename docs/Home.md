@@ -22,6 +22,7 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 - [[Paper-Utilities]] — `.wf-tape`, `.wf-pin`, `.wf-torn-*`, `.wf-stacked`, `.wf-sketch`
 - [[Icons]] — SVG icon usage + per-design-system catalogs
 - [[Themes]] — Nib / SLDS / Material / High-Contrast + custom theme builder
+- [[Design-System-Packs]] — adopt a real design system (e.g. from Figma) as a reusable tokens + theme + component-map pack
 - [[Fidelity-Levels]] — Napkin / Blueprint / Polished
 - [[Confidence-Levels]] — `data-wf-confidence` for per-element certainty
 - [[Evidence]] — `data-wf-evidence`: the prototype as a heatmap of design certainty

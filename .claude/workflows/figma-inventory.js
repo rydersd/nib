@@ -1,136 +1,134 @@
 export const meta = {
   name: 'figma-inventory',
-  description: 'Inventory a Figma design system (tokens, components, patterns) via ClaudeToFigma and assemble a Nib pack artifact',
-  whenToUse: 'Run after joining a ClaudeToFigma channel to extract a reusable design-system pack. Pass args:{channel}.',
+  description: 'Inventory a Figma design system (tokens, components, patterns) via ClaudeToFigma and assemble a round-trip-ready Nib pack artifact',
+  whenToUse: 'Run after joining a ClaudeToFigma channel to extract a reusable design-system pack WITH real component publish keys. Pass args:{channel} or args:"<channel>".',
   phases: [
     { title: 'Recon', detail: 'document info, styles, page list' },
-    { title: 'Digest', detail: 'slice the overflowing variables + components payloads in parallel subagents' },
-    { title: 'Synthesize', detail: 'assemble design-system.json + wfMap + figma-map' },
+    { title: 'Digest', detail: 'variables (tokens) + COMPONENT_SET enumeration (keys + grammars) in parallel' },
+    { title: 'Synthesize', detail: 'assemble design-system.json + wfMap + round-trip figma-map (real keys)' },
   ],
 }
 
-// args: { channel: "<id>" }
-const channel = (args && args.channel) || ''
-if (!channel) {
-  log('No channel id provided (args.channel). Join a ClaudeToFigma channel and pass its id.')
-}
+// Robust arg parsing: args may be an object, a JSON string, or the bare channel string.
+let _a = args
+if (typeof _a === 'string') { try { _a = JSON.parse(_a) } catch (e) { _a = { channel: _a } } }
+const channel = (_a && _a.channel) || ''
+if (!channel) log('No channel id in args — assuming a ClaudeToFigma channel is already joined this session.')
 
-const TOOLS_HINT =
-  'First call ToolSearch with query "select:mcp__ClaudeToFigma__join_channel,mcp__ClaudeToFigma__get_document_info,' +
-  'mcp__ClaudeToFigma__get_styles,mcp__ClaudeToFigma__get_local_variables,mcp__ClaudeToFigma__get_local_components" ' +
-  'to load the tool schemas, then call mcp__ClaudeToFigma__join_channel({channel:"' + channel + '"}) before anything else.'
+// Every agent first loads the MCP tools it needs and (best-effort) joins the channel.
+const JOIN =
+  'First call ToolSearch query "select:mcp__ClaudeToFigma__join_channel,mcp__ClaudeToFigma__get_document_info,' +
+  'mcp__ClaudeToFigma__get_styles,mcp__ClaudeToFigma__get_local_variables,mcp__ClaudeToFigma__figma_eval" to load tools.' +
+  (channel ? ' Then call mcp__ClaudeToFigma__join_channel({channel:"' + channel + '"}).' :
+             ' A channel is already joined this session — call get_document_info directly to confirm access.')
+
+const SLICE =
+  'If a result exceeds the token limit it is saved to a tool-result .txt file whose PATH is in the error. Do NOT read it inline. ' +
+  'Slice it via python in ~80,000-char spans (python3 -c "print(open(PATH).read()[A:B])") until 100% read, then return ONLY the structured summary.'
 
 const RECON_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['document', 'styles', 'pages'],
+  type: 'object', additionalProperties: true,
+  required: ['styles'],
   properties: {
     document: { type: 'object', additionalProperties: true },
-    styles: {
-      type: 'object', additionalProperties: true,
-      description: 'summary counts + names of text/effect/grid styles and the font families seen',
-    },
+    styles: { type: 'object', additionalProperties: true, description: 'count+names of text/effect/grid styles + font families' },
     pages: { type: 'array', items: { type: 'object', additionalProperties: true } },
     notes: { type: 'string' },
   },
 }
 
 const TOKENS_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
+  type: 'object', additionalProperties: false,
   required: ['collections', 'primitives', 'semantics', 'numbers', 'wfMap'],
   properties: {
     collections: { type: 'array', items: { type: 'object', additionalProperties: true } },
-    primitives: { type: 'object', additionalProperties: true, description: 'path -> {value,type}' },
-    semantics: { type: 'object', additionalProperties: true, description: 'path -> {alias,value}' },
-    numbers: { type: 'object', additionalProperties: true, description: 'radius/spacing/stroke groups' },
-    wfMap: { type: 'object', additionalProperties: true, description: '--wf-* -> resolved hex, with caveats' },
+    primitives: { type: 'object', additionalProperties: true },
+    semantics: { type: 'object', additionalProperties: true },
+    numbers: { type: 'object', additionalProperties: true },
+    wfMap: { type: 'object', additionalProperties: true },
     caveats: { type: 'array', items: { type: 'string' } },
   },
 }
 
-const COMPONENTS_SCHEMA = {
-  type: 'object',
-  additionalProperties: false,
-  required: ['total', 'families', 'sets'],
+// Keyed component map — the part that makes round-trip possible.
+const SETS_SCHEMA = {
+  type: 'object', additionalProperties: false,
+  required: ['total', 'sets'],
   properties: {
-    total: { type: 'number' },
-    families: { type: 'array', items: { type: 'object', additionalProperties: true }, description: 'name prefix -> count + class' },
+    total: { type: 'number', description: 'total COMPONENT_SET count seen' },
+    publicCount: { type: 'number' },
     sets: {
       type: 'object', additionalProperties: true,
-      description: 'setName -> {key?, id?, class, variants:{prop:[values]}, variantCount}',
+      description: 'setName -> { key:"<40-hex publish key>", class, variants:{prop:[values]} }',
     },
-    patterns: { type: 'array', items: { type: 'object', additionalProperties: true } },
-    conventions: { type: 'object', additionalProperties: true },
+    notes: { type: 'string' },
   },
 }
 
-// ── Phase 1: Recon (cheap, inline-able) ─────────────────────────────────
+// ── Phase 1: Recon ──────────────────────────────────────────────────────
 phase('Recon')
 const recon = await agent(
-  TOOLS_HINT + '\n\nThen call get_document_info and get_styles. Return a recon summary: the document/page tree, ' +
-  'a COUNT-and-NAMES summary of text/effect/grid styles (do NOT dump every field), the font families used, and ' +
-  'the list of pages (each likely a component). Note that colors usually live in Variables, not styles. ' +
-  'Keep the payload small — summarize, never paste raw style objects wholesale.',
+  JOIN + '\n\nThen call get_document_info and get_styles. Return a recon summary: the page tree, a COUNT-and-NAMES ' +
+  'summary of text/effect/grid styles, the font families, and the page list. Colors live in Variables not styles — note that. ' +
+  'Summarize; never paste raw style objects wholesale.',
   { label: 'recon', phase: 'Recon', schema: RECON_SCHEMA }
 )
 
-// ── Phase 2: Digest the two overflowing payloads, in parallel ───────────
-// Each agent TRIGGERS the heavy pull (which auto-saves to a tool-result file
-// on overflow), then slices that file by char-range and returns structure only.
+// ── Phase 2: Digest — tokens + KEYED component sets, in parallel ─────────
 phase('Digest')
-const SLICE_INSTRUCTION =
-  'The result will exceed the token limit and be saved to a tool-result .txt file; the error message gives its PATH. ' +
-  'Do NOT read it inline. Slice it in ~80,000-char spans via python until you have read 100% of it: ' +
-  'python3 -c "print(open(PATH).read()[A:B])". Then return ONLY the structured summary below.'
-
-const [tokens, components] = await parallel([
+const [tokens, sets] = await parallel([
   () => agent(
-    TOOLS_HINT + '\n\nThen call get_local_variables. ' + SLICE_INSTRUCTION + '\n\n' +
-    'Inventory: every COLLECTION (name + mode count); per collection the token families with counts and ' +
-    'representative names + resolved hex; resolve aliases TRANSITIVELY to final hex (flag external-library hops); ' +
-    'the naming convention; and a wfMap proposing --wf-ink/text/muted/line/tint/surface/canvas/accent/red/amber/green/purple ' +
-    'from the best-fit semantic tokens, listing caveats (e.g. amber->yellow not orange; --wf-purple AI-meaning absent; ' +
-    'prefer the cool neutral ramp). Also capture non-color number tokens (radius/spacing/stroke).',
+    JOIN + '\n\nThen call get_local_variables. ' + SLICE + '\n\n' +
+    'Inventory every COLLECTION (name + mode count); per collection the token families with counts and resolved hex; ' +
+    'resolve aliases TRANSITIVELY to final hex (flag external-library hops); capture non-color number tokens ' +
+    '(radius/spacing/stroke); and propose a wfMap (--wf-ink/text/muted/line/tint/surface/canvas/accent/red/amber/green/purple) ' +
+    'from the best-fit semantic tokens, listing caveats.',
     { label: 'digest:variables', phase: 'Digest', schema: TOKENS_SCHEMA }
   ),
   () => agent(
-    TOOLS_HINT + '\n\nThen call get_local_components. ' + SLICE_INSTRUCTION + '\n\n' +
-    'Inventory: total count; component FAMILIES by name prefix with counts; reconstruct component SETS from leaf ' +
-    'variant names (signatures like "Type=Primary, Size=Medium") into {variants:{prop:[values]}, variantCount}; ' +
-    'classify each as atom/molecule/organism/private/icon using naming (.=private, _=subpart, ❖=swap, [Template]=composed, /=hierarchy); ' +
-    'identify composed PATTERNS (datatable system, overlays, flows). Quote real names.',
-    { label: 'digest:components', phase: 'Digest', schema: COMPONENTS_SCHEMA }
+    JOIN + '\n\nThen capture component sets WITH their real publish keys by running mcp__ClaudeToFigma__figma_eval with this code body:\n' +
+    '```js\n' +
+    'await figma.loadAllPagesAsync();\n' +
+    "const sets = figma.root.findAllWithCriteria({types:['COMPONENT_SET']}).filter(s => !/^[._\\[]/.test(s.name));\n" +
+    'return sets.map(s => ({ name: s.name, key: s.key, props: Object.fromEntries(Object.entries(s.variantGroupProperties||{}).map(([k,v]) => [k, v.values])) }));\n' +
+    '```\n' +
+    'This returns the PUBLIC component sets (private `_`/`.`/`[Template]` filtered out), each with its 40-char publish `key` and full ' +
+    'variant grammar {prop: [values]}. ' + SLICE + '\n\n' +
+    'Build a map setName -> { key, class (atom/molecule/organism/icon by naming + complexity), variants }. Keep the real keys verbatim. ' +
+    'If the eval still overflows, slice the saved file and extract name/key/props. Return every public set you can (prioritize core UI ' +
+    'families: buttons, badges, tags, inputs, selects, checkboxes/radios/toggles, table/datatable cells, tabs, tooltips, avatars, nav, charts).',
+    { label: 'digest:component-keys', phase: 'Digest', schema: SETS_SCHEMA }
   ),
 ])
 
-// ── Phase 3: Synthesize the pack artifact ───────────────────────────────
+// ── Phase 3: Synthesize — assemble a round-trip-ready pack ───────────────
 phase('Synthesize')
 const PACK_SCHEMA = {
-  type: 'object',
-  additionalProperties: true,
+  type: 'object', additionalProperties: true,
   required: ['designSystem', 'figmaMap', 'theme'],
   properties: {
-    designSystem: { type: 'object', additionalProperties: true, description: 'matches packs/sample/design-system.json' },
-    figmaMap: { type: 'object', additionalProperties: true, description: 'matches packs/sample/figma-map.json' },
-    theme: { type: 'object', additionalProperties: true, description: 'NIB_PACKS[id].theme: {label,font,fontUrl?,tokens}' },
-    gaps: { type: 'array', items: { type: 'string' }, description: 'anything unresolved: external aliases, missing keys, ambiguous mappings' },
+    designSystem: { type: 'object', additionalProperties: true },
+    figmaMap: { type: 'object', additionalProperties: true },
+    theme: { type: 'object', additionalProperties: true },
+    gaps: { type: 'array', items: { type: 'string' } },
   },
 }
 
 const pack = await agent(
-  'Assemble a Nib design-system pack from the inventory below. Match the shapes in packs/sample/ exactly.\n\n' +
-  'RECON:\n' + JSON.stringify(recon) + '\n\nTOKENS:\n' + JSON.stringify(tokens) + '\n\nCOMPONENTS:\n' + JSON.stringify(components) + '\n\n' +
-  'Produce: (1) designSystem (meta/tokens{primitives,semantics,numbers,wfMap}/components/patterns/styles/conventions); ' +
+  'Assemble a round-trip-ready Nib design-system pack from the inventory below. Match the shapes in packs/sample/ exactly. ' +
+  'CRITICAL: use the REAL 40-char publish keys from the component-set map for every component’s `key` (never null when a key exists).\n\n' +
+  'RECON:\n' + JSON.stringify(recon) + '\n\nTOKENS:\n' + JSON.stringify(tokens) + '\n\nCOMPONENT-SETS (name->{key,props}):\n' + JSON.stringify(sets) + '\n\n' +
+  'Produce: (1) designSystem (meta/tokens{primitives,semantics,numbers,wfMap}/components{name:{key,class,variants}}/patterns/styles/conventions); ' +
   '(2) theme {label, font, fontUrl?, tokens:{--wf-*}} from wfMap; ' +
-  '(3) figmaMap {variables ($var:Collection/Name), components{name:{key,props}}, recreationRules (table->cell default + grill list, button->grill Type/Size), overrides:{}}. ' +
-  'List gaps (external aliases, missing publish keys, ambiguous component mappings to grill the user on later).',
+  '(3) figmaMap {variables ($var:Collection/Name), components{name:{key,props:<sensible default variant>}}, ' +
+  'recreationRules (table->the datatable/list cell component as default + grill list; button->grill Type/Size/solid-vs-outline; badge-vs-tag), overrides:{}}. ' +
+  'List gaps only for things genuinely missing (e.g. sets not enumerated, licensed fonts). Component keys should NOT be a gap — they come from the set map.',
   { label: 'synthesize', phase: 'Synthesize', schema: PACK_SCHEMA }
 )
 
 return {
-  channel,
+  channel: channel || '(pre-joined)',
   recon,
   pack,
-  note: 'Emit pack.designSystem/theme/figmaMap into the pack repo (private for proprietary systems). See docs/Design-System-Packs.md.',
+  note: 'Emit pack.designSystem/theme/figmaMap into the pack repo (private for proprietary systems) via tools/figma-inventory/emit.js. Component keys are real publish keys — create_component_instance round-trips work.',
 }

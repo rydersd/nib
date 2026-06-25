@@ -250,10 +250,17 @@ function wirePackInto(target, spec) {
   const meta = JSON.parse(fs.readFileSync(path.join(dir, 'pack.json'), 'utf8'));
   const id = meta.id || path.basename(dir);
   const destPack = path.join(target, 'pack');
-  fs.mkdirSync(destPack, { recursive: true });
-  for (const f of ['theme.js', 'tokens.css', 'design-system.json', 'figma-map.json', 'pack.json']) {
-    const s = path.join(dir, f);
-    if (fs.existsSync(s)) fs.copyFileSync(s, path.join(destPack, f));
+  // Copy the whole pack so bundled assets (e.g. fonts/ + fonts.css) come along,
+  // skipping dev/doc/package cruft.
+  copyDirSync(dir, destPack, { skip: new Set(['node_modules', '.git', '.github', 'docs']) });
+  // The pack now lives under ./pack/. If the theme bundles a RELATIVE fontUrl
+  // (e.g. "fonts.css"), prefix it with pack/ so the <link> resolves from the
+  // project root. (Absolute URLs and already-prefixed paths are left alone.)
+  const themePath = path.join(destPack, 'theme.js');
+  if (fs.existsSync(themePath)) {
+    let tj = fs.readFileSync(themePath, 'utf8');
+    const fixed = tj.replace(/("fontUrl"\s*:\s*")(?!https?:|\/\/|\/|pack\/)([^"]+)(")/g, '$1pack/$2$3');
+    if (fixed !== tj) fs.writeFileSync(themePath, fixed);
   }
   patchPackConfig(target, id);
   injectPackScripts(target, id);

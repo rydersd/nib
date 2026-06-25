@@ -1,0 +1,60 @@
+{
+  "meta": {
+    "source": "figma:SAMPLE",
+    "extractedAt": "1970-01-01T00:00:00Z",
+    "system": "Sample Design System",
+    "nibContract": "1.0"
+  },
+  "tokens": {
+    "primitives": {
+      "neutral/900": { "value": "#0f2e2a", "type": "color" },
+      "neutral/500": { "value": "#5b736f", "type": "color" },
+      "teal/500":    { "value": "#0d8a7a", "type": "color" }
+    },
+    "semantics": {
+      "text/primary":   { "alias": "neutral/900", "value": "#0f2e2a" },
+      "accent/default": { "alias": "teal/500",    "value": "#0d8a7a" }
+    },
+    "numbers": {
+      "radius":  { "regular": 6, "rounder": 8, "circle": 9999 },
+      "spacing": { "small": 8, "medium": 16, "large": 24 },
+      "stroke":  { "standard": 1, "thicker": 2 }
+    },
+    "wfMap": {
+      "--wf-ink": "#0f2e2a",
+      "--wf-text": "#2c4a46",
+      "--wf-muted": "#5b736f",
+      "--wf-accent": "#0d8a7a"
+    }
+  },
+  "components": {
+    "Button": {
+      "key": "SAMPLE_BUTTON_KEY",
+      "id": "0:1",
+      "class": "atom",
+      "variants": {
+        "Type": ["Primary", "Destructive"],
+        "Size": ["Small", "Medium", "Large"],
+        "State": ["Default", "Hover", "Pressed"],
+        "Disabled": ["False", "True"]
+      },
+      "variantCount": 36
+    },
+    "List/Cell": {
+      "key": "SAMPLE_CELL_KEY",
+      "id": "0:2",
+      "class": "atom",
+      "variants": {
+        "Content": ["Text", "Link", "Badge", "Checkbox", "Action", "Status"],
+        "State": ["Default", "Hover", "Selected"]
+      },
+      "variantCount": 18,
+      "note": "Preferred primitive for recreating table rows (see draw contract AC-2)."
+    }
+  },
+  "patterns": [
+    { "name": "datatable", "kind": "template", "parts": ["List/Cell", "_datatable-sticky"] }
+  ],
+  "styles": { "text": [], "effect": [], "grid": [] },
+  "conventions": { "private": ".", "subpart": "_", "swapSlot": "❖", "template": "[Template]" }
+}

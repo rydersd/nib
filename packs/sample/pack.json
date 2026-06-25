@@ -1,0 +1,13 @@
+{
+  "id": "sample",
+  "name": "Sample Design System",
+  "version": "1.0.0",
+  "nibContract": "1.0",
+  "description": "Reference design-system pack demonstrating the Nib pack contract. IP-free; copy this shape for a real (often private) pack.",
+  "exports": {
+    "theme": "theme.js",
+    "tokens": "tokens.css",
+    "inventory": "design-system.json",
+    "figmaMap": "figma-map.json"
+  }
+}

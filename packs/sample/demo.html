@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" class="wireframe">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nib Pack Loader — Demo</title>
+  <!-- Core framework CSS (tokens + components) -->
+  <link rel="stylesheet" href="../../core/proto-core.css">
+</head>
+<body>
+  <main style="max-width:760px;margin:40px auto;padding:0 20px;">
+    <h1>Design-System Pack Loader — Demo</h1>
+    <p class="wf-muted">
+      This page sets <code>WIREFRAME_CONFIG.pack = 'sample'</code>. The sample
+      pack's teal/indigo theme should be applied by <code>core/packs/loader.js</code>.
+      Open the console for <code>[nib-pack]</code> diagnostics, and toggle the
+      theme switcher in the settings panel — "Sample DS" should be listed.
+    </p>
+
+    <div class="wf-card" style="padding:16px;margin:16px 0;">
+      <h3>Buttons</h3>
+      <button class="btn btn-primary">Primary</button>
+      <button class="btn">Secondary</button>
+    </div>
+
+    <div class="wf-card" style="padding:16px;margin:16px 0;">
+      <h3>Table (cell-driven)</h3>
+      <table class="wf-table">
+        <thead><tr><th>Account</th><th>Status</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr><td>Acme Corp</td><td><span class="wf-badge wf-badge-green">Active</span></td><td>R. Booth</td></tr>
+          <tr><td>Globex</td><td><span class="wf-badge wf-badge-amber">Pending</span></td><td>J. Doe</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <!-- 1. Project config (declares which pack to load) -->
+  <script>
+    window.WIREFRAME_CONFIG = {
+      title: 'Pack Loader Demo',
+      pack: 'sample'
+    };
+    window.SECTIONS = [];
+  </script>
+  <!-- 2. Pack registration (a real pack ships this in its package) -->
+  <script src="theme.js"></script>
+  <!-- 3. Nav engine (provides the theme apply/switcher machinery) -->
+  <script src="../../core/proto-nav.js"></script>
+  <!-- 4. Pack loader (reads WIREFRAME_CONFIG.pack, applies the pack theme) -->
+  <script src="../../core/packs/loader.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "meta": { "system": "Sample Design System", "nibContract": "1.0" },
+  "variables": {
+    "comment": "Names to bind in create_node_tree color fields via $var:Collection/Name",
+    "accent": "$var:core-color/teal/500",
+    "ink": "$var:core-color/neutral/900"
+  },
+  "components": {
+    "Button": {
+      "key": "SAMPLE_BUTTON_KEY",
+      "instanceWith": "create_component_instance",
+      "props": { "Type": "Primary", "Size": "Medium", "State": "Default", "Disabled": "False" }
+    },
+    "List/Cell": {
+      "key": "SAMPLE_CELL_KEY",
+      "instanceWith": "create_component_instance",
+      "props": { "Content": "Text", "State": "Default" }
+    }
+  },
+  "recreationRules": {
+    "comment": "Drives the draw skill's behavioral contract (design doc §6c).",
+    "table": {
+      "default": "List/Cell",
+      "grill": ["Content per column", "density", "header style", "selection affordance"]
+    },
+    "button": { "default": "Button", "grill": ["Type", "Size"] }
+  },
+  "overrides": {}
+}

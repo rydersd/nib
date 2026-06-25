@@ -250,9 +250,11 @@ function wirePackInto(target, spec) {
   const meta = JSON.parse(fs.readFileSync(path.join(dir, 'pack.json'), 'utf8'));
   const id = meta.id || path.basename(dir);
   const destPack = path.join(target, 'pack');
-  // Copy the whole pack so bundled assets (e.g. fonts/ + fonts.css) come along,
-  // skipping dev/doc/package cruft.
-  copyDirSync(dir, destPack, { skip: new Set(['node_modules', '.git', '.github', 'docs']) });
+  // Copy the whole pack so bundled assets (e.g. fonts/ + fonts.css, html/) come
+  // along, skipping dev/doc/package cruft. `reference/` (Figma shots + raw icon
+  // SVGs) is dev-only — the html/quix.css ships self-contained data-URI icons —
+  // so it's skipped to keep scaffolded projects lean.
+  copyDirSync(dir, destPack, { skip: new Set(['node_modules', '.git', '.github', 'docs', 'reference']) });
   // The pack now lives under ./pack/. If the theme bundles a RELATIVE fontUrl
   // (e.g. "fonts.css"), prefix it with pack/ so the <link> resolves from the
   // project root. (Absolute URLs and already-prefixed paths are left alone.)

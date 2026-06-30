@@ -531,7 +531,9 @@ html.home-alt[data-wf-fidelity="napkin"] body::before {
   content: '';
   position: absolute; inset: 0;
   background: #808080; mix-blend-mode: saturation;
-  pointer-events: none; z-index: 799;
+  /* z-801: ABOVE the warm paper texture (z-800) so it's desaturated too —
+     napkin is a B&W sketch, not sepia. Chrome (z≥1000) stays in color. */
+  pointer-events: none; z-index: 801;
 }
 /* Keep the reading column opaque so the desk's coffee rings + tea stains (z:-1)
    don't bleed up THROUGH the content and compete with it. The texture/stains stay

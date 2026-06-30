@@ -254,7 +254,10 @@ html.wireframe[data-wf-fidelity="napkin"] body::before {
   background: #808080;
   mix-blend-mode: saturation;
   pointer-events: none;
-  z-index: 799;
+  /* ABOVE the paper texture (z-800) so the warm natural-paper grain is
+     desaturated too — napkin reads as a B&W sketch, not sepia. Still below
+     framework chrome (z≥1000), which stays in color. */
+  z-index: 801;
 }
 
 /* NOTE: do NOT "fall back" to filter: grayscale(1) on html here. A filter on

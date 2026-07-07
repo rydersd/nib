@@ -330,7 +330,7 @@
       // along the perimeter — with an occasional pen-lift gap. Ink alpha,
       // nib width, margin, and wobble seed vary per frame. Stamped onto each
       // card as a CSS custom prop (--wf-ink-frame) and shown only at napkin
-      // by wf-fidelity.css. One tiny SVG, rasterized once per card.
+      // by proto-blueprint.css (nib) / wf-fidelity.css (eqPartners). One tiny SVG, rasterized once per card.
       // Calibrated pen profiles (evidence: nib/docs/Pen-Samples.md). rgb is
       // the pen's ink — ballpoint runs blue-grey, sharpie warm black. twin =
       // odds of double-tracking (a faint parallel ghost stroke, clear in the
@@ -560,7 +560,7 @@
         // PAST the scissor cut — the chamfer eats up to ~9px inside the
         // layout box, but only the ::before paper is clipped, never the
         // content. Tag offenders (a class, not inline style, so toggling
-        // fidelity restores them); wf-fidelity.css lifts their fills at
+        // fidelity restores them); the fidelity CSS lifts their fills at
         // napkin only. Reads batched after all stamping writes above.
         var BLEED = 9; // corner chamfer 7px + edge waver 2.4px, rounded
         function bgAlpha(c) {
@@ -597,6 +597,53 @@
         }
       }
 
+      // ── content-column measurement — marks live in the SIDE GUTTERS ──
+      // Union of the canonical content containers' rects = the content
+      // column. Stains, scribbles and doodles place only to its left/right
+      // (and in the drawer's doodle strip) so they frame the work as a
+      // discussion piece instead of competing with the content
+      // (stakeholder direction, 2026-07-07).
+      function contentGutters() {
+        var bodyW = document.body.clientWidth || window.innerWidth;
+        var sels = '.wf-card,.ds-card,.ds-kpi-card,.ds-sidebar-card,.sfdc-card,' +
+          '.wf-table,.ds-main,.ds-sidebar,.slack-shell,.sfdc-page,main,.wf-page,.pr-page';
+        var els = document.querySelectorAll(sels);
+        var L = Infinity, R = -Infinity;
+        for (var i = 0; i < els.length; i++) {
+          var r = els[i].getBoundingClientRect();
+          if (!r.width || !r.height) continue;
+          var x1 = r.left + window.scrollX, x2 = r.right + window.scrollX;
+          if (x1 < L) L = x1;
+          if (x2 > R) R = x2;
+        }
+        if (L === Infinity) { L = bodyW * 0.16; R = bodyW * 0.84; }
+        L = Math.max(0, Math.min(L, bodyW));
+        R = Math.max(L, Math.min(R, bodyW));
+        return { left: L, right: R, bodyW: bodyW };
+      }
+
+      // Pick an x for a mark of width `size` inside a side gutter, never
+      // under the content column. Left marks may bleed off-canvas (negative
+      // offsets clip); right marks may bleed past the body edge because the
+      // stencil/doodle layers are overflow:hidden. Returns null when neither
+      // gutter can show at least ~a quarter of the mark. Pass side
+      // ('left'|'right') to pin the mark to one gutter.
+      function gutterX(size, g, side) {
+        var tol = 8, minVis = size * 0.25;
+        var sides = [];
+        // left gutter: right edge of the mark stays left of the content
+        var lMax = g.left - size + tol, lMin = -size * 0.75;
+        if (side !== 'right' && g.left >= minVis && lMax > lMin) sides.push({ w: g.left, min: lMin, max: lMax });
+        // right gutter: left edge of the mark stays right of the content
+        var rMin = g.right - tol, rMax = g.bodyW - minVis;
+        if (side !== 'left' && g.bodyW - g.right >= minVis && rMax > rMin) sides.push({ w: g.bodyW - g.right, min: rMin, max: rMax });
+        if (!sides.length) return null;
+        // weight the roll by gutter width so the roomier side hosts more
+        var pick = sides.length === 1 ? sides[0]
+          : (Math.random() < sides[0].w / (sides[0].w + sides[1].w) ? sides[0] : sides[1]);
+        return Math.round(pick.min + Math.random() * (pick.max - pick.min));
+      }
+
       function spawnNapkinStencils() {
         if (document.querySelector('.wf-stencil-layer')) return; // already built
         var texPath = wfTexturePath();
@@ -608,6 +655,7 @@
         // canvas (the truncated-texture seam). Runs at window load so the
         // measurement is settled.
         var docH = Math.max(document.body.offsetHeight, window.innerHeight);
+        var gutters = contentGutters();
 
         var scribbles = [
           { cls: 'wf-stencil--scribble-1', file: 'scribble-1.svg', w: 130, h: 65 },
@@ -619,21 +667,24 @@
         for (var si = 0; si < scribbles.length; si++) {
           if (Math.random() > 0.7) continue;
           var sc = scribbles[si];
+          var scale = 0.8 + Math.random() * 0.4;
+          var sw = Math.round(sc.w * scale), sh = Math.round(sc.h * scale);
+          var sx = gutterX(sw, gutters);
+          if (sx == null) continue;   // no gutter roomy enough — skip, never under content
           var img = document.createElement('img');
           img.className = 'wf-stencil ' + sc.cls;
           img.src = texPath + sc.file;
           img.alt = '';
           img.setAttribute('aria-hidden', 'true');
-          var scale = 0.8 + Math.random() * 0.4;
-          img.style.width = Math.round(sc.w * scale) + 'px';
-          img.style.height = Math.round(sc.h * scale) + 'px';
-          img.style.left = (-5 + Math.random() * 90) + '%';
-          img.style.top = (5 + Math.random() * 80) + '%';
+          img.style.width = sw + 'px';
+          img.style.height = sh + 'px';
+          img.style.left = sx + 'px';
+          img.style.top = Math.round(Math.random() * Math.max(0, docH - sh * 1.4)) + 'px';
           img.style.transform = 'rotate(' + ((-8 + Math.random() * 16).toFixed(1)) + 'deg)';
           layer.appendChild(img);
         }
-        // Stretch the layer to the document so the scribbles' % offsets
-        // resolve against the whole page, not just the first viewport.
+        // Stretch the layer to the document so absolute offsets distribute
+        // down the whole page; overflow:hidden clips edge bleed safely.
         layer.style.height = docH + 'px';
         document.body.appendChild(layer);
 
@@ -669,11 +720,21 @@
           var stainPool = [];
           STAINS.forEach(function (s) { for (var wi = 0; wi < s.weight; wi++) stainPool.push(s); });
 
-          // 1..5, weighted toward 2-3 marks; very long pages nudge up
+          // How stained is today's desk? 1-3 marks on ONE side — never more
+          // than three per side — weighted toward 1-2, plus occasionally a
+          // single mark LOW on the other side for balance. Organic, not
+          // over-stained (stakeholder direction, 2026-07-07).
           var cr = Math.random();
-          var count = cr < 0.20 ? 1 : cr < 0.45 ? 2 : cr < 0.68 ? 3 : cr < 0.86 ? 4 : 5;
-          if (docH > 3200 && count < 5 && Math.random() < 0.4) count++;
-          for (var ci = 0; ci < count; ci++) {
+          var primaryCount = cr < 0.34 ? 1 : cr < 0.72 ? 2 : 3;
+          if (docH > 3200 && primaryCount < 3 && Math.random() < 0.4) primaryCount++;
+          var lw = gutters.left, rw = gutters.bodyW - gutters.right;
+          var primarySide = Math.random() < lw / ((lw + rw) || 1) ? 'left' : 'right';
+          var placements = [];
+          for (var pi = 0; pi < primaryCount; pi++) placements.push({ side: primarySide, low: false });
+          if (primaryCount > 1 && Math.random() < 0.45) {
+            placements.push({ side: primarySide === 'left' ? 'right' : 'left', low: true });
+          }
+          for (var ci = 0; ci < placements.length; ci++) {
             var stain = stainPool[Math.floor(Math.random() * stainPool.length)];
             var ring = document.createElement('img');
             ring.className = 'wf-coffee-ring';
@@ -712,23 +773,21 @@
               strength = 0.22 + Math.random() * 0.14;
             }
             ring.style.opacity = strength.toFixed(2);
-            // Horizontal: clamped so the right edge stays inside the body —
-            // stains are position:absolute (they scroll with the page), so a
-            // right overhang would grow the scroll area past the painted
-            // background. Left bleed is fine: negative offsets clip, they
-            // don't scroll.
-            var bodyW = document.body.clientWidth || window.innerWidth;
-            ring.style.left = Math.min(
-              Math.round((-0.10 + Math.random() * 0.95) * bodyW),
-              Math.max(0, bodyW - size)) + 'px';
+            // Horizontal: side gutters only — never under the content
+            // column. Stains are typically wider than a gutter, so they
+            // ride the page edge with a slice showing (the stencil layer's
+            // overflow:hidden clips the bleed without growing the scroll
+            // area). If neither gutter can show a quarter of the stain,
+            // the page stays clean.
+            var sxp = gutterX(size, gutters, placements[ci].side);
+            if (sxp == null) continue;
+            ring.style.left = sxp + 'px';
             // px against full document height — % would resolve against the
             // viewport-sized containing block, bunching every ring up top.
-            // Clamped fully INSIDE the document: a stain poking past the
-            // content used to extend the scroll area beyond body's painted
-            // background, where the napkin overlays blend against
-            // transparency and show as a raw gray band.
-            ring.style.top = Math.round(Math.random() * Math.max(0, docH - size)) + 'px';
-            document.body.appendChild(ring);
+            // The balance mark sits LOW on its side of the page.
+            var minTop = placements[ci].low ? docH * 0.55 : 0;
+            ring.style.top = Math.round(minTop + Math.random() * Math.max(0, docH - size - minTop)) + 'px';
+            layer.appendChild(ring);
           }
         }
       }
@@ -780,6 +839,7 @@
     buildInkFrameSVG: buildInkFrameSVG, buildCutPath: buildCutPath,
     buildCoffeeRingSVG: buildCoffeeRingSVG, buildTeaStainSVG: buildTeaStainSVG,
     paperTile: paperTile, stampInkFrames: stampInkFrames, spawnNapkinStencils: spawnNapkinStencils,
+    contentGutters: contentGutters, gutterX: gutterX,
     gesture: gesture, wrap: wrap, ink: ink, dot: dot, plen: plen,
     rnd: rnd, ri: ri, r1: r1, pick: pick, TAU: TAU, uid: function(){ return _uid++; },
     wfTexturePath: wfTexturePath, init: init, runAssetsPass: runAssetsPass

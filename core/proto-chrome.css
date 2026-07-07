@@ -1145,6 +1145,21 @@ html.wf-review-heatmap [data-wf-review="reject"] {
   color: var(--wf-accent);
 }
 
+/* Doodle strip at the bottom of the drawer — the sanctioned in-chrome home
+   for napkin doodles (page doodles/stains live in the side gutters, never
+   under content). Filled by wfDrawerDoodles(); napkin fidelity only. */
+.wf-drawer-doodles {
+  display: none;
+}
+html.wireframe[data-wf-fidelity="napkin"] .wf-drawer-doodles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 14px 20px 18px;
+  pointer-events: none;
+}
+
 /* ── Design-notes Changelog tab + context-bar recent-changes badge ──────────
    Per-page changelog: a <script id="wf-changelog" type="application/json">
    block of { date, note } entries. See wfReadChangelog() in proto-nav.js. */

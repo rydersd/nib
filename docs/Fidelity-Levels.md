@@ -8,9 +8,9 @@ Nib's three-mode fidelity slider. Each mode communicates a different level of de
 
 | Mode | Meaning | Visual |
 |---|---|---|
-| **Napkin** | "Here's a rough idea. Everything is negotiable." | White paper, sharpie outlines, grayscale only |
-| **Blueprint** | "The structure is taking shape. Let's refine." | Default — subtle grid, paper texture, wireframe aesthetic |
-| **Polished** | "We're confident in this direction." | Clean lines, minimal wireframe artifacts |
+| **Napkin** | "Here's a rough idea. Everything is negotiable." | White paper, hand-drawn sharpie ink frames, scissor-cut cards, grayscale only, stains + doodles in the margins |
+| **Blueprint** | "The structure is taking shape. Let's refine." | Default — the drafting table: blue-grey ink on blue-tinted paper, subtle grid, **no color** (semantic hues collapse to the one drafting ink) |
+| **Polished** | "We're confident in this direction." | Clean lines, neutral-gray palette, vivid accent, minimal wireframe artifacts |
 
 ## How it works
 
@@ -25,15 +25,23 @@ See [[Design-Tokens#paper-effects|Design Tokens: Paper Effects]] for the full li
 
 ## Persistence
 
-The slider state persists in `sessionStorage` across page navigations within the same browser session. Users don't need to re-select on every page.
+The slider state persists in `sessionStorage` across page navigations (and mirrors to `localStorage` so `core/wf-fidelity-boot.js` can restore it **before first paint** on later visits — no fidelity flash). Starters load the boot script as the first element in `<head>`.
 
 ## Never hardcode fidelity values
 
 Because the slider drives CSS variables, **never hardcode** `--wf-wobble-radius`, `--wf-grain-opacity`, or `--wf-grid-opacity`. Always use `var(--wf-*)` so your element responds to the slider.
 
-## Napkin mode overrides
+## Blueprint mode: the drafting table
 
-Napkin mode is the most dramatic transformation — it strips color and shifts every token to grayscale on white paper. See the [[Design-Tokens#napkin-mode-overrides|full override table]] in Design Tokens.
+Blueprint (the default) retints the whole palette to blue-grey drafting ink on blue-tinted paper — including the semantic status colors, which collapse to value shifts of the same ink. Nothing on a blueprint may read as final art: the tier is still arguing placement and content, so labels and patterns carry status, not color. See the [[Design-Tokens#fidelity-overrides|full override table]] in Design Tokens.
+
+## Napkin mode: the paper prototype
+
+Napkin is the most dramatic transformation — a B&W paper prototype:
+
+- **Tokens** shift to grayscale on white paper, and a saturation overlay desaturates everything below the framework chrome.
+- **The napkin engine** (`core/wf-napkin.js` + `core/wf-doodles.js`, lazy-loaded by `proto-nav.js` — no page changes needed) stamps each card with a generated tapering **sharpie ink frame** and a **scissor-cut silhouette** (`--wf-ink-frame` / `--wf-cut-path`), stamps masking-tape strips on ~30% of pieces, and generates coffee-ring / tea-bag **stains**, scribbles, and a 24-mark **doodle** vocabulary.
+- **Placement policy:** stains and doodles never sit under the content column. They live in the **left/right side gutters** (measured from the real content bounds, clipped at the page edges) and in the **doodle strip at the bottom of the nav drawer**. The marks make the screen a discussion piece without competing with the content.
 
 ---
 

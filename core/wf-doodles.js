@@ -271,6 +271,10 @@ function renderAll(){ renderCatalog(); renderSheet(); }
     if (document.querySelector('.wf-doodle-layer')) return;
     var docH = Math.max(document.body.offsetHeight, window.innerHeight);
     var bodyW = document.body.clientWidth || window.innerWidth;
+    // Side gutters only — doodles never sit under the content column
+    // (stakeholder direction, 2026-07-07). The drawer's bottom doodle strip
+    // is the other sanctioned home (see wfDrawerDoodles in proto-nav.js).
+    var gutters = N.contentGutters();
     var layer = document.createElement('div');
     layer.className = 'wf-doodle-layer';
     layer.setAttribute('aria-hidden', 'true');
@@ -282,27 +286,29 @@ function renderAll(){ renderCatalog(); renderSheet(); }
     // Count: 0 to n — often a couple, rarely none, occasionally a flurry.
     var count = opts.count != null ? opts.count : (Math.random() < 0.10 ? 0 : ri(1, 8));
     // Sometimes the doodles CLUSTER — a person sitting on one side of the board,
-    // doodling in one spot while others talk — rather than scattered around it.
-    var clustered = count > 2 && Math.random() < 0.5, ccx, ccy, sx, sy;
+    // doodling in one spot while others talk. The cluster hugs ONE gutter.
+    var clustered = count > 2 && Math.random() < 0.5, ccy, sy;
     if (clustered) {
-      ccx = (Math.random() < 0.5 ? rnd(0.04, 0.24) : rnd(0.76, 0.96)) * bodyW; // one side
       ccy = rnd(0.08, 0.92) * docH;
-      sx = bodyW * rnd(0.07, 0.15); sy = docH * rnd(0.04, 0.11);
+      sy = docH * rnd(0.04, 0.11);
+      // Pin the cluster to ONE gutter by zeroing the other side's width —
+      // gutterX() then only ever offers the chosen side.
+      var lw = gutters.left, rw = gutters.bodyW - gutters.right;
+      gutters = (Math.random() < lw / ((lw + rw) || 1))
+        ? { left: gutters.left, right: gutters.bodyW, bodyW: gutters.bodyW }
+        : { left: 0, right: gutters.right, bodyW: gutters.bodyW };
     }
     for (var i = 0; i < count; i++) {
       var S = rnd(54, 104), kind = pick(ORDER), pen = penFor(S);
+      // Narrow gutters get smaller doodles rather than none — a margin is
+      // exactly where a human doodles small.
+      var widest = Math.max(gutters.left, gutters.bodyW - gutters.right);
+      if (widest < S && widest >= 44) S = Math.max(44, widest * 0.9);
       var svg = wrap(S, S, PRIMS[kind](pen, S / 2, S / 2, S * 0.9), { w: S, h: S });
-      var x, y;
-      if (clustered) { x = ccx + rnd(-sx, sx) - S / 2; y = ccy + rnd(-sy, sy) - S / 2; }
-      else {
-        // bias to the left/right margins (off to the sides), occasionally central
-        var zr = Math.random();
-        if (zr < 0.42) x = rnd(-S * 0.35, bodyW * 0.18);
-        else if (zr < 0.84) x = rnd(bodyW * 0.82 - S, bodyW - S * 0.55);
-        else x = rnd(bodyW * 0.18, Math.max(bodyW * 0.18, bodyW * 0.82 - S));
-        y = rnd(-S * 0.3, Math.max(S, docH - S * 0.5));
-      }
-      x = Math.max(-S * 0.3, Math.min(x, bodyW - S * 0.6));
+      var x = N.gutterX(S, gutters), y;
+      if (x == null) continue;   // no gutter roomy enough — skip, never under content
+      y = clustered ? ccy + rnd(-sy, sy) - S / 2
+                    : rnd(-S * 0.3, Math.max(S, docH - S * 0.5));
       y = Math.max(0, Math.min(y, docH - S * 0.6));
       var d = document.createElement('div');
       d.className = 'wf-doodle';

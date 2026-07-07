@@ -57,10 +57,40 @@ html.wireframe {
   transition: --wf-grain-opacity 0.4s ease, --wf-grid-opacity 0.4s ease, --wf-shadow-scale 0.4s ease;
 }
 
+/* ── Blueprint fidelity: the drafting table ─────────────────────────────
+   Matches explicit data-wf-fidelity="blueprint" AND the default state (no
+   attribute — most pages load as blueprint without declaring it), so the
+   drafting palette applies pre-paint with no JS dependency.
+
+   Restored from the pre-deck-palette base (see 8286a1f): a blueprint has
+   ONE ink — blue-grey lines on blue-tinted paper. No semantic color
+   either: the tier is still arguing placement and content, so nothing on
+   it may read as final art. Status hues collapse to value shifts of the
+   same drafting ink (labels and patterns carry the meaning, like a real
+   blueprint). Polished keeps the neutral base + vivid accent above. */
+html.wireframe:not([data-wf-fidelity="napkin"]):not([data-wf-fidelity="polished"]) {
+  --wf-ink:         #1e2a3a;
+  --wf-text:        #3b4f68;
+  --wf-muted:       #4a5f7f;
+  --wf-line:        #b0bdd0;
+  --wf-tint:        #dce4ef;
+  --wf-surface:     #edf1f7;
+  --wf-canvas:      #f0f4fa;
+  --wf-accent:      #3d6daa;
+  --wf-accent-lt:   #dce4ef;
+  --wf-accent-fill: rgba(61, 109, 170, 0.08);
+  --wf-red:         #3a4f73;
+  --wf-amber:       #62759a;
+  --wf-green:       #4c6288;
+  --wf-purple:      #55688e;
+  /* even the pushpin holds the no-color promise on the drafting table */
+  --wf-pin-color:   #46608c;
+}
+
 html.wireframe[data-wf-fidelity="napkin"] {
   /* Scissor-cut corners: small and uneven, not organic blobs. A hand cut
      is straight-ish with tiny angle errors — the roundness belongs to the
-     sharpie line (see the sharpie ::before in wf-fidelity.css), not the cut. */
+     sharpie line (see the sharpie ::before in proto-blueprint.css), not the cut. */
   --wf-wobble-radius: 3px 6px 2px 7px / 5px 2px 8px 3px;
   --wf-wobble-filter: none;
   --wf-grain-opacity: 0.4;
@@ -226,7 +256,7 @@ html.wireframe::after {
    grayscale comes from the body::before saturation overlay below. Chrome
    (context bar at z≥1000, drawers at z≥2000) sits above z-800 and stays in
    color; page surfaces above z-800 (modal overlay, story bar) get their own
-   grayscale(1) in wf-fidelity.css. */
+   grayscale(1) in proto-blueprint.css. */
 html.wireframe[data-wf-fidelity="napkin"] body::after {
   content: '';
   /* Absolute, not fixed: the grain is ON the paper, scrolls with it, and
@@ -265,7 +295,7 @@ html.wireframe[data-wf-fidelity="napkin"] body::before {
    stencil layer, chrome) and breaks hit-testing. The body::before saturation
    overlay above handles the napkin grayscale for everything below z-799; page
    surfaces stacked higher (modal overlay, story bar) are desaturated
-   individually in wf-fidelity.css. Texture paths are relative to THIS file
+   individually in proto-blueprint.css. Texture paths are relative to THIS file
    (nib/core/), so url(textures/…) resolves to nib/core/textures/. */
 
 /* Per-element paper texture — napkin mode only.
@@ -346,8 +376,9 @@ html.wireframe[data-wf-fidelity="napkin"] .wf-doodle-layer {
   pointer-events: none;
 }
 
-/* Coffee ring — background accent, lives OUTSIDE the stencil layer
-   as a direct body child so it can use z-index:-1 to sit behind content.
+/* Coffee ring — background accent, lives INSIDE the stencil layer
+   (overflow:hidden clips edge bleed without growing the scroll area).
+   Placed in the side gutters only — never under the content column.
    Hidden by default, shown only in napkin mode. Position/rotation/size
    set inline by JS with Math.random() so every refresh is different. */
 .wf-coffee-ring {

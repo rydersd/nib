@@ -212,15 +212,19 @@ html.wireframe[data-wf-fidelity="napkin"] .wf-ctx-fidelity label { opacity: 1; }
 html.wireframe[data-wf-fidelity="napkin"] .wf-card,
 html.wireframe[data-wf-fidelity="napkin"] .ds-card,
 html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card,
-html.wireframe[data-wf-fidelity="napkin"] .sfdc-card {
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card,
+html.wireframe[data-wf-fidelity="napkin"] .ds-sidebar-card {
   position: relative;
   overflow: visible;
 }
 
-html.wireframe[data-wf-fidelity="napkin"] .wf-card::after,
-html.wireframe[data-wf-fidelity="napkin"] .ds-card::after,
-html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card::after,
-html.wireframe[data-wf-fidelity="napkin"] .sfdc-card::after {
+/* Stacked/torn-bottom cards own their ::after (back sheet / torn filter) —
+   the notch must never restyle it (it used to corrupt the stacked back
+   sheet into a 12px canvas square). */
+html.wireframe[data-wf-fidelity="napkin"] .wf-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe[data-wf-fidelity="napkin"] .ds-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card:not(.wf-stacked):not(.wf-torn-bottom)::after {
   content: '';
   position: absolute;
   top: 0; right: 0;
@@ -231,6 +235,134 @@ html.wireframe[data-wf-fidelity="napkin"] .sfdc-card::after {
   filter: blur(0.3px);
   z-index: 1;
   pointer-events: none;
+}
+
+/* --- Napkin: Sharpie edge — paper-prototype cut-outs ---------------------
+   The metaphor: each card was drawn in sharpie and cut (or torn) out, just
+   outside the ink. Three truths from the reference photos:
+     · the ink line TAPERS — wf-napkin.js stamps each card with a generated
+       --wf-ink-frame SVG (base nib stroke + heavier pressure passes +
+       occasional pen-lift gap), stretched edge-to-edge on the ::before
+     · the edge varies by human and tool — most cards are scissor-cut
+       (straight-ish, small uneven radius) via the generated --wf-cut-path
+     · cut paper has no drawn border — it sits on the page, so the box
+       border goes transparent and the layered paper shadow carries depth */
+html.wireframe[data-wf-fidelity="napkin"] .wf-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin),
+html.wireframe[data-wf-fidelity="napkin"] .ds-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin),
+html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin),
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin),
+html.wireframe[data-wf-fidelity="napkin"] .ds-sidebar-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin) {
+  /* :not() chain matches the paper ::before below — a card EXCLUDED from
+     the clipped paper must keep painting its own box (the pin/tape/stacked
+     utilities rely on it), or it renders no paper at all.
+     !important: status-accent borders arrive as inline style attributes
+     (border-top: 3px solid var(--wf-green)) and would otherwise survive,
+     drawing a straight edge past the scissor cut. */
+  border-color: transparent !important;
+  /* The card box itself paints NOTHING — the paper lives on the clipped
+     ::before below, so its scissor-cut silhouette is the visible edge.
+     drop-shadow (not box-shadow) hugs that silhouette instead of drawing
+     a straight 90° rectangle around it. */
+  background: transparent !important;
+  box-shadow: none;
+  filter:
+    drop-shadow(0 0.6px 0.8px rgba(26, 27, 30, 0.13))
+    drop-shadow(0 1.6px 2.2px rgba(26, 27, 30, 0.085))
+    drop-shadow(0 4px 7px rgba(26, 27, 30, 0.05));
+}
+html.wireframe[data-wf-fidelity="napkin"] .wf-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin)::before,
+html.wireframe[data-wf-fidelity="napkin"] .ds-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin)::before,
+html.wireframe[data-wf-fidelity="napkin"] .ds-kpi-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin)::before,
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin)::before,
+html.wireframe[data-wf-fidelity="napkin"] .ds-sidebar-card:not(.wf-stacked):not(.wf-torn-top):not(.wf-tape):not(.wf-tape-left):not(.wf-tape-right):not(.wf-pin)::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  /* THE PAPER: white sheet + grain + the hand-drawn ink frame, cut out
+     along the scissor polygon. Ink crossing the cut gets cut with it —
+     a human cutting out a box drawn in sharpie. Sits under the content. */
+  background-color: var(--wf-white, #fff);
+  background-image: var(--wf-ink-frame, none), var(--wf-paper-tex, none);
+  background-size: 100% 100%, auto;
+  background-repeat: no-repeat, repeat;
+  background-blend-mode: normal, multiply;
+  clip-path: var(--wf-cut-path, none);
+  pointer-events: none;
+  z-index: -1;
+}
+/* Headers ruled, not filled — a paper prototype doesn't have gray fills,
+   it has the hand-drawn title-bar rule (and a filled header band would
+   poke past the cut silhouette at the corners). */
+html.wireframe[data-wf-fidelity="napkin"] .ds-card-header,
+html.wireframe[data-wf-fidelity="napkin"] .ds-card-hd,
+html.wireframe[data-wf-fidelity="napkin"] .wf-card-hd,
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card-hd,
+html.wireframe[data-wf-fidelity="napkin"] .sfdc-card-header {
+  background: transparent !important;
+}
+/* Any opaque box that reaches a card corner paints PAST the cut (the
+   chamfer eats up to ~9px inside the layout box). wf-napkin.js tags those
+   at load; fills aren't part of the paper metaphor anyway, so lift them
+   only while the cut silhouette is visible. */
+html.wireframe[data-wf-fidelity="napkin"] .wf-cut-bleed {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+/* Dark panels — cards/bands styled inline with an ink background and light
+   text. The transparent lift strips the dark fill, so without this the
+   light text lands invisibly on white paper. Tag the element with
+   .wf-dark-panel and at napkin it reads as ink-on-paper like everything
+   else. */
+html.wireframe[data-wf-fidelity="napkin"] .wf-dark-panel,
+html.wireframe[data-wf-fidelity="napkin"] .wf-dark-panel * {
+  color: var(--wf-ink) !important;
+}
+html.wireframe[data-wf-fidelity="napkin"] .wf-dark-panel a {
+  color: var(--wf-accent) !important;
+}
+/* High-z surfaces float ABOVE the saturation/grain overlays (z 800/801) —
+   an html-level filter:grayscale(1) would cover them but creates a
+   containing block that breaks position:fixed, so the known >801 page
+   surfaces desaturate individually instead. */
+html.wireframe[data-wf-fidelity="napkin"] .ds-modal-overlay,
+html.wireframe[data-wf-fidelity="napkin"] .wf-story-bar {
+  filter: grayscale(1);
+}
+/* Hand-ruled table grids — fine ballpoint ink instead of system-gray rules.
+   The table-level #wf-line-wobble filter (below) already bends them. */
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) th,
+html.wireframe[data-wf-fidelity="napkin"] table:not([data-fidelity-skip]) td {
+  border-color: rgba(28, 29, 32, 0.32);
+}
+
+/* Masking tape — stamped onto ~30% of pieces by wf-napkin.js
+   stampInkFrames(). Half on the piece, half on the board, like the
+   reference photos. */
+.wf-tape-strip { display: none; }
+html.wireframe[data-wf-fidelity="napkin"] .wf-tape-strip {
+  display: block;
+  position: absolute;
+  top: -8px;
+  height: 17px;
+  background: rgba(232, 227, 211, 0.62);
+  border-left: 1px solid rgba(0, 0, 0, 0.03);
+  border-right: 1px solid rgba(0, 0, 0, 0.03);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* The corner notch ::after was the FAKE cut corner — the clip-path now
+   cuts real chamfered corners, so the notch retires at napkin whenever the
+   engine has stamped a cut path. Stacked and torn-bottom cards are exempt:
+   their ::after IS the effect (back sheet / torn filter). Gated on
+   .wf-napkin-ready so pages without the napkin engine keep the notch. */
+html.wireframe.wf-napkin-ready[data-wf-fidelity="napkin"] .wf-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe.wf-napkin-ready[data-wf-fidelity="napkin"] .ds-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe.wf-napkin-ready[data-wf-fidelity="napkin"] .ds-kpi-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe.wf-napkin-ready[data-wf-fidelity="napkin"] .sfdc-card:not(.wf-stacked):not(.wf-torn-bottom)::after,
+html.wireframe.wf-napkin-ready[data-wf-fidelity="napkin"] .ds-sidebar-card:not(.wf-stacked):not(.wf-torn-bottom)::after {
+  content: none;
 }
 
 /* Preserve existing ::after effects — no corner notch on stacked/torn */

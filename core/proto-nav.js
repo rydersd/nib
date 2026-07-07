@@ -441,6 +441,11 @@ function buildDrawer() {
   // Settings link at bottom of drawer
   drawerHTML += '<a class="wf-nav-settings-link" onclick="wfNavClose();wfSettingsOpen()">&#9881; Settings</a>';
 
+  // Doodle strip at the very bottom of the menu — filled by wfDrawerDoodles()
+  // at napkin fidelity only (the one sanctioned in-chrome home for doodles;
+  // page doodles/stains live in the side gutters, never under content).
+  drawerHTML += '<div class="wf-drawer-doodles" aria-hidden="true"></div>';
+
   drawerHTML += (
     '      </div>' +
     '    </nav>'
@@ -2438,6 +2443,9 @@ function wfFidelityChange(val) {
   var fidelity = _wfFidelityValues[val] || 'blueprint';
   document.documentElement.setAttribute('data-wf-fidelity', fidelity);
   sessionStorage.setItem('wf_fidelity', String(val));
+  // localStorage too — wf-fidelity-boot.js reads it pre-paint on the next
+  // page load (sessionStorage alone left the boot script blind).
+  try { localStorage.setItem('wf_fidelity', String(val)); } catch (e) {}
 
   // Polished mode: clear inline wobble overrides so CSS `none` takes effect.
   // Other modes: re-randomize wobble assignments.
@@ -2446,10 +2454,24 @@ function wfFidelityChange(val) {
   } else {
     randomizeWobble();
   }
+
+  // Napkin needs its asset pass (ink frames, gutter stains, doodles) — load
+  // the shared engine on first entry, re-run idempotently on re-entry.
+  if (fidelity === 'napkin') {
+    wfLoadNapkinEngine(function () {
+      window.WFNapkin.runAssetsPass();
+      wfDrawerDoodles();
+    });
+  }
 }
 
 function wfFidelityRestore() {
   var saved = sessionStorage.getItem('wf_fidelity');
+  // New session: fall back to localStorage — the pre-paint boot script
+  // (wf-fidelity-boot.js) reads it, so the dropdown must follow suit.
+  if (saved === null) {
+    try { saved = localStorage.getItem('wf_fidelity'); } catch (e) {}
+  }
   if (saved !== null) {
     var val = parseInt(saved, 10);
     wfFidelityChange(val);
@@ -2682,111 +2704,69 @@ function wfInitScatterTransition() {
 }
 
 /**
- * Build napkin stencil layer — scribble marks.
- * Only visible in napkin fidelity mode via CSS.
+ * Napkin engine loader — wf-napkin.js + wf-doodles.js (the shared texture
+ * pipeline, one source of truth with eqPartners). Injected on demand so
+ * pages need no extra script tags; both modules gate all work on
+ * data-wf-fidelity="napkin". Replaces the retired in-file stencil/coffee
+ * builders: WFNapkin.spawnNapkinStencils() now owns scribbles + generated
+ * coffee/tea stains, WFDoodles.scatterDoodles() owns margin doodles.
  */
-function buildStencilLayer() {
-  /* Resolve path to textures/ relative to proto-nav.js location. */
+var _wfNapkinLoading = false;
+function wfCorePath() {
   var scripts = document.getElementsByTagName('script');
-  var corePath = '';
   for (var i = 0; i < scripts.length; i++) {
     var src = scripts[i].getAttribute('src') || '';
-    if (src.indexOf('proto-nav.js') !== -1) {
-      corePath = src.replace('proto-nav.js', '');
-      break;
-    }
+    if (src.indexOf('proto-nav.js') !== -1) return src.replace(/proto-nav\.js([?#].*)?$/, '');
   }
-  var tex = corePath + 'textures/';
+  return 'core/';
+}
 
-  /* Scribble stencils — randomized position/rotation every page load.
-     Each scribble gets a random spot, rotation, and size. Not all 3
-     appear on every page (~70% chance each). */
-  var scribbles = [
-    { cls: 'wf-stencil--scribble-1', file: 'scribble-1.svg', w: 130, h: 65 },
-    { cls: 'wf-stencil--scribble-2', file: 'scribble-2.svg', w: 100, h: 85 },
-    { cls: 'wf-stencil--scribble-3', file: 'scribble-3.svg', w: 115, h: 50 }
-  ];
-
-  var layer = document.createElement('div');
-  layer.className = 'wf-stencil-layer';
-
-  for (var s = 0; s < scribbles.length; s++) {
-    /* ~70% chance each scribble appears */
-    if (Math.random() > 0.7) continue;
-
-    var sc = scribbles[s];
-    var img = document.createElement('img');
-    img.className = 'wf-stencil ' + sc.cls;
-    img.src = tex + sc.file;
-    img.alt = '';
-    img.setAttribute('aria-hidden', 'true');
-
-    /* Random size: 80–120% of base */
-    var scale = 0.8 + Math.random() * 0.4;
-    img.style.width = Math.round(sc.w * scale) + 'px';
-    img.style.height = Math.round(sc.h * scale) + 'px';
-
-    /* Random position anywhere in viewport */
-    img.style.left = (-5 + Math.random() * 90) + '%';
-    img.style.top = (5 + Math.random() * 80) + '%';
-
-    /* Random rotation */
-    var rot = -8 + Math.random() * 16;
-    img.style.transform = 'rotate(' + rot.toFixed(1) + 'deg)';
-
-    layer.appendChild(img);
+function wfLoadNapkinEngine(cb) {
+  if (window.WFNapkin && window.WFDoodles) {
+    if (!window.WFNapkin._inited) window.WFNapkin.init();
+    if (cb) cb();
+    return;
   }
-
-  document.body.appendChild(layer);
-
-  /* ── Coffee ring accents ──────────────────────────────────────────── */
-  /* Separate from stencil layer: inserted as direct body children at
-     z-index:-1 so they render BEHIND all page content (body creates a
-     stacking context via z-index:0 in napkin mode).
-     Uses Math.random() — every refresh gets a different placement.
-     Not every page gets one (~60% chance). */
-  buildCoffeeRings(tex);
+  if (_wfNapkinLoading) return;
+  _wfNapkinLoading = true;
+  var base = wfCorePath();
+  var s1 = document.createElement('script');
+  s1.src = base + 'wf-napkin.js';
+  s1.onload = function () {
+    var s2 = document.createElement('script');
+    s2.src = base + 'wf-doodles.js';
+    s2.onload = function () {
+      _wfNapkinLoading = false;
+      window.WFNapkin.init();
+      if (cb) cb();
+    };
+    document.head.appendChild(s2);
+  };
+  document.head.appendChild(s1);
 }
 
 /**
- * Build coffee ring background accents.
- * Created as direct body children with class .wf-coffee-ring.
- * CSS shows them only in napkin fidelity mode at z-index:-1.
+ * Fill the drawer's bottom doodle strip — napkin fidelity only. Doodles and
+ * stains stay OUT of the content column (side gutters + here), so the page
+ * reads as a discussion piece without the marks competing with content.
  */
-function buildCoffeeRings(texPath) {
-  /* ~60% of page loads get a coffee ring */
-  if (Math.random() > 0.6) return;
-
-  /* 1 or 2 rings (70/30 split) */
-  var count = Math.random() < 0.7 ? 1 : 2;
-
-  for (var i = 0; i < count; i++) {
-    var ring = document.createElement('img');
-    ring.className = 'wf-coffee-ring';
-    ring.src = texPath + 'coffee-ring.svg';
-    ring.alt = '';
-    ring.setAttribute('aria-hidden', 'true');
-
-    /* Random size: 250–400px, then scaled 85–100% */
-    var baseSize = 250 + Math.random() * 150;
-    var scale = 0.85 + Math.random() * 0.15;
-    var size = Math.round(baseSize * scale);
-    ring.style.width = size + 'px';
-    ring.style.height = size + 'px';
-
-    /* Random rotation: full 360 degrees */
-    var rotation = Math.floor(Math.random() * 360);
-    ring.style.transform = 'rotate(' + rotation + 'deg)';
-
-    /* Random position: pick a random spot within viewport margins.
-       Use top/left with percentage values for viewport-relative placement.
-       Offset by up to -15% of ring size so it can bleed off edges. */
-    var x = -10 + Math.random() * 95;  /* -10% to 85% from left */
-    var y = -10 + Math.random() * 95;  /* -10% to 85% from top */
-    ring.style.left = x + '%';
-    ring.style.top = y + '%';
-
-    document.body.appendChild(ring);
+function wfDrawerDoodles() {
+  var host = document.querySelector('.wf-drawer-doodles');
+  if (!host || !window.WFDoodles) return;
+  if (document.documentElement.getAttribute('data-wf-fidelity') !== 'napkin') return;
+  if (host.childNodes.length) return;   // once per page load
+  var n = 2 + Math.floor(Math.random() * 2);
+  for (var i = 0; i < n; i++) {
+    var S = Math.round(44 + Math.random() * 22);
+    var kind = WFDoodles.ORDER[Math.floor(Math.random() * WFDoodles.ORDER.length)];
+    var cell = WFDoodles.cellSVG(kind, S);
+    var d = document.createElement('span');
+    d.className = 'wf-drawer-doodle';
+    d.style.cssText = 'display:inline-block;width:' + S + 'px;height:' + S +
+      'px;opacity:' + (0.45 + Math.random() * 0.25).toFixed(2) +
+      ';transform:rotate(' + Math.floor(-14 + Math.random() * 28) + 'deg);';
+    d.innerHTML = cell.svg;
+    host.appendChild(d);
   }
 }
 
@@ -3267,7 +3247,11 @@ function wfNavInit() {
   randomizeTornEdges();
   randomizeWobble();
   wfInitScatterTransition();
-  buildStencilLayer();
+  // Napkin assets (ink frames, gutter stains, doodles) — load the shared
+  // engine only when the page is actually at napkin fidelity.
+  if (document.documentElement.getAttribute('data-wf-fidelity') === 'napkin') {
+    wfLoadNapkinEngine(wfDrawerDoodles);
+  }
 
   // Global paste handler — capture pasted images when feedback panel is open
   document.addEventListener('paste', function(e) {

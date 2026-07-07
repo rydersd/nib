@@ -103,4 +103,4 @@ npm i @your-org/nib-yourds
 - [[Themes]] — packs build on the theme engine; a pack *is* a theme at runtime
 - [[Design-Tokens]] — the `--wf-*` tokens a pack's theme overrides
 - [[Create-Project]] — `create-nib --pack` wires a pack at scaffold time
-- [[Themes#resolution-order]] — how a pack theme resolves against per-section overrides
+- [[Themes#theme-resolution-order]] — how a pack theme resolves against per-section overrides

@@ -117,7 +117,7 @@ framework/
 │   ├── proto-compose.js    # Compose runtime (COMPOSE → PAGE_BLUEPRINT transformation)
 │   ├── compose-flow.js     # Multi-page flow wiring (wizard navigation, scenarios, stepper sync)
 │   ├── proto-gen.js        # Declarative Page Blueprint renderer (PAGE_BLUEPRINT → HTML)
-│   ├── proto-scatter-gl.js # Scatter plot GL visualization
+│   ├── proto-scatter-gl.js # WebGL paper-curl page transition (optional, napkin scatter nav)
 │   ├── schema/             # JSON Schema for the canonical Nib project shape
 │   │   └── workbook.schema.json
 │   ├── ingest/             # Adapter-agnostic Excel/Sheets → project pipeline (consumed by tools/nib-ingest.js)

@@ -1,5 +1,7 @@
 # Design Notes Guide
 
+> ⚠️ **Deprecated.** Edit [`docs/Design-Notes.md`](../docs/Design-Notes.md) instead. This file will be removed in a future release.
+
 Every wireframe page includes a `<div class="wf-design-notes" hidden>` section at the bottom. This content is displayed in the navigation drawer's "Design Notes" tab and provides context for stakeholders reviewing the prototype.
 
 ## Required Sections

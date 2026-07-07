@@ -1,5 +1,7 @@
 # Page Template
 
+> ⚠️ **Deprecated.** Edit [`docs/Page-Template.md`](../docs/Page-Template.md) instead. This file will be removed in a future release.
+
 > Read before creating any wireframe page. Copy the boilerplate exactly.
 
 ## Required Boilerplate

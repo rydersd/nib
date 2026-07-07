@@ -1,5 +1,7 @@
 # Salesforce Lightning Design System Rules
 
+> ⚠️ **Deprecated.** Edit [`docs/SLDS-Rules.md`](../docs/SLDS-Rules.md) instead. This file will be removed in a future release.
+
 > Authoritative rules for building Salesforce-style wireframes in nib. Grounded in the official Lightning Design System 2 (SLDS 2), Cosmos theme, and WCAG 2.1 AA accessibility standards.
 
 ## How This Document Was Established

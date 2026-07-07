@@ -24,21 +24,13 @@ const url = require('url');
 const { spawn } = require('child_process');
 const os = require('os');
 
-const C = {
-  reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
-  red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m',
-};
+const { C, fail } = require('./_cli-utils');
 
 // Resolve the nib repo root. When run from `node tools/nib-create.js`,
 // __dirname is .../nib/tools so .. is the root. When bundled into an npm
 // package, this script ships under the package's tools/ — same relative path.
 const NIB_ROOT = path.resolve(__dirname, '..');
 const WIZARD_DIR = path.join(__dirname, 'wizard');
-
-function fail(msg) {
-  console.error(`${C.red}✗${C.reset} ${msg}`);
-  process.exit(1);
-}
 
 function parseArgs(argv) {
   if (argv.includes('--help') || argv.includes('-h') || argv.length === 0) {
@@ -302,9 +294,12 @@ window.SECTIONS = SECTIONS;
   <meta charset="UTF-8">
   <title>${title}</title>
   <link rel="stylesheet" href="nib/core/proto-tokens.css">
-  <link rel="stylesheet" href="nib/core/proto-core.css">
-  <link rel="stylesheet" href="nib/core/proto-components.css">
   <link rel="stylesheet" href="nib/core/proto-chrome.css">
+  <link rel="stylesheet" href="nib/core/proto-components.css">
+  <link rel="stylesheet" href="nib/core/proto-story.css">
+  <link rel="stylesheet" href="nib/core/proto-feedback.css">
+  <link rel="stylesheet" href="nib/core/proto-blueprint.css">
+  <link rel="stylesheet" href="nib/core/proto-keyframes.css">
 </head>
 <body>
   <main style="padding:32px;max-width:720px;margin:0 auto;">

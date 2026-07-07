@@ -15,7 +15,13 @@ The required HTML boilerplate for every Nib page. Copy this exactly.
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>[Page Name] — [Project Name]</title>
-  <link rel="stylesheet" href="../core/proto-core.css">
+  <link rel="stylesheet" href="../core/proto-tokens.css">
+  <link rel="stylesheet" href="../core/proto-chrome.css">
+  <link rel="stylesheet" href="../core/proto-components.css">
+  <link rel="stylesheet" href="../core/proto-story.css">
+  <link rel="stylesheet" href="../core/proto-feedback.css">
+  <link rel="stylesheet" href="../core/proto-blueprint.css">
+  <link rel="stylesheet" href="../core/proto-keyframes.css">
   <link rel="stylesheet" href="../surfaces/[surface].css">
   <link rel="stylesheet" href="project.css">
 </head>
@@ -36,7 +42,7 @@ The required HTML boilerplate for every Nib page. Copy this exactly.
 ## Required elements
 
 1. `class="wireframe"` on `<html>` — activates the token system
-2. `proto-core.css` loaded **first** — always required
+2. The seven core stylesheets loaded **first**, in the order shown (`proto-tokens` → `proto-chrome` → `proto-components` → `proto-story` → `proto-feedback` → `proto-blueprint` → `proto-keyframes`). Linking them directly loads in parallel; the legacy `proto-core.css` aggregator still works but its `@import`s load serially — prefer the split links for new pages
 3. Exactly **one** surface CSS — pick from [[Surfaces]]
 4. `project-data.js` loads **before** `proto-nav.js` — see [[Navigation]]
 5. A `.wf-design-notes` div on every page — see [[Design-Notes]]

@@ -153,7 +153,13 @@ function buildHtml(rows, stats) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pages index</title>
-<link rel="stylesheet" href="../nib/core/proto-core.css">
+<link rel="stylesheet" href="../nib/core/proto-tokens.css">
+<link rel="stylesheet" href="../nib/core/proto-chrome.css">
+<link rel="stylesheet" href="../nib/core/proto-components.css">
+<link rel="stylesheet" href="../nib/core/proto-story.css">
+<link rel="stylesheet" href="../nib/core/proto-feedback.css">
+<link rel="stylesheet" href="../nib/core/proto-blueprint.css">
+<link rel="stylesheet" href="../nib/core/proto-keyframes.css">
 <style>
   body { background: var(--wf-canvas); margin: 0; font-family: system-ui, sans-serif; }
   .pi-hero { border-bottom: 1px solid var(--wf-line); padding: 22px 28px; background: var(--wf-white); }

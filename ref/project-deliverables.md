@@ -1,5 +1,7 @@
 # Project Deliverables
 
+> ⚠️ **Deprecated.** Edit [`docs/Project-Deliverables.md`](../docs/Project-Deliverables.md) instead. This file will be removed in a future release.
+
 Beyond individual wireframe pages, a complete prototype includes structural deliverables that establish the project's information architecture, user context, and workflow logic. These pages live alongside your wireframe pages in the `project/` directory.
 
 ## Sitemap Page (`index.html`)

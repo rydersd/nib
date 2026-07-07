@@ -1,5 +1,7 @@
 # Lessons Learned
 
+> ⚠️ **Deprecated.** Edit [`docs/Lessons-Learned.md`](../docs/Lessons-Learned.md) instead. This file will be removed in a future release.
+
 > Root cause documentation from PP-Selfserve Phase 2 implementation. Read this before starting a new project to avoid repeating these mistakes.
 
 ## 1. Stale File Copies

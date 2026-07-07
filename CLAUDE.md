@@ -30,47 +30,47 @@ Read `docs/Create-Project.md` for the full flag set + how distribution works.
 2. Copy the closest template into your project; replace `data/` from your workbook.
 
 ### Before generating any page (manual path):
-1. Read `ref/_index.md` — routing table for which refs to load
-2. Read `ref/tokens.md` — color and typography tokens (never hardcode hex)
-3. Read `ref/page-template.md` — required HTML boilerplate
+1. Read `docs/For-Agents.md` — routing table for which docs to load
+2. Read `docs/Design-Tokens.md` — color and typography tokens (never hardcode hex)
+3. Read `docs/Page-Template.md` — required HTML boilerplate
 
 ### For a specific surface:
-- Slack wireframe → read `ref/surface-slack.md`
-- Salesforce wireframe → read `ref/surface-salesforce.md` + `ref/surface-salesforce-rules.md`
-- Internal portal wireframe → read `ref/surface-internal.md`
+- Slack wireframe → read `docs/Surface-Slack.md`
+- Salesforce wireframe → read `docs/Surface-Salesforce.md` + `docs/SLDS-Rules.md`
+- Internal portal wireframe → read `docs/Surface-Internal.md`
 
 ### For complex layouts:
-- Read `ref/layouts.md` — grid, sidebar, split view patterns
-- Read `ref/components.md` — buttons, cards, tables, forms, badges, modals, toast
+- Read `docs/Layouts.md` — grid, sidebar, split view patterns
+- Read `docs/Components.md` — buttons, cards, tables, forms, badges, modals, toast
 
 ### For new projects:
-- Read `ref/new-project.md` — bootstrap from starters/
+- Read `docs/New-Project.md` — bootstrap from starters/
 
 ### For declarative pages (data-driven generation):
-- Read `ref/page-blueprint.md` — define PAGE_BLUEPRINT object, proto-gen.js renders the page
+- Read `docs/Page-Blueprint.md` — define PAGE_BLUEPRINT object, proto-gen.js renders the page
 - Starters: `starters/blueprint-record.html` (SFDC record) and `starters/blueprint-dashboard.html` (dashboard)
 - Script load order: `project-data.js` → `proto-nav.js` → blueprint data → `proto-gen.js`
 
 ### For compose-format pages (template-level authoring):
-- Read `ref/page-compose.md` — define COMPOSE object with template references, proto-compose.js transforms to PAGE_BLUEPRINT
+- Read `docs/Page-Compose.md` — define COMPOSE object with template references, proto-compose.js transforms to PAGE_BLUEPRINT
 - Starters: `starters/compose-record.html` (SFDC record) and `starters/compose-wizard.html` (wizard step)
 - Script load order: `project-data.js` → `proto-nav.js` → compose data → `proto-compose.js` → `compose-flow.js` (optional) → `proto-gen.js`
 - For clickable multi-page prototypes, add `COMPOSE_FLOW` to `project-data.js` and include `compose-flow.js` in the load order
 - Example: `examples/deal-registration/` — 9-screen clickable deal registration flow
 
 ### For decks / review presentations:
-- Read `ref/decks.md` (wiki: `docs/Decks.md`) — slide model, content blocks, keyboard map, SVG export
+- Read `docs/Decks.md` — slide model, content blocks, keyboard map, SVG export
 - Starters: `starters/deck.html` (fluid scroll-deck) and `starters/deck-fit.html` (fixed 1600×900 canvas)
 - Only assets needed: `core/proto-deck.css` + `core/proto-deck.js` (the context bar is optional)
 - Example: `examples/design-review/` — a 9-slide weekly design-review deck
 
 ### For evidence-driven fidelity:
-- Read `ref/evidence.md` (wiki: `docs/Evidence.md`) — mark how grounded each region is with `data-wf-evidence`
+- Read `docs/Evidence.md` — mark how grounded each region is with `data-wf-evidence`
 - Load `core/proto-evidence.css` + `core/proto-evidence.js`; low-evidence regions render rough, validated ones crisp
 - Agents: emit honest evidence — default invented content to `data-wf-evidence="guess"`, only mark `validated` for real sign-off
 
 ### For navigation setup:
-- Read `ref/navigation.md` — how SECTIONS drives the drawer + breadcrumbs
+- Read `docs/Navigation.md` — how SECTIONS drives the drawer + breadcrumbs
 
 ### When starting a real project:
 The `examples/` directory contains reference implementations. When bootstrapping a new project:
@@ -80,15 +80,13 @@ The `examples/` directory contains reference implementations. When bootstrapping
 4. Do not link back to examples from your project — examples are for reference only
 
 ### For project deliverables:
-- Read `ref/project-deliverables.md` — sitemaps, JTBD pages, user flows, personas, design stories
-- Read `ref/design-notes-guide.md` — writing effective design notes
-- Read `ref/lessons-learned.md` — patterns and pitfalls from real projects
+- Read `docs/Project-Deliverables.md` — sitemaps, JTBD pages, user flows, personas, design stories
+- Read `docs/Design-Notes.md` — writing effective design notes
+- Read `docs/Lessons-Learned.md` — patterns and pitfalls from real projects
 
 ### For Salesforce projects:
-- Read `ref/surface-salesforce-rules.md` — SLDS compliance rules and OOB component guidance
-- Read `ref/agent-sfdc-ux.md` — UX review agent for Salesforce wireframes
-- Read `ref/agent-sfdc-dev.md` — Dev feasibility review agent for Salesforce wireframes
-- Read `ref/agent-install.md` — how to install review agents locally
+- Read `docs/SLDS-Rules.md` — SLDS compliance rules and OOB component guidance
+- Read `docs/Review-Agents.md` — the SFDC UX + dev-feasibility review agents (live agent definitions stay in `ref/agent-sfdc-ux.md` / `ref/agent-sfdc-dev.md`; install steps in `ref/agent-install.md`)
 
 ## Directory Structure
 
@@ -118,6 +116,12 @@ framework/
 │   ├── compose-flow.js     # Multi-page flow wiring (wizard navigation, scenarios, stepper sync)
 │   ├── proto-gen.js        # Declarative Page Blueprint renderer (PAGE_BLUEPRINT → HTML)
 │   ├── proto-scatter-gl.js # WebGL paper-curl page transition (optional, napkin scatter nav)
+│   ├── proto-chrome-extras.js # Lazy-loaded chrome: feedback panel, review mode, settings UI (injected by proto-nav.js on first use)
+│   ├── wf-napkin.js        # Shared napkin engine: ink frames, cut paths, tea/coffee stains, gutter placement (lazy-loaded at napkin; also consumed by eqPartners via submodule)
+│   ├── wf-doodles.js       # 24-mark doodle vocabulary (napkin engine tenant)
+│   ├── wf-fidelity-boot.js # Pre-paint fidelity restore (first script in every starter <head>)
+│   ├── home-alt.css/.js    # Alternate landing surface — consumed by eqPartners (prototype/nib submodule); do not delete as "orphaned"
+│   ├── resources.css/.js   # Workshop resources engine — consumed by eqPartners prototype/resources/; do not delete as "orphaned"
 │   ├── schema/             # JSON Schema for the canonical Nib project shape
 │   │   └── workbook.schema.json
 │   ├── ingest/             # Adapter-agnostic Excel/Sheets → project pipeline (consumed by tools/nib-ingest.js)
@@ -154,8 +158,8 @@ framework/
 │   ├── nib-sync.js         # Idempotent re-ingest with diff (Track 1)
 │   ├── nib-seed-topics.js  # Seed data-topic/data-role on pages (agentic retrieval)
 │   └── nib-pages-index.js  # Build pages-index.html + lean data/pages.json
-├── ref/          # Agent reference docs (read before building)
-├── docs/         # Wiki — human-facing companion to ref/
+├── ref/          # DEPRECATED — banner stubs point to docs/; agent defs (agent-*.md) still live here
+├── docs/         # Wiki — THE documentation surface (agents + humans)
 ├── starters/     # Single-file copy-paste HTML templates
 └── examples/     # Multi-file project templates (clone whole)
 ```
@@ -163,18 +167,18 @@ framework/
 ## Current Phase
 
 Phases 1 + 2 (documentation, starters, core CSS/JS extraction) are complete. **Phase 3** (eqPartners back-port + spreadsheet bootstrap) is now shipped:
-- **Spreadsheet-driven project bootstrap** — `tools/nib-ingest.js` turns one workbook (xlsx, Google Sheets sharing URL via CSV, or Sheets API with `--auth`) into a complete Nib project (sections, tokens, personas, stories, blueprints, registries). `tools/nib-sync.js` does idempotent re-ingest with diff. Schema in `core/schema/workbook.schema.json`. See `ref/spreadsheet-authoring.md`.
-- **Service blueprint canvas** — React Flow-based editable swimlane canvas (`core/blueprint/`). Overview/Detail toggle. Breadcrumb drill-down through nested blueprints (via `meta:parent` + `childBlueprintId`). Round-trip xlsx export. `examples/service-blueprint/` is the worked example. See `ref/service-blueprint.md`.
-- **Feedback → Issue consolidation** — Worker (`examples/cloudflare-worker/`) now supports `node_id` labels, `/api/nodes/counts` cache, and `/api/card-sort`. Triage tool lifted to `examples/feedback-triage/`. Panel sends `node_id` from `window._wfActiveNodeId`. See `ref/feedback.md`.
-- **Context bar evolution** — `wfCopyDeepLink()` always-on (click current breadcrumb to copy URL); `document.lastModified` timestamp; `core/proto-search.js` opt-in portal header + search widget + Ask AI mode (gated by `WIREFRAME_CONFIG.portalHeader` / `.search`). See `ref/context-bar.md`.
-- **Project templates** — `examples/spreadsheet-bootstrap/`, `service-blueprint/`, `feedback-triage/`, `research-study/` (lifted card-sort), plus existing `deal-registration/` etc. cataloged in `ref/templates.md`.
+- **Spreadsheet-driven project bootstrap** — `tools/nib-ingest.js` turns one workbook (xlsx, Google Sheets sharing URL via CSV, or Sheets API with `--auth`) into a complete Nib project (sections, tokens, personas, stories, blueprints, registries). `tools/nib-sync.js` does idempotent re-ingest with diff. Schema in `core/schema/workbook.schema.json`. See `docs/Spreadsheet-Authoring.md`.
+- **Service blueprint canvas** — React Flow-based editable swimlane canvas (`core/blueprint/`). Overview/Detail toggle. Breadcrumb drill-down through nested blueprints (via `meta:parent` + `childBlueprintId`). Round-trip xlsx export. `examples/service-blueprint/` is the worked example. See `docs/Service-Blueprint.md`.
+- **Feedback → Issue consolidation** — Worker (`examples/cloudflare-worker/`) now supports `node_id` labels, `/api/nodes/counts` cache, and `/api/card-sort`. Triage tool lifted to `examples/feedback-triage/`. Panel sends `node_id` from `window._wfActiveNodeId`. See `docs/Feedback.md`.
+- **Context bar evolution** — `wfCopyDeepLink()` always-on (click current breadcrumb to copy URL); `document.lastModified` timestamp; `core/proto-search.js` opt-in portal header + search widget + Ask AI mode (gated by `WIREFRAME_CONFIG.portalHeader` / `.search`). See `docs/Context-Bar.md`.
+- **Project templates** — `examples/spreadsheet-bootstrap/`, `service-blueprint/`, `feedback-triage/`, `research-study/` (lifted card-sort), plus existing `deal-registration/` etc. cataloged in `docs/Templates.md`.
 
 **Phase 4** (eqPartners back-port — second wave) is now shipped:
 - **Deck / slides engine** — `core/proto-deck.{js,css}` graduates the design-review deck engine: scroll-snapping or fixed 1600×900 canvas slides, keyboard nav, SVG export. Starters `deck.html` / `deck-fit.html`; example `examples/design-review/`. See `docs/Decks.md`.
 - **Service-blueprint viewer layer** — `core/blueprint/` gains an optional analytical-viewer mode: a 57-SVG thumbnail system, text search + browser-find, a filter rail, a sentiment/research-evidence model, persona-key raise/knock. Additive — the editor is unchanged; gated by `mountCanvas` options. See `docs/Service-Blueprint.md`.
 - **Evidence-driven fidelity** — `data-wf-evidence` marks how grounded a region is; `core/proto-evidence.{js,css}` renders the prototype as a heatmap of design certainty (guesses rough, validated crisp). The page-level successor to `data-wf-confidence`. See `docs/Evidence.md`.
 - **Components & utilities** — `proto-analytics.js`, `proto-kpi-filter.js`, `proto-wizard-help.js`, `proto-signals.js`, `surfaces/salesforce-polish.js`, `surfaces/internal-ds-extended.css` (~240 net-new `ds-` components), a design-notes Changelog tab, and agentic-retrieval tooling (`tools/nib-seed-topics.js`, `nib-pages-index.js`). See `docs/Agentic-Retrieval.md`.
-- **Neutral-gray palette** — the default token ramp is now neutral gray (`--wf-ink #27282a` …); the blueprint grid and `--wf-accent` stay blue, so blueprint mode still reads as a blueprint. Napkin overrides the palette regardless.
+- **Three-tier palette** — the base `:root` ramp is neutral gray with a vivid accent (`--wf-ink #15110d`, `--wf-accent #2c6af2`) and renders at Polished. Blueprint fidelity (the default) overrides to the blue-grey drafting palette (`--wf-ink #1e2a3a`, `--wf-accent #3d6daa`, semantic hues collapse to one ink — no color). Napkin overrides to B&W paper. See `docs/Design-Tokens.md`.
 
 Phase 2 features (still active):
 - **Tabbed design notes** — 5-tab panel (Context / Design / Technical / Reviews / Changelog) with auto-split

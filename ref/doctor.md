@@ -1,5 +1,7 @@
 # Nib Doctor — Diagnostic Engine
 
+> ⚠️ **Deprecated.** Edit [`docs/Doctor.md`](../docs/Doctor.md) instead. This file will be removed in a future release.
+
 > Automated checks for common wireframe page mistakes. Catches silent failures before they cost hours to debug.
 
 ## Quick Start

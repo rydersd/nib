@@ -11,7 +11,9 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 ## Get started
 
 - [[Getting-Started]] — 5-minute bootstrap for a new project
+- [[Create-Project]] — `npx create-nib`: one-command project creation (wizard, workbook, or template)
 - [[New-Project]] — 7-step full project setup, including reference hubs
+- [[Project-Wiki]] — the `docs/` wiki every generated project ships with
 - [[Philosophy]] — Why deliberate imperfection makes better prototypes
 - [[Glossary]] — Terms and concepts
 
@@ -29,9 +31,11 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 
 ## Authoring pages
 
+- [[Spreadsheet-Authoring]] — One workbook (Excel / Google Sheets) → a complete Nib project
 - [[Page-Template]] — Required HTML boilerplate
 - [[Page-Blueprint]] — Declarative `PAGE_BLUEPRINT` rendering
 - [[Page-Compose]] — Template-level authoring (SLDS record pages, list views, wizards)
+- [[Service-Blueprint]] — React Flow swimlane canvas with drill-down + xlsx round-trip
 - [[Decks]] — Scroll-snapping review-presentation decks with SVG export
 - [[Layouts]] — Grid, sidebar, split-view, app-shell recipes
 - [[Design-Notes]] — Per-page notes structure, JTBD, friction points
@@ -40,8 +44,10 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 
 - [[Architecture]] — Load order, globals, CSS modules, z-index system
 - [[Navigation]] — `SECTIONS`, `JOURNEYS`, `SCENARIOS`, `DESIGN_STORIES`
+- [[Context-Bar]] — Breadcrumb deep links, portal header, search + Ask AI mode
 - [[Review-Mode]] — Stakeholder reactions, heat map, Cloudflare sync
 - [[Feedback]] — Context-bar feedback → GitHub issues + R2 screenshots
+- [[Utility-Modules]] — Opt-in modules: signal bar, KPI filters, analytics, wizard help, paper-curl transition
 - [[Doctor]] — 15 automated checks for common mistakes
 
 ## Platform surfaces
@@ -55,6 +61,8 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 ## Deliverables & examples
 
 - [[Project-Deliverables]] — Sitemap, JTBD, flows, personas, design stories
+- [[Workshop-Resources]] — Printable workshop starter sheets + cut-out widgets
+- [[Templates]] — Catalog of `examples/` project scaffolds to clone whole
 - [[Examples]] — Sales Portal, Deal Registration, Kanban, Charts, and more ([all examples](../examples/index.html))
 
 ## Governance

@@ -1,5 +1,7 @@
 # Navigation System
 
+> ⚠️ **Deprecated.** Edit [`docs/Navigation.md`](../docs/Navigation.md) instead. This file will be removed in a future release.
+
 > Read when setting up proto-nav.js for a project, or when adding story maps / scenarios.
 
 ## How It Works

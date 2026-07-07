@@ -1,5 +1,7 @@
 # Design Tokens
 
+> ⚠️ **Deprecated.** Edit [`docs/Design-Tokens.md`](../docs/Design-Tokens.md) instead. This file will be removed in a future release.
+
 > Read before styling any element. Never hardcode hex values.
 
 ## Color Tokens

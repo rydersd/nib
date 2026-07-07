@@ -1,5 +1,7 @@
 # Surface: Slack
 
+> ⚠️ **Deprecated.** Edit [`docs/Surface-Slack.md`](../docs/Surface-Slack.md) instead. This file will be removed in a future release.
+
 > Read when building Slack-style wireframes. Requires `surfaces/slack.css` + `proto-core.css`.
 
 ## App Shell Structure

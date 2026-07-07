@@ -1,5 +1,7 @@
 # New Project Bootstrap
 
+> ⚠️ **Deprecated.** Edit [`docs/New-Project.md`](../docs/New-Project.md) instead. This file will be removed in a future release.
+
 > Read when starting a project from scratch. Two paths:
 >
 > **Path A — From a spreadsheet (recommended).** If you have an Excel workbook or Google Sheet describing the project's pages, personas, blueprints, etc., read [`spreadsheet-authoring.md`](spreadsheet-authoring.md) and run `node tools/nib-ingest.js <workbook> --out ./my-project`. The CLI generates `data/*.js` files that this guide's Step 2 hand-authors. Then continue from Step 1 below to set up the directory layout (skipping Step 2 since it's already generated).

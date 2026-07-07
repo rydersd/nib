@@ -1,5 +1,7 @@
 # Deck Reference
 
+> ⚠️ **Deprecated.** Edit [`docs/Decks.md`](../docs/Decks.md) instead. This file will be removed in a future release.
+
 > A scroll-snap slide engine for review decks and briefings. One deck = one HTML file.
 > Read this before generating a deck.
 

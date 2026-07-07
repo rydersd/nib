@@ -1,5 +1,7 @@
 # Component Catalog
 
+> ⚠️ **Deprecated.** Edit [`docs/Components.md`](../docs/Components.md) instead. This file will be removed in a future release.
+
 > Shared components from proto-core.css. Use these before building custom.
 
 ## Buttons

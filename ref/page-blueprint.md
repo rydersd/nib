@@ -1,5 +1,7 @@
 # Page Blueprint
 
+> ⚠️ **Deprecated.** Edit [`docs/Page-Blueprint.md`](../docs/Page-Blueprint.md) instead. This file will be removed in a future release.
+
 > Declarative page generation from structured data. Write a JavaScript object, get a compliant wireframe page.
 
 ## What It Is

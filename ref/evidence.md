@@ -1,5 +1,7 @@
 # ref/evidence.md — Evidence-driven fidelity
 
+> ⚠️ **Deprecated.** Edit [`docs/Evidence.md`](../docs/Evidence.md) instead. This file will be removed in a future release.
+
 > Wiki version: `docs/Evidence.md` (canonical). This is the slim agent-facing ref.
 
 Mark how grounded each region of a wireframe is. Low-evidence regions render

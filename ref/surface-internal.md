@@ -1,5 +1,7 @@
 # Surface: Internal Design System
 
+> ⚠️ **Deprecated.** Edit [`docs/Surface-Internal.md`](../docs/Surface-Internal.md) instead. This file will be removed in a future release.
+
 > Read when building internal portal wireframes (partner portals, admin panels, dashboards). Requires `surfaces/internal-ds.css` + `proto-core.css`.
 
 ## Page Structure

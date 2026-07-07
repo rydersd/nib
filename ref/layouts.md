@@ -1,5 +1,7 @@
 # Layout Patterns
 
+> ⚠️ **Deprecated.** Edit [`docs/Layouts.md`](../docs/Layouts.md) instead. This file will be removed in a future release.
+
 > Read when building multi-column pages, dashboards, or split views.
 
 ## Grid Layouts

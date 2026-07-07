@@ -1,5 +1,7 @@
 # Surface: Design Review Deck
 
+> ⚠️ **Deprecated.** Edit [`docs/Decks.md`](../docs/Decks.md) instead. This file will be removed in a future release.
+
 > Read when building an editorial **presentation deck** (design reviews, position papers, briefings) as a wireframe page. Requires `surfaces/deck.css` + `core/proto-deck.js`. **Self-contained** — this surface owns its own tokens and does NOT load `proto-core.css` / `proto-tokens.css` (the one surface exception; it is an editorial artifact, not a portal screen).
 
 One review = one HTML file. Each slide is a `<section class="slide">`; the deck renders as a vertically-scrolling, scroll-snapped slideshow with arrow-key navigation, a side-rail dot nav, per-slide SVG export, and whole-deck PowerPoint (`.pptx`) export.

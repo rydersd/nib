@@ -1,5 +1,7 @@
 # SLDS 2 Component Reference (Cosmos Theme)
 
+> ⚠️ **Deprecated.** This content has not been migrated to the wiki yet — the closest page is [`docs/SLDS-Rules.md`](../docs/SLDS-Rules.md). This file will be removed in a future release.
+
 > Extracted from SLDS 2 Storybook (`sds-site-docs-1fea39e7763a.herokuapp.com`) on 2026-03-16.
 > Cross-referenced with `surface-salesforce-rules.md` for Nib token mappings.
 > CSS definitions extracted from authored stylesheets with resolved custom property values.

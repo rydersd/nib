@@ -6,11 +6,20 @@ Reusable UI primitives available across all surfaces.
 
 > **Live demo:** Open [`components.html`](components.html) in a browser to see every primitive rendered interactively with the [[Fidelity-Levels|fidelity slider]] attached.
 
-For the agent-facing component reference, see [`ref/components.md`](../ref/components.md).
+Use these before building custom. They live in `proto-components.css` (and the legacy `proto-core.css` monolith).
 
 ## Buttons
 
 All buttons use the `.btn` base class with optional variant modifiers. Buttons have no surface prefix — they're shared across [[Surfaces|all surfaces]].
+
+| Class | Use |
+|-------|-----|
+| `.btn` | Base button (no fill) |
+| `.btn-primary` | Primary action (accent bg, white text) |
+| `.btn-secondary` | Secondary action (accent text, tint bg) |
+| `.btn-ghost` | Tertiary/cancel (text only, hover fills) |
+| `.btn-danger` | Destructive action (red text) |
+| `.btn-sm` | Add to any btn for compact size |
 
 ```html
 <button class="btn btn-primary">Primary</button>
@@ -41,6 +50,12 @@ The base `.wf-card` provides border, shadow, and paper texture. Surface-specific
 <!-- Base wireframe card -->
 <div class="wf-card">...</div>
 
+<!-- Base card with header/body structure -->
+<div class="wf-card">
+  <div class="wf-card-header">Card Title</div>
+  <div class="wf-card-body">Content here</div>
+</div>
+
 <!-- Internal DS card with header/body structure -->
 <div class="ds-card">
   <div class="ds-card-header">
@@ -49,6 +64,8 @@ The base `.wf-card` provides border, shadow, and paper texture. Surface-specific
   <div class="ds-card-body">Content</div>
 </div>
 ```
+
+Variant: add inline `style="border-left: 3px solid var(--wf-accent)"` for an accent card.
 
 ## Paper utilities
 
@@ -102,6 +119,57 @@ Add physical-artifact texture to any card — see [[Paper-Utilities]] for the fu
 </div>
 ```
 
+## Modal overlay
+
+```html
+<div class="wf-modal-overlay" id="my-modal" style="display:none;">
+  <div class="wf-modal">
+    <div class="wf-modal-header">
+      <span class="wf-modal-title">Modal Title</span>
+      <button class="wf-modal-close" onclick="wfModalClose('my-modal')">&times;</button>
+    </div>
+    <div class="wf-modal-body">
+      <!-- form content -->
+    </div>
+    <div class="wf-modal-footer">
+      <button class="btn btn-ghost" onclick="wfModalClose('my-modal')">Cancel</button>
+      <button class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+```
+
+Show with `document.getElementById('my-modal').style.display='flex';` — close with `wfModalClose('my-modal')` (from `proto-nav.js`).
+
+## Toast
+
+```html
+<button onclick="wfToast('Changes saved')">Save</button>
+<button onclick="wfToast('Item deleted', 3000)">Delete</button>
+```
+
+`wfToast(message, durationMs)` — shows a brief notification. Default 2500ms. Provided by `proto-nav.js` — no extra imports.
+
+## Design notes panel
+
+Always include at the bottom of the page, before scripts — see [[Design-Notes]] for how to write the content:
+
+```html
+<div class="wf-design-notes">
+  <div class="wf-spec-panel">
+    <div class="wf-spec-header">Page Name</div>
+    <div class="wf-spec-section">
+      <div class="wf-spec-section-title">Summary</div>
+      <div class="wf-spec-body">What this page shows.</div>
+    </div>
+  </div>
+</div>
+```
+
+## Feedback panel
+
+The feedback panel (💬 button in the context bar) provides in-context feedback with type selection, screenshot paste/drop, and mailto integration — see [[Feedback]] for the full pipeline. Fully styled via `.wf-fb-*` classes: `.wf-fb-overlay`, `.wf-fb-panel`, `.wf-fb-hd`, `.wf-fb-body`, `.wf-fb-type-pills`, `.wf-fb-textarea`, `.wf-fb-drop`, `.wf-fb-submit-btn`. Auto-closes after submission; ESC dismisses.
+
 ## Confidence levels
 
 Use `data-wf-confidence` to communicate design certainty on individual elements — see [[Confidence-Levels]] for the full pattern.
@@ -112,6 +180,14 @@ Use `data-wf-confidence` to communicate design certainty on individual elements 
 <div class="ds-card" data-wf-confidence="uncertain">...</div>
 ```
 
+## Rules
+
+- Use `wf-` prefixed components for anything shared across surfaces
+- Use surface-specific components (`slack-`, `sfdc-`, `ds-`) for platform UI
+- Don't duplicate: if `wf-card` works, don't make a custom card
+- Buttons never need a surface prefix — `.btn-primary` works everywhere
+- Toast and modal are JS functions from `proto-nav.js` — no extra imports
+
 ---
 
 ## Related
@@ -121,4 +197,4 @@ Use `data-wf-confidence` to communicate design certainty on individual elements 
 - [[Paper-Utilities]] — paper effect utility classes
 - [[Confidence-Levels]] — per-element certainty
 - [[Surfaces]] — platform-specific component overlays
-- [`ref/components.md`](../ref/components.md) — agent-facing component catalog
+- [[Design-Notes]] — the notes panel every page must include

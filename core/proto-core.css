@@ -1,8 +1,17 @@
 /* ============================================================================
    PROTO FRAMEWORK — CORE WIREFRAME SYSTEM
    ============================================================================
-   Single entry point that loads all framework modules. Pages only need:
-     <link rel="stylesheet" href="../../core/proto-core.css">
+   LEGACY AGGREGATOR — kept for back-compat (examples/ and external consumers).
+   @imports load sequentially and block rendering, so starters/ now link the
+   split files directly (parallel fetches). Any NEW page should do the same,
+   in this exact order:
+     <link rel="stylesheet" href="core/proto-tokens.css">
+     <link rel="stylesheet" href="core/proto-chrome.css">
+     <link rel="stylesheet" href="core/proto-components.css">
+     <link rel="stylesheet" href="core/proto-story.css">
+     <link rel="stylesheet" href="core/proto-feedback.css">
+     <link rel="stylesheet" href="core/proto-blueprint.css">
+     <link rel="stylesheet" href="core/proto-keyframes.css">
 
    Modules:
    - proto-tokens.css      Design tokens, reset, grid, paper texture, fidelity
@@ -24,7 +33,5 @@
 @import url('proto-blueprint.css');
 @import url('proto-keyframes.css');
 
-/* ── Icons ── */
-.wf-icon { display: inline-block; width: 16px; height: 16px; fill: currentColor; vertical-align: middle; }
-.wf-icon-sm { width: 12px; height: 12px; }
-.wf-icon-lg { width: 24px; height: 24px; }
+/* Icon utilities (.wf-icon) moved to proto-components.css so pages linking
+   the split files directly still get them. */

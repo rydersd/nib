@@ -1,5 +1,7 @@
 # Compose Format Reference
 
+> ⚠️ **Deprecated.** Edit [`docs/Page-Compose.md`](../docs/Page-Compose.md) instead. This file will be removed in a future release.
+
 > Template-level page authoring. Write less data, get the same wireframe output.
 
 ## When to Use Compose vs PAGE_BLUEPRINT

@@ -11,16 +11,7 @@ const https = require('https');
 // ---------------------------------------------------------------------------
 // ANSI colors
 // ---------------------------------------------------------------------------
-const C = {
-  reset:  '\x1b[0m',
-  bold:   '\x1b[1m',
-  dim:    '\x1b[2m',
-  red:    '\x1b[31m',
-  green:  '\x1b[32m',
-  yellow: '\x1b[33m',
-  cyan:   '\x1b[36m',
-  white:  '\x1b[37m',
-};
+const { C } = require('./_cli-utils');
 
 const PASS = `${C.green}PASS${C.reset}`;
 const WARN = `${C.yellow}WARN${C.reset}`;
@@ -791,7 +782,13 @@ function dashboard(projectDir, args) {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Confidence Dashboard \u2014 ${escapeHtml(data.projectName)}</title>
-  <link rel="stylesheet" href="core/proto-core.css">
+  <link rel="stylesheet" href="core/proto-tokens.css">
+  <link rel="stylesheet" href="core/proto-chrome.css">
+  <link rel="stylesheet" href="core/proto-components.css">
+  <link rel="stylesheet" href="core/proto-story.css">
+  <link rel="stylesheet" href="core/proto-feedback.css">
+  <link rel="stylesheet" href="core/proto-blueprint.css">
+  <link rel="stylesheet" href="core/proto-keyframes.css">
   <link rel="stylesheet" href="surfaces/internal-ds.css">
 </head>
 <body>

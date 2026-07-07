@@ -1,5 +1,7 @@
 # Nib Architecture
 
+> ⚠️ **Deprecated.** Edit [`docs/Architecture.md`](../docs/Architecture.md) instead. This file will be removed in a future release.
+
 > How the pieces connect. Read this to understand the system mental model before building pages.
 
 ## 1. Script Load Order & Initialization

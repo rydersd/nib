@@ -34,6 +34,7 @@
 - [[Architecture]]
 - [[Navigation]]
 - [[Context-Bar]]
+- [[Utility-Modules]]
 - [[Review-Mode]]
 - [[Feedback]]
 - [[Doctor]]
@@ -47,6 +48,7 @@
 
 **Deliverables**
 - [[Project-Deliverables]]
+- [[Workshop-Resources]]
 - [[Templates]]
 - [[Examples]]
 

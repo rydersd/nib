@@ -1,5 +1,7 @@
 # Surface: Salesforce
 
+> ⚠️ **Deprecated.** Edit [`docs/Surface-Salesforce.md`](../docs/Surface-Salesforce.md) instead. This file will be removed in a future release.
+
 > Read when building Salesforce Lightning-style wireframes. Requires `surfaces/salesforce.css` + `proto-core.css`.
 
 ## Record Page Structure

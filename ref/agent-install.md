@@ -1,5 +1,7 @@
 # SFDC Review Agent Installation
 
+> ⚠️ **Deprecated.** This content has not been migrated to the wiki yet — the closest page is [`docs/Review-Agents.md`](../docs/Review-Agents.md). This file will be removed in a future release.
+
 ## Quick Install
 
 Copy agent definitions from nib to your local Claude config:

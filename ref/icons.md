@@ -1,5 +1,7 @@
 # Icon Reference
 
+> ⚠️ **Deprecated.** Edit [`docs/Icons.md`](../docs/Icons.md) instead. This file will be removed in a future release.
+
 > How to use icons in wireframes. Design-system-agnostic — works with any SVG icon set.
 
 ## Usage Pattern

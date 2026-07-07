@@ -1,6 +1,6 @@
 # Context Bar
 
-> ⚠️ **Deprecated.** Edit [`docs/Context-Bar.md`](../docs/Context-Bar.md) instead — and create that page if it doesn't exist yet (this content needs to be mirrored). This file will be removed in a future release.
+> ⚠️ **Deprecated.** Edit [`docs/Context-Bar.md`](../docs/Context-Bar.md) instead. This file will be removed in a future release.
 
 > Read when configuring the page chrome — context bar, portal header, search widget. The context bar always builds; the portal header + search are opt-in via `WIREFRAME_CONFIG`.
 

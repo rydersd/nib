@@ -1,5 +1,7 @@
 # Distilling a Design System into a Nib Theme
 
+> ⚠️ **Deprecated.** Edit [`docs/Themes.md`](../docs/Themes.md) instead. This file will be removed in a future release.
+
 To configure nib for your design system, define a theme object in
 `WIREFRAME_CONFIG.themes`. Use this guide to extract what you need.
 

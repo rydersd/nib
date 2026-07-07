@@ -1831,3 +1831,8 @@ html.wireframe[data-wf-fidelity="napkin"] .btn-ghost:hover {
   color: var(--wf-white);
 }
 .wf-af-callout-btn:hover { filter: brightness(1.08); }
+
+/* ── Icons (moved from proto-core.css) ── */
+.wf-icon { display: inline-block; width: 16px; height: 16px; fill: currentColor; vertical-align: middle; }
+.wf-icon-sm { width: 12px; height: 12px; }
+.wf-icon-lg { width: 24px; height: 24px; }

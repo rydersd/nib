@@ -1,5 +1,7 @@
 # Salesforce Global Compliance & Regulatory Reference
 
+> ⚠️ **Deprecated.** Edit [`docs/Compliance.md`](../docs/Compliance.md) instead. This file will be removed in a future release.
+
 > For agents building Salesforce wireframes. Flags compliance and regulatory concerns that are **not out-of-the-box** and require custom implementation. This is about what the wireframe should account for in the actual Salesforce implementation — not framework compliance.
 
 Each section: **What's not OOB** → **What it costs** → **Wireframe implication**.

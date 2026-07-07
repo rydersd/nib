@@ -22,16 +22,8 @@ const path = require('path');
 
 const { buildProject } = require('../core/ingest/build');
 const { emitWiki } = require('../core/ingest/emit-wiki');
-
-const C = {
-  reset: '\x1b[0m', bold: '\x1b[1m', dim: '\x1b[2m',
-  red: '\x1b[31m', green: '\x1b[32m', yellow: '\x1b[33m', cyan: '\x1b[36m',
-};
-
-function fail(msg) {
-  console.error(`${C.red}✗${C.reset} ${msg}`);
-  process.exit(1);
-}
+const { loadSource, resolveSource } = require('../core/ingest/source');
+const { C, fail } = require('./_cli-utils');
 
 function usage(code = 0) {
   console.log(`${C.bold}nib-wiki${C.reset} — regenerate the project wiki without re-running the data emitter.
@@ -69,37 +61,6 @@ function parseArgs(argv) {
     else fail(`unknown flag: ${a}`);
   }
   return { sub, ...flags };
-}
-
-function readSourceOfTruth(projectDir) {
-  const sotPath = path.join(projectDir, 'data', 'source-of-truth.txt');
-  if (!fs.existsSync(sotPath)) return null;
-  const text = fs.readFileSync(sotPath, 'utf8');
-  const out = {};
-  for (const line of text.split('\n')) {
-    const m = line.match(/^([^:]+):\s*(.*)$/);
-    if (m) out[m[1].trim()] = m[2].trim();
-  }
-  return out;
-}
-
-function isSheetsUrl(input) {
-  return /^https?:\/\/(?:docs\.google\.com|sheets\.googleapis\.com)/i.test(input);
-}
-
-async function ingest(source, auth) {
-  if (isSheetsUrl(source)) {
-    if (auth) {
-      const { readSheets } = require('../core/ingest/sheets-api');
-      return readSheets(source, auth);
-    }
-    const { readPublishedCsv } = require('../core/ingest/sheets-csv');
-    return readPublishedCsv(source);
-  }
-  const ext = path.extname(source).toLowerCase();
-  if (ext !== '.xlsx') fail(`unsupported source: ${source} (need .xlsx or a Sheets URL)`);
-  const { readWorkbook } = require('../core/ingest/xlsx');
-  return readWorkbook(source);
 }
 
 function diffWiki(shadow, projectDir) {
@@ -148,17 +109,10 @@ async function run() {
   const args = parseArgs(process.argv.slice(2));
   const log = args.quiet ? () => {} : (...a) => console.log(...a);
 
-  let source = args.source;
-  if (!source) {
-    const sot = readSourceOfTruth(args.project);
-    if (!sot || !sot.Location) {
-      fail(`no --source given and ${path.join(args.project, 'data/source-of-truth.txt')} doesn't record one. Pass --source <xlsx|url>.`);
-    }
-    source = sot.Location;
-  }
+  const source = resolveSource(args.source, args.project);
 
   log(`${C.cyan}→${C.reset} Re-ingesting wiki source: ${source}`);
-  const { tabs, sourceMeta } = await ingest(source, args.auth);
+  const { tabs, sourceMeta } = await loadSource(source, { auth: args.auth });
   const { project, warnings } = buildProject(tabs, {
     warn: (msg) => console.warn(`${C.yellow}!${C.reset} ${msg}`),
   });

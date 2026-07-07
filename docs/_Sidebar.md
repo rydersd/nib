@@ -35,6 +35,7 @@
 - [[Navigation]]
 - [[Context-Bar]]
 - [[Utility-Modules]]
+- [[React-Shell]]
 - [[Review-Mode]]
 - [[Feedback]]
 - [[Doctor]]

@@ -120,6 +120,7 @@ framework/
 │   ├── wf-napkin.js        # Shared napkin engine: ink frames, cut paths, tea/coffee stains, gutter placement (lazy-loaded at napkin; also consumed by eqPartners via submodule)
 │   ├── wf-doodles.js       # 24-mark doodle vocabulary (napkin engine tenant)
 │   ├── wf-fidelity-boot.js # Pre-paint fidelity restore (first script in every starter <head>)
+│   ├── shell/              # Headless shell logic (pure ESM): fidelity.js, theme.js, nav-model.js — consumed by packages/nib-react; proto-nav.js mirrors it for file:// pages
 │   ├── home-alt.css/.js    # Alternate landing surface — consumed by eqPartners (prototype/nib submodule); do not delete as "orphaned"
 │   ├── resources.css/.js   # Workshop resources engine — consumed by eqPartners prototype/resources/; do not delete as "orphaned"
 │   ├── schema/             # JSON Schema for the canonical Nib project shape
@@ -158,10 +159,13 @@ framework/
 │   ├── nib-sync.js         # Idempotent re-ingest with diff (Track 1)
 │   ├── nib-seed-topics.js  # Seed data-topic/data-role on pages (agentic retrieval)
 │   └── nib-pages-index.js  # Build pages-index.html + lean data/pages.json
+├── packages/     # Publishable packages
+│   ├── create-nib/         # npx create-nib scaffolder
+│   └── nib-react/          # React bindings: NibProvider/ContextBar/NavDrawer + hooks over core/shell (see docs/React-Shell.md)
 ├── ref/          # DEPRECATED — banner stubs point to docs/; agent defs (agent-*.md) still live here
 ├── docs/         # Wiki — THE documentation surface (agents + humans)
 ├── starters/     # Single-file copy-paste HTML templates
-└── examples/     # Multi-file project templates (clone whole)
+└── examples/     # Multi-file project templates (clone whole; react-shell/ is the nib-react demo)
 ```
 
 ## Current Phase

@@ -809,6 +809,19 @@
   }
   function runAssetsPass(){ stampFrames(); spawnStains(); spawnDoodles(); }
 
+  // Public: clear every scattered mark so the pass can re-run against fresh
+  // content — SPA shells (packages/nib-react) call this on route change,
+  // where the document height and content-column bounds have changed but
+  // the old absolutely-positioned layers survive. Ink frames need no reset:
+  // stampInkFrames skips cards that already carry --wf-ink-frame, and a
+  // route change replaces the cards themselves.
+  function reset(){
+    var kill = document.querySelectorAll('.wf-stencil-layer, .wf-doodle-layer, .wf-coffee-ring');
+    for (var i = 0; i < kill.length; i++) {
+      if (kill[i].parentNode) kill[i].parentNode.removeChild(kill[i]);
+    }
+  }
+
   var _scheduled = false;
   function schedule(){
     if (_scheduled) return; _scheduled = true;
@@ -842,7 +855,7 @@
     contentGutters: contentGutters, gutterX: gutterX,
     gesture: gesture, wrap: wrap, ink: ink, dot: dot, plen: plen,
     rnd: rnd, ri: ri, r1: r1, pick: pick, TAU: TAU, uid: function(){ return _uid++; },
-    wfTexturePath: wfTexturePath, init: init, runAssetsPass: runAssetsPass
+    wfTexturePath: wfTexturePath, init: init, runAssetsPass: runAssetsPass, reset: reset
   };
   // Back-compat: notes/stain-scale-lab.html reads window.wfStainLab.ring/tea.
   window.wfStainLab = { ring: buildCoffeeRingSVG, tea: buildTeaStainSVG };

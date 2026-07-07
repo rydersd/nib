@@ -1,0 +1,30 @@
+{
+  "name": "nib-react",
+  "version": "0.1.0",
+  "description": "React bindings for the Nib wireframe shell — NibProvider, ContextBar, NavDrawer, and fidelity/theme hooks on top of core/shell and the shared Nib token/chrome CSS.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src",
+    "README.md"
+  ],
+  "sideEffects": false,
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "keywords": [
+    "nib",
+    "wireframe",
+    "prototype",
+    "react",
+    "design-tokens"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

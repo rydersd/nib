@@ -48,6 +48,7 @@ Nib is an agent-consumable wireframe prototyping framework. It provides shared C
 - [[Review-Mode]] — Stakeholder reactions, heat map, Cloudflare sync
 - [[Feedback]] — Context-bar feedback → GitHub issues + R2 screenshots
 - [[Utility-Modules]] — Opt-in modules: signal bar, KPI filters, analytics, wizard help, paper-curl transition
+- [[React-Shell]] — Nib as a React app shell (nib-react + core/shell) sharing the same tokens/theming
 - [[Doctor]] — 15 automated checks for common mistakes
 
 ## Platform surfaces

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" class="wireframe">
+<head>
+  <script src="../../core/wf-fidelity-boot.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Shell — nib-react demo</title>
+  <!-- Surface CSS is per-app here (the provider injects the core split
+       stylesheets itself from coreBase) -->
+  <link rel="stylesheet" href="../../surfaces/internal-ds.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+    }
+  }
+  </script>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import { createElement as e, useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { NibProvider, ContextBar, NavDrawer, useNib } from '../../packages/nib-react/src/index.js';
+
+/* Same schema as project-data.js — this would normally be imported from
+   your ingest-generated data. */
+const SECTIONS = [
+  {
+    id: 'overview', label: 'Overview',
+    items: [
+      { file: 'dashboard', label: 'Analytics Dashboard', type: 'internal' },
+      { file: 'deals', label: 'Deal Pipeline', type: 'internal' }
+    ]
+  },
+  {
+    id: 'admin', label: 'Administration',
+    items: [
+      { file: 'team', label: 'Team Settings', type: 'internal' }
+    ]
+  }
+];
+
+const CONFIG = { title: 'React Shell Demo', subtitle: 'nib-react + core/shell', defaultTheme: 'nib' };
+
+/* ── tiny hash router: '#/deals.html' ↔ location prop ─────────────────── */
+function useHashLocation() {
+  const read = () => (window.location.hash.replace(/^#/, '') || '/dashboard.html');
+  const [path, setPath] = useState(read);
+  useEffect(() => {
+    const onHash = () => setPath(read());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+  return [path, (href) => { window.location.hash = '#/' + href.replace(/^\//, ''); }];
+}
+
+/* ── demo pages (plain nib component classes) ──────────────────────────── */
+function Kpi(label, value, note) {
+  return e('div', { className: 'ds-kpi-card' },
+    e('div', { className: 'ds-kpi-value' }, value),
+    e('div', { className: 'ds-kpi-label' }, label),
+    e('div', { className: 'ds-kpi-trend' }, note));
+}
+
+function Dashboard() {
+  return e('div', null,
+    e('h1', null, 'Analytics Dashboard'),
+    e('div', { className: 'ds-kpi-grid', style: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' } },
+      Kpi('Total Revenue', '$3.9M', '↑ 15% vs last period'),
+      Kpi('Active Users', '35,396', '↑ 5% vs last period'),
+      Kpi('Conversion', '7.9%', '↓ 0.8% vs last period'),
+      Kpi('Avg Order', '$114', '↓ 8% vs last period')),
+    e('div', { className: 'wf-card', style: { marginTop: '20px' } },
+      e('div', { className: 'wf-card-hd' }, 'Revenue by Quarter'),
+      e('p', null, 'Chart placeholder — the point of this demo is the shell: ',
+        'switch fidelity top-right, open the drawer, navigate. Tokens, Figtree, ',
+        'napkin ink frames and gutter marks all come from the same nib core a static page uses.')));
+}
+
+function Deals() {
+  const rows = [
+    ['Millways Restaurant Group', '$416K', 'Active'],
+    ['Infinite Improbability Inc', '$402K', 'At Risk'],
+    ['Trillian Analytics', '$381K', 'Churned']
+  ];
+  return e('div', null,
+    e('h1', null, 'Deal Pipeline'),
+    e('div', { className: 'wf-card' },
+      e('div', { className: 'wf-card-hd' }, 'Open Deals'),
+      e('table', { className: 'wf-table' },
+        e('thead', null, e('tr', null, ['Customer', 'Revenue', 'Status'].map((h) => e('th', { key: h }, h)))),
+        e('tbody', null, rows.map((r) => e('tr', { key: r[0] }, r.map((c, i) => e('td', { key: i }, c))))))));
+}
+
+function Team() {
+  return e('div', null,
+    e('h1', null, 'Team Settings'),
+    e('div', { className: 'wf-card' },
+      e('div', { className: 'wf-card-hd' }, 'Members'),
+      e('p', null, 'This section resolves its own theme via the standard resolution chain — ',
+        'set a theme on the SECTIONS group and it applies here only.')));
+}
+
+const ROUTES = { dashboard: Dashboard, deals: Deals, team: Team };
+
+function CurrentPage() {
+  const { file } = useNib();
+  const Page = ROUTES[file] || Dashboard;
+  return e('main', { style: { maxWidth: '1100px', margin: '76px auto 40px', padding: '0 24px' } }, e(Page));
+}
+
+function App() {
+  const [path, navigate] = useHashLocation();
+  return e(NibProvider, {
+    sections: SECTIONS,
+    config: CONFIG,
+    location: path,
+    onNavigate: navigate,
+    coreBase: '../../core/'
+  },
+    e(ContextBar),
+    e(NavDrawer),
+    e(CurrentPage));
+}
+
+createRoot(document.getElementById('root')).render(e(App));
+</script>
+</body>
+</html>

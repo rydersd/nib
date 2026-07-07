@@ -6,6 +6,11 @@
    that every other module builds on.
    ============================================================================ */
 
+/* Figtree — the working-tier typeface (Blueprint + Napkin set --wf-font to
+   it below). Loaded here so no page needs its own <link>; offline/file://
+   pages fall back through the system stack. @import must precede all rules. */
+@import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
+
 /* ── @property registrations — enable smooth CSS transitions on custom props ── */
 @property --wf-grain-opacity { syntax: '<number>'; inherits: true; initial-value: 0.12; }
 @property --wf-grid-opacity  { syntax: '<number>'; inherits: true; initial-value: 0.08; }
@@ -85,6 +90,8 @@ html.wireframe:not([data-wf-fidelity="napkin"]):not([data-wf-fidelity="polished"
   --wf-purple:      #55688e;
   /* even the pushpin holds the no-color promise on the drafting table */
   --wf-pin-color:   #46608c;
+  /* working-tier typeface — Figtree (loaded via the @import above) */
+  --wf-font:        'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 html.wireframe[data-wf-fidelity="napkin"] {
@@ -108,6 +115,9 @@ html.wireframe[data-wf-fidelity="napkin"] {
   --wf-accent: #1a1a1a;
   --wf-accent-lt: #f0f0f0;
   --wf-accent-fill: rgba(0, 0, 0, 0.04);
+  /* working-tier typeface — Figtree, same as blueprint (paper prototypes
+     are still working documents; only Polished switches to the base font) */
+  --wf-font: 'Figtree', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   /* Semantic colors removed — grayscale(1) filter handles desaturation */
   /* Pieces LIE FLAT on the board (reference photos) — shadow is soft and
      short, not floaty. Layered, one light direction, fast falloff. */

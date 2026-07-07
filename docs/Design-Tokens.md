@@ -59,7 +59,10 @@ Each [[Fidelity-Levels|fidelity mode]] retints the palette to match its message.
 | `--wf-line` | `#b0bdd0` | `#aaaaaa` | `#c4c5c7` |
 | `--wf-surface` | `#edf1f7` | `#f8f8f8` | `#eeeeef` |
 | `--wf-accent` | `#3d6daa` | `#1a1a1a` | `#2c6af2` |
+| `--wf-font` | `'Figtree', …` | `'Figtree', …` | `'Inter', …` (base stack) |
 | `--wf-wobble-filter` | `url(#wf-line-wobble)` | `none` (ink frames carry the line) | `none` |
+
+Figtree (Google Fonts) is loaded by `core/proto-tokens.css` itself via `@import` — no page-level `<link>` needed; offline pages fall back through the system stack. The working tiers (Blueprint + Napkin) render in Figtree; Polished uses the base font.
 
 ---
 

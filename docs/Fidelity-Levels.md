@@ -8,9 +8,9 @@ Nib's three-mode fidelity slider. Each mode communicates a different level of de
 
 | Mode | Meaning | Visual |
 |---|---|---|
-| **Napkin** | "Here's a rough idea. Everything is negotiable." | White paper, hand-drawn sharpie ink frames, scissor-cut cards, grayscale only, stains + doodles in the margins |
-| **Blueprint** | "The structure is taking shape. Let's refine." | Default — the drafting table: blue-grey ink on blue-tinted paper, subtle grid, **no color** (semantic hues collapse to the one drafting ink) |
-| **Polished** | "We're confident in this direction." | Clean lines, neutral-gray palette, vivid accent, minimal wireframe artifacts |
+| **Napkin** | "Here's a rough idea. Everything is negotiable." | White paper, hand-drawn sharpie ink frames, scissor-cut cards, grayscale only, stains + doodles in the margins. Figtree type. |
+| **Blueprint** | "The structure is taking shape. Let's refine." | Default — the drafting table: blue-grey ink on blue-tinted paper, subtle grid, **no color** (semantic hues collapse to the one drafting ink). Figtree type. |
+| **Polished** | "We're confident in this direction." | Clean lines, neutral-gray palette, vivid accent, base font stack, minimal wireframe artifacts |
 
 ## How it works
 

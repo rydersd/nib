@@ -1602,7 +1602,10 @@ function clearWobbleOverrides() {
 var _builtInThemes = {
   'nib': {
     label: 'Nib (Default)',
-    font: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    // No font/token overrides: the default theme leaves everything to the
+    // stylesheets, where fidelity sets --wf-font (Figtree at blueprint +
+    // napkin, the base stack at polished).
+    font: '',
     tokens: {}
   },
   'slds': {
@@ -1702,14 +1705,20 @@ function _wfMergedThemes() {
 
 /**
  * Reset all tokens to nib defaults before applying a new theme.
+ * RELEASES the tokens back to the stylesheets (removes inline overrides)
+ * instead of re-stamping captured computed values: computed values are
+ * fidelity-specific, so freezing them inline pinned the load-time palette
+ * across live fidelity switches and overrode the working-tier --wf-font.
  */
+var _WF_THEME_TOKENS = [
+  '--wf-ink', '--wf-text', '--wf-muted', '--wf-line', '--wf-tint',
+  '--wf-surface', '--wf-canvas', '--wf-accent', '--wf-red', '--wf-amber',
+  '--wf-green', '--wf-purple', '--wf-radius', '--wf-font'
+];
 function wfThemeReset() {
-  if (!_nibDefaultTokens) return;
   var root = document.documentElement;
-  for (var token in _nibDefaultTokens) {
-    if (_nibDefaultTokens.hasOwnProperty(token)) {
-      root.style.setProperty(token, _nibDefaultTokens[token]);
-    }
+  for (var i = 0; i < _WF_THEME_TOKENS.length; i++) {
+    root.style.removeProperty(_WF_THEME_TOKENS[i]);
   }
 }
 

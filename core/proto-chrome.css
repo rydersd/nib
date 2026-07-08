@@ -99,12 +99,12 @@ html.wireframe[data-wf-fidelity="napkin"] .wf-ctx-bar {
   color: var(--wf-accent);
 }
 
-.wf-ctx-crumb-sep {
+.wf-ctx-breadcrumb-sep {
   color: var(--wf-line);
   font-size: 10px;
 }
 
-.wf-ctx-crumb-current {
+.wf-ctx-breadcrumb-current {
   color: var(--wf-ink);
   font-weight: 600;
   background: none;

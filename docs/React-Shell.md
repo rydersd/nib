@@ -36,6 +36,24 @@ Everything themable lives outside React, so nothing is ported:
 </NibProvider>
 ```
 
+## Controlled / host-driven use
+
+Apps with their own router, breadcrumb model, or fidelity state don't have to adopt the provider to share the bar. Every provider-derived piece of `<ContextBar>` has a prop override, and a fully-controlled bar needs no `<NibProvider>` at all:
+
+```jsx
+<ContextBar
+  crumbs={[{ label: 'Home', href: '/' }, { label: 'Deals' }]}  // last = current
+  onNavigate={(href, ev) => { ev.preventDefault(); navigate(href); }}
+  onHamburger={() => setMenuOpen(true)}
+  fidelity={fidelity} onFidelityChange={setFidelity}            // same value names as core/shell
+  showTheme={false}                                             // theme badge is provider-only
+  leftActions={<MyLensPills />}                                 // after the crumbs
+  actions={<MyButtons />}                                       // before the fidelity select
+/>
+```
+
+Styling still comes from `core/proto-chrome.css`; a host can re-skin without overriding rules by setting the `--wf-*` custom properties on `.wf-ctx-bar`.
+
 ## Napkin in an SPA
 
 At napkin the provider lazy-loads the shared engine (`core/wf-napkin.js` + `wf-doodles.js` — the same files static pages and eqPartners use) and runs the asset pass. On route change it calls `WFNapkin.reset()` (clears the scattered gutter marks) and re-scatters against the new content. See [[Fidelity-Levels]] for the placement policy.
